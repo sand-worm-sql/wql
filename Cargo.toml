@@ -1,6 +1,24 @@
-[package]
-name = "sql"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = [
+  "cli"
+]
+default-members = [
+  "cli"
+]
 
-[dependencies]
+# ref. https://github.com/rustwasm/wasm-pack/issues/1111
+# enable this only for gluesql-js build
+# [profile.release]
+# opt-level = "s"
+
+[workspace.package]
+version = "0.16.3"
+edition = "2021"
+description = "Sand Worm SQL - Open source SQL database engine fully written in Rust with pure functional execution layer, easily swappable storage and web assembly support!"
+license = "Apache-2.0"
+repository = "https://github.com/gluesql/gluesql"
+documentation = "https://docs.rs/gluesql/"
+
+[workspace.dependencies]
+cli = { package = "sand-worm-cli", path = "./cli", version = "0.0.1" }
