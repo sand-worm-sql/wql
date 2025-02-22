@@ -639,6 +639,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sand-worm-core"
+version = "0.16.3"
+
+[[package]]
 name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

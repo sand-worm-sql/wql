@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "cli"
+, "core"
 ]
 default-members = [
   "cli"
