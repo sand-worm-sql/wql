@@ -16,49 +16,67 @@ use {
 };
 
 #[derive(Parser, Debug)]
-#[clap(name = "sand-worm-cli", about, version)]
+#[clap(name = "sand-worm-cli", about = "Sand Worm SQL CLI", version = "1.0")]
 struct Args {
     /// SQL file to execute
-    #[clap(short, long, value_parser)]
+    #[arg(short, long)]
     execute: Option<PathBuf>,
 
     /// PATH to dump whole database
-    #[clap(short, long, value_parser)]
+    #[arg(short, long)]
     dump: Option<PathBuf>,
 
     /// Storage path to load
-    #[clap(short, long, value_parser)]
+    #[arg(short, long)]
     path: Option<PathBuf>,
+
 }
 
 pub fn run() -> Result<()> {
     let args = Args::parse();
-    let path = args.path.as_deref().and_then(Path::to_str);
 
-    match (path, args.dump) {
-        (None, None) => {
-            
+    // println!("{}", args.execute.unwrap_or("".to_string()));
+
+   // println!("sand-worm-sql {}", path.unwrap_or(""));
+
+    // match (path, args.dump) {
+    //     (None, None) => {
+    //         eprintln!("Error: No path or dump specified.");
+    //         return Ok(()); // Exit early
+    //     }
+    //     (None, Some(dump_path)) => {
+    //         dump_data(dump_path)?; 
+    //     }
+    //     (Some(_), None) => {
+    //         execute_program(args.execute); 
+    //     }
+    //     (Some(_), Some(_)) => {
+    //         eprintln!("Error: Cannot specify both a path and a dump at the same time.");
+    //         return Ok(()); // Exit early
+    //     }
+    // }
+
+    Ok(())
+}
+
+fn execute_program(input: Option<PathBuf>) {
+    println!("sand-worm-sql");
+    let output = std::io::stdout();
+    let mut cli = Cli::new(output);
+
+    if let Some(path) = input {
+        if let Err(e) = cli.load(path.as_path()) {
+            eprintln!("[error] {}\n", e);
         }
-        (None, Some(_)) => {}
-        (Some(_), None) => {}
-        (Some(_), Some(_)) => {}
     }
 
-    fn exacute_program(input: Option<PathBuf>) {
-        println!("sand-worm-sql");
-        let output = std::io::stdout();
-        let mut cli = Cli::new(output);
-
-        if let Some(path) = input {
-            if let Err(e) = cli.load(path.as_path()) {
-                println!("[error] {}\n", e);
-            };
-        }
-
-        if let Err(e) = cli.run() {
-            eprintln!("{}", e);
-        }
+    if let Err(e) = cli.run() {
+        eprintln!("{}", e);
     }
+}
 
+pub fn dump_data(dump_path: PathBuf) -> Result<()> {
+    let _file = File::create(&dump_path)?;
+    println!("sand-worm-sql {}", dump_path.display());
     Ok(())
 }
