@@ -1,6 +1,6 @@
 use {
     crate::{
-        command::{Command, CommandError},
+        command::{Command, CommandError, SetOption},
         helper::CliHelper,
         print::Print,
     },
@@ -99,52 +99,53 @@ where
 
             match command {
                 Command::Help => {
-                    self.print.help()?;
-                    continue;
-                }
+                                self.print.help()?;
+                                continue;
+                            }
                 Command::Quit => {
-                    println!("bye\n");
-                    break;
-                }
+                                println!("bye\n");
+                                break;
+                            }
                 Command::Execute(sql) => self.execute(sql)?,
                 Command::ExecuteFromFile(filename) => {
-                    if let Err(e) = self.load(&filename) {
-                        println!("[error] {}\n", e);
-                    }
-                }
+                                if let Err(e) = self.load(&filename) {
+                                    println!("[error] {}\n", e);
+                                }
+                            }
                 Command::SpoolOn(path) => {
-                    self.print.spool_on(path)?;
-                }
+                                self.print.spool_on(path)?;
+                            }
                 Command::SpoolOff => {
-                    self.print.spool_off();
-                }
+                                self.print.spool_off();
+                            }
                 Command::Edit(file_name) => {
-                    match file_name {
-                        Some(file_name) => {
-                            let file = Path::new(&file_name);
-                            edit_file(file)?;
-                        }
-                        None => {
-                            let mut builder = Builder::new();
-                            builder.prefix("Glue_").suffix(".sql");
-                            let last = rl.history().last().map_or_else(|| "", String::as_str);
-                            let edited = edit_with_builder(last, &builder)?;
-                            rl.add_history_entry(edited);
-                        }
-                    };
-                }
+                                match file_name {
+                                    Some(file_name) => {
+                                        let file = Path::new(&file_name);
+                                        edit_file(file)?;
+                                    }
+                                    None => {
+                                        let mut builder = Builder::new();
+                                        builder.prefix("Glue_").suffix(".sql");
+                                        let last = rl.history().last().map_or_else(|| "", String::as_str);
+                                        let edited = edit_with_builder(last, &builder)?;
+                                        rl.add_history_entry(edited);
+                                    }
+                                };
+                            }
+                Command::Set(option) => self.print.set_option(option),
                 Command::Run => {
-                    let sql = rl.history().last().ok_or(CommandError::LackOfSQLHistory);
+                                let sql = rl.history().last().ok_or(CommandError::LackOfSQLHistory);
 
-                    match sql {
-                        Ok(sql) => {
-                            self.execute(sql)?;
-                        }
-                        Err(e) => {
-                            println!("[error] {}\n", e);
-                        }
-                    };
-                }
+                                match sql {
+                                    Ok(sql) => {
+                                        self.execute(sql)?;
+                                    }
+                                    Err(e) => {
+                                        println!("[error] {}\n", e);
+                                    }
+                                };
+                            }
             }
         }
 

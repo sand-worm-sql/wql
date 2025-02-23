@@ -7,6 +7,7 @@ use {
         fs::File,
         io::{Result as IOResult, Write},
         path::Path,
+        fmt::Display,
     },
     tabled::{builder::Builder, Style, Table},
 };
@@ -122,6 +123,76 @@ impl<'a, W: Write> Print<W> {
 
     // //   Ok(())
     // }
+
+    fn write_rows(
+        &mut self,
+        rows: impl Iterator<Item = impl Iterator<Item = String>>,
+    ) -> IOResult<()> {
+        for row in rows {
+            let row = row
+                .map(|v| format!("{c}{v}{c}", c = self.option.colwrap))
+                .collect::<Vec<_>>()
+                .join(self.option.colsep.as_str());
+
+            self.write(row)?;
+        }
+
+        Ok(())
+    }
+
+    fn write_lf(&mut self, payload: impl Display, lf: &str) -> IOResult<()> {
+        if let Some(file) = &self.spool_file {
+            writeln!(file.to_owned(), "{payload}{lf}")?;
+        };
+
+        writeln!(self.output, "{payload}{lf}")
+    }
+
+    fn write(&mut self, payload: impl Display) -> IOResult<()> {
+        self.write_lf(payload, "")
+    }
+
+    fn writeln(&mut self, payload: impl Display) -> IOResult<()> {
+        self.write_lf(payload, "\n")
+    }
+
+    fn write_header<'b>(&mut self, labels: impl Iterator<Item = &'b str>) -> IOResult<()> {
+        let PrintOption {
+            heading,
+            colsep,
+            colwrap,
+            ..
+        } = &self.option;
+
+        if !heading {
+            return Ok(());
+        }
+
+        let labels = labels
+            .map(|v| format!("{colwrap}{v}{colwrap}"))
+            .collect::<Vec<_>>()
+            .join(colsep.as_str());
+
+        self.write(labels)
+    }
+
+    pub fn show_option(&mut self, option: ShowOption) -> IOResult<()> {
+        let payload = self.option.format(option);
+        self.writeln(payload)?;
+
+        Ok(())
+    }
+
+    pub fn set_option(&mut self, option: SetOption) {
+        match option {
+            SetOption::Tabular(value) => self.option.tabular(value),
+            SetOption::Colsep(value) => self.option.colsep(value),
+            SetOption::Colwrap(value) => self.option.colwrap(value),
+            SetOption::Heading(value) => self.option.heading(value),
+        }
+    }
+
+
 
     pub fn spool_on<P: AsRef<Path>>(&mut self, filename: P) -> IOResult<()> {
         let file = File::create(filename)?;

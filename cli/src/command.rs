@@ -88,6 +88,7 @@ pub enum Command {
     ExecuteFromFile(String),
     SpoolOn(String),
     SpoolOff,
+    Set(SetOption),
     Edit(Option<String>),
     Run,
 }
@@ -119,7 +120,17 @@ impl Command {
             match params.first() {
                 Some(&".quit") => Ok(Self::Quit),
                 Some(&".help") => Ok(Self::Help),
-
+                Some(&".version") => Ok(Self::Execute("SHOW VERSION".to_owned())),
+                Some(&".spool") => match params.get(1) {
+                    Some(&"off") => Ok(Self::SpoolOff),
+                    Some(path) => Ok(Self::SpoolOn(path.to_string())),
+                    None => Err(CommandError::LackOfFile),
+                },
+                Some(&".set") => match (params.get(1), params.get(2)) {
+                    (Some(key), value) => Ok(Self::Set(SetOption::parse(key, value, option)?)),
+                    (None, _) => Err(CommandError::LackOfOption),
+                },
+                Some(&".run")=>  Ok(Self::Run),
                 _ => Err(CommandError::NotSupported),
             }
         } else {
