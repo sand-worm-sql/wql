@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+    sand_worm_cli::run().unwrap();
 }
