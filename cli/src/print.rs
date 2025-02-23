@@ -1,14 +1,13 @@
 use {
-    // crate::command::{SetOption, ShowOption},
-    // gluesql_core::prelude::{Payload, PayloadVariable},
+    crate::command::{
+        SetOption,
+        ShowOption,
+    },
     std::{
-        collections::{HashMap, HashSet},
-        fmt::Display,
         fs::File,
         io::{Result as IOResult, Write},
         path::Path,
     },
-    strum_macros::Display,
     tabled::{builder::Builder, Style, Table},
 };
 
@@ -26,51 +25,51 @@ pub struct PrintOption {
 }
 
 impl PrintOption {
-    // pub fn tabular(&mut self, tabular: bool) {
-    //     match tabular {
-    //         true => {
-    //             self.tabular = tabular;
-    //             self.colsep("|".into());
-    //             self.colwrap("".into());
-    //             self.heading(true);
-    //         }
-    //         false => self.tabular = tabular,
-    //     }
-    // }
+    pub fn tabular(&mut self, tabular: bool) {
+        match tabular {
+            true => {
+                self.tabular = tabular;
+                self.colsep("|".into());
+                self.colwrap("".into());
+                self.heading(true);
+            }
+            false => self.tabular = tabular,
+        }
+    }
 
-    // fn colsep(&mut self, colsep: String) {
-    //     self.colsep = colsep;
-    // }
+    fn colsep(&mut self, colsep: String) {
+        self.colsep = colsep;
+    }
 
-    // fn colwrap(&mut self, colwrap: String) {
-    //     self.colwrap = colwrap;
-    // }
+    fn colwrap(&mut self, colwrap: String) {
+        self.colwrap = colwrap;
+    }
 
-    // fn heading(&mut self, heading: bool) {
-    //     self.heading = heading;
-    // }
+    fn heading(&mut self, heading: bool) {
+        self.heading = heading;
+    }
 
-    // fn format(&self, option: ShowOption) -> String {
-    //     fn string_from(value: &bool) -> String {
-    //         match value {
-    //             true => "ON".into(),
-    //             false => "OFF".into(),
-    //         }
-    //     }
-    //     match option {
-    //         ShowOption::Tabular => format!("tabular {}", string_from(&self.tabular)),
-    //         ShowOption::Colsep => format!("colsep \"{}\"", self.colsep),
-    //         ShowOption::Colwrap => format!("colwrap \"{}\"", self.colwrap),
-    //         ShowOption::Heading => format!("heading {}", string_from(&self.heading)),
-    //         ShowOption::All => format!(
-    //             "{}\n{}\n{}\n{}",
-    //             self.format(ShowOption::Tabular),
-    //             self.format(ShowOption::Colsep),
-    //             self.format(ShowOption::Colwrap),
-    //             self.format(ShowOption::Heading),
-    //         ),
-    //     }
-    // }
+    fn format(&self, option: ShowOption) -> String {
+        fn string_from(value: &bool) -> String {
+            match value {
+                true => "ON".into(),
+                false => "OFF".into(),
+            }
+        }
+        match option {
+            ShowOption::Tabular => format!("tabular {}", string_from(&self.tabular)),
+            ShowOption::Colsep => format!("colsep \"{}\"", self.colsep),
+            ShowOption::Colwrap => format!("colwrap \"{}\"", self.colwrap),
+            ShowOption::Heading => format!("heading {}", string_from(&self.heading)),
+            ShowOption::All => format!(
+                "{}\n{}\n{}\n{}",
+                self.format(ShowOption::Tabular),
+                self.format(ShowOption::Colsep),
+                self.format(ShowOption::Colwrap),
+                self.format(ShowOption::Heading),
+            ),
+        }
+    }
 }
 
 impl Default for PrintOption {

@@ -1,5 +1,85 @@
 use {crate::print::PrintOption, std::fmt::Debug, thiserror::Error as ThisError};
 
+
+#[derive(Eq, Debug, PartialEq)]
+pub enum SetOption {
+    Tabular(bool),
+    Colsep(String),
+    Colwrap(String),
+    Heading(bool),
+}
+
+
+impl SetOption {
+    fn parse(key: &str, value: Option<&&str>, option: &PrintOption) -> Result<Self, CommandError> {
+        fn bool_from(value: String) -> Result<bool, CommandError> {
+            match value.to_uppercase().as_str() {
+                "ON" => Ok(true),
+                "OFF" => Ok(false),
+                _ => Err(CommandError::WrongOption(value)),
+            }
+        }
+
+        if let Some(value) = value {
+            let value = match *value {
+                "\"\"" => "",
+                _ => value,
+            }
+            .to_owned();
+
+            let set_option = match (key.to_lowercase().as_str(), &option.tabular) {
+                ("tabular", _) => Self::Tabular(bool_from(value)?),
+                ("colsep", false) => Self::Colsep(value),
+                ("colwrap", false) => Self::Colwrap(value),
+                ("heading", false) => Self::Heading(bool_from(value)?),
+                (_, true) => return Err(CommandError::WrongOption("run .set tabular OFF".into())),
+
+                _ => return Err(CommandError::WrongOption(key.into())),
+            };
+
+            Ok(set_option)
+        } else {
+            let payload = match key.to_lowercase().as_str() {
+                "tabular" => "Usage: .set tabular {ON|OFF}",
+                "colsep" => "Usage: .set colsep {\"\"|TEXT}",
+                "colwrap" => "Usage: .set colwrap {\"\"|TEXT}",
+                "heading" => "Usage: .set heading {ON|OFF}",
+
+                _ => return Err(CommandError::WrongOption(key.into())),
+            };
+
+            Err(CommandError::LackOfValue(payload.into()))
+        }
+    }
+}
+
+
+#[derive(Eq, Debug, PartialEq)]
+pub enum ShowOption {
+    Tabular,
+    Colsep,
+    Colwrap,
+    Heading,
+    All,
+}
+
+impl ShowOption {
+    fn parse(key: &str) -> Result<Self, CommandError> {
+        let show_option = match key.to_lowercase().as_str() {
+            "tabular" => Self::Tabular,
+            "colsep" => Self::Colsep,
+            "colwrap" => Self::Colwrap,
+            "heading" => Self::Heading,
+            "all" => Self::All,
+            _ => return Err(CommandError::WrongOption(key.into())),
+        };
+
+        Ok(show_option)
+    }
+}
+
+
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Command {
     Help,
@@ -39,6 +119,7 @@ impl Command {
             match params.first() {
                 Some(&".quit") => Ok(Self::Quit),
                 Some(&".help") => Ok(Self::Help),
+
                 _ => Err(CommandError::NotSupported),
             }
         } else {

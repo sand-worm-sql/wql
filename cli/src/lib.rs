@@ -10,7 +10,6 @@ use {
     std::{
         fmt::Debug,
         fs::File,
-        io::Write,
         path::{Path, PathBuf},
     },
 };
@@ -33,29 +32,7 @@ struct Args {
 }
 
 pub fn run() -> Result<()> {
-    let args = Args::parse();
-
-    // println!("{}", args.execute.unwrap_or("".to_string()));
-
-   // println!("sand-worm-sql {}", path.unwrap_or(""));
-
-    // match (path, args.dump) {
-    //     (None, None) => {
-    //         eprintln!("Error: No path or dump specified.");
-    //         return Ok(()); // Exit early
-    //     }
-    //     (None, Some(dump_path)) => {
-    //         dump_data(dump_path)?; 
-    //     }
-    //     (Some(_), None) => {
-    //         execute_program(args.execute); 
-    //     }
-    //     (Some(_), Some(_)) => {
-    //         eprintln!("Error: Cannot specify both a path and a dump at the same time.");
-    //         return Ok(()); // Exit early
-    //     }
-    // }
-
+    execute_program(None);
     Ok(())
 }
 
