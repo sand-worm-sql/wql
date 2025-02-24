@@ -84,6 +84,7 @@ impl ShowOption {
 pub enum Command {
     Help,
     Quit,
+    Chain,
     Execute(String),
     ExecuteFromFile(String),
     SpoolOn(String),
@@ -120,6 +121,7 @@ impl Command {
             match params.first() {
                 Some(&".quit") => Ok(Self::Quit),
                 Some(&".help") => Ok(Self::Help),
+                Some(&".chains") => Ok(Self::Chain),
                 Some(&".version") => Ok(Self::Execute("SHOW VERSION".to_owned())),
                 Some(&".spool") => match params.get(1) {
                     Some(&"off") => Ok(Self::SpoolOff),

@@ -106,6 +106,10 @@ where
                                 println!("bye\n");
                                 break;
                             }
+                Command::Chain => {
+                                self.print.chains()?;
+                                continue;
+                            }
                 Command::Execute(sql) => self.execute(sql)?,
                 Command::ExecuteFromFile(filename) => {
                                 if let Err(e) = self.load(&filename) {

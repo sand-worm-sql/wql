@@ -93,12 +93,77 @@ impl<'a, W: Write> Print<W> {
         }
     }
 
+    pub fn chains(&mut self) -> IOResult<()>{
+        const HEADER: [&str; 2] = ["chain", "description"];
+        const SUB_CHAIN_HEADER: [&str; 2] = ["subchain", "description"];
+
+        const MAIN_CHAINS: [[&str; 2]; 12] = [
+            ["eth", "Ethereum Mainnet     "],  
+            ["sui", "Sui Network         "],  
+            ["tron", "Tron Blockchain     "],  
+            ["avalanche", "Avalanche C-Chain   "],  
+            ["bnb", "Binance Smart Chain "],  
+            ["celo", "Celo Blockchain     "],  
+            ["fantom", "Fantom Opera        "],  
+            ["gnosis", "Gnosis Chain        "],  
+            ["kava", "Kava Blockchain     "],  
+            ["moonbeam", "Moonbeam Network    "],  
+            ["ronin", "Ronin Blockchain    "],  
+            ["moonriver", "Moonriver Network   "],  
+        ];
+
+        const ETH_SUB_CHAINS: [[&str; 2]; 12]  = [
+            ["arb", "Arbitrum One       "],  
+            ["op", "Optimism Layer 2   "],  
+            ["base", "Base L2 by Coinbase"],  
+            ["blast", "Blast Network      "],  
+            ["polygon", "Polygon PoS Chain  "],  
+            ["sepolia", "Sepolia Testnet    "],  
+            ["mantle", "Mantle Network     "],  
+            ["zksync", "zkSync Era L2      "],  
+            ["taiko", "Taiko Rollup       "],  
+            ["scroll", "Scroll zkEVM   "],  
+            ["linea", "Linea zkEVM        "],  
+            ["zora", "Zora Network       "],  
+        ];
+
+        let mut main_chain_table = self.get_table(HEADER);
+        for row in MAIN_CHAINS {
+            main_chain_table.add_record(row);
+        }
+        let main_chain_table = self.build_table(main_chain_table);
+
+        let mut sub_chain_table = self.get_table(SUB_CHAIN_HEADER);
+        for row in ETH_SUB_CHAINS {
+            sub_chain_table.add_record(row);
+        }
+        let sub_chain_table = self.build_table(sub_chain_table);
+        
+        const BOLD: &str = "\x1b[1m";
+        const RESET: &str = "\x1b[0m";
+
+        writeln!(self.output, "{}Supported main chains{}", BOLD, RESET)?;
+        writeln!(self.output, "{}\n", main_chain_table)?;
+
+        writeln!(self.output, "{}Supported sub chains{}", BOLD, RESET)?;
+        writeln!(self.output, "{}\n", sub_chain_table)?;
+
+        writeln!(
+            self.output,
+            "{}Supported chains: {}{}",
+            BOLD,
+            MAIN_CHAINS.len() + ETH_SUB_CHAINS.len(),
+            RESET
+        )?;
+        Ok(())
+    }
+
     pub fn help(&mut self) -> IOResult<()> {
         const HEADER: [&str; 2] = ["command", "description"];
         const CONTENT: [[&str; 2]; 12] = [
             [".help", "show help"],
             [".quit", "quit program"],
-            [".tables", "show table names"],
+            [".chains", "show supported chains "],
             [".functions", "show function names"],
             [".columns TABLE", "show columns from TABLE"],
             [".version", "show version"],
