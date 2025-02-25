@@ -1,6 +1,5 @@
 use {crate::print::PrintOption, std::fmt::Debug, thiserror::Error as ThisError};
 
-
 #[derive(Eq, Debug, PartialEq)]
 pub enum SetOption {
     Tabular(bool),
@@ -8,7 +7,6 @@ pub enum SetOption {
     Colwrap(String),
     Heading(bool),
 }
-
 
 impl SetOption {
     fn parse(key: &str, value: Option<&&str>, option: &PrintOption) -> Result<Self, CommandError> {
@@ -53,7 +51,6 @@ impl SetOption {
     }
 }
 
-
 #[derive(Eq, Debug, PartialEq)]
 pub enum ShowOption {
     Tabular,
@@ -77,8 +74,6 @@ impl ShowOption {
         Ok(show_option)
     }
 }
-
-
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Command {
@@ -137,7 +132,7 @@ impl Command {
                     Some(key) => Ok(Self::Show(ShowOption::parse(key)?)),
                     None => Err(CommandError::LackOfOption),
                 },
-                Some(&".run")=>  Ok(Self::Run),
+                Some(&".run") => Ok(Self::Run),
                 _ => Err(CommandError::NotSupported),
             }
         } else {

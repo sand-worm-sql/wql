@@ -28,7 +28,6 @@ struct Args {
     /// Storage path to load
     #[arg(short, long)]
     path: Option<PathBuf>,
-
 }
 
 pub fn run() -> Result<()> {

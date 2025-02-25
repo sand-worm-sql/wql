@@ -1,13 +1,10 @@
 use {
-    crate::command::{
-        SetOption,
-        ShowOption,
-    },
+    crate::command::{SetOption, ShowOption},
     std::{
+        fmt::Display,
         fs::File,
         io::{Result as IOResult, Write},
         path::Path,
-        fmt::Display,
     },
     tabled::{builder::Builder, Style, Table},
 };
@@ -93,38 +90,38 @@ impl<'a, W: Write> Print<W> {
         }
     }
 
-    pub fn chains(&mut self) -> IOResult<()>{
+    pub fn chains(&mut self) -> IOResult<()> {
         const HEADER: [&str; 2] = ["chain", "description"];
         const SUB_CHAIN_HEADER: [&str; 2] = ["subchain", "description"];
 
         const MAIN_CHAINS: [[&str; 2]; 12] = [
-            ["eth", "Ethereum Mainnet     "],  
-            ["sui", "Sui Network         "],  
-            ["tron", "Tron Blockchain     "],  
-            ["avalanche", "Avalanche C-Chain   "],  
-            ["bnb", "Binance Smart Chain "],  
-            ["celo", "Celo Blockchain     "],  
-            ["fantom", "Fantom Opera        "],  
-            ["gnosis", "Gnosis Chain        "],  
-            ["kava", "Kava Blockchain     "],  
-            ["moonbeam", "Moonbeam Network    "],  
-            ["ronin", "Ronin Blockchain    "],  
-            ["moonriver", "Moonriver Network   "],  
+            ["eth", "Ethereum Mainnet     "],
+            ["sui", "Sui Network         "],
+            ["tron", "Tron Blockchain     "],
+            ["avalanche", "Avalanche C-Chain   "],
+            ["bnb", "Binance Smart Chain "],
+            ["celo", "Celo Blockchain     "],
+            ["fantom", "Fantom Opera        "],
+            ["gnosis", "Gnosis Chain        "],
+            ["kava", "Kava Blockchain     "],
+            ["moonbeam", "Moonbeam Network    "],
+            ["ronin", "Ronin Blockchain    "],
+            ["moonriver", "Moonriver Network   "],
         ];
 
-        const ETH_SUB_CHAINS: [[&str; 2]; 12]  = [
-            ["arb", "Arbitrum One       "],  
-            ["op", "Optimism Layer 2   "],  
-            ["base", "Base L2 by Coinbase"],  
-            ["blast", "Blast Network      "],  
-            ["polygon", "Polygon PoS Chain  "],  
-            ["sepolia", "Sepolia Testnet    "],  
-            ["mantle", "Mantle Network     "],  
-            ["zksync", "zkSync Era L2      "],  
-            ["taiko", "Taiko Rollup       "],  
-            ["scroll", "Scroll zkEVM   "],  
-            ["linea", "Linea zkEVM        "],  
-            ["zora", "Zora Network       "],  
+        const ETH_SUB_CHAINS: [[&str; 2]; 12] = [
+            ["arb", "Arbitrum One       "],
+            ["op", "Optimism Layer 2   "],
+            ["base", "Base L2 by Coinbase"],
+            ["blast", "Blast Network      "],
+            ["polygon", "Polygon PoS Chain  "],
+            ["sepolia", "Sepolia Testnet    "],
+            ["mantle", "Mantle Network     "],
+            ["zksync", "zkSync Era L2      "],
+            ["taiko", "Taiko Rollup       "],
+            ["scroll", "Scroll zkEVM   "],
+            ["linea", "Linea zkEVM        "],
+            ["zora", "Zora Network       "],
         ];
 
         let mut main_chain_table = self.get_table(HEADER);
@@ -138,7 +135,7 @@ impl<'a, W: Write> Print<W> {
             sub_chain_table.add_record(row);
         }
         let sub_chain_table = self.build_table(sub_chain_table);
-        
+
         const BOLD: &str = "\x1b[1m";
         const RESET: &str = "\x1b[0m";
 
@@ -251,8 +248,6 @@ impl<'a, W: Write> Print<W> {
             SetOption::Heading(value) => self.option.heading(value),
         }
     }
-
-
 
     pub fn spool_on<P: AsRef<Path>>(&mut self, filename: P) -> IOResult<()> {
         let file = File::create(filename)?;
