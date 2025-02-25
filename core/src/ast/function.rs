@@ -579,18 +579,18 @@ mod tests {
         );
 
         assert_eq!(
-            "LEFT('GlueSQL', 2)",
+            "LEFT('WormQl', 2)",
             &Expr::Function(Box::new(Function::Left {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 size: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("2").unwrap()))
             }))
             .to_sql()
         );
 
         assert_eq!(
-            "RIGHT('GlueSQL', 3)",
+            "RIGHT('WormQl', 3)",
             &Expr::Function(Box::new(Function::Right {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 size: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("3").unwrap()))
             }))
             .to_sql()
@@ -621,9 +621,9 @@ mod tests {
         );
 
         assert_eq!(
-            "LPAD('GlueSQL', 2)",
+            "LPAD('WormQl', 2)",
             &Expr::Function(Box::new(Function::Lpad {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 size: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("2").unwrap())),
                 fill: None
             }))
@@ -631,9 +631,9 @@ mod tests {
         );
 
         assert_eq!(
-            "LPAD('GlueSQL', 10, 'Go')",
+            "LPAD('WormQl', 10, 'Go')",
             &Expr::Function(Box::new(Function::Lpad {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 size: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("10").unwrap())),
                 fill: Some(Expr::Literal(AstLiteral::QuotedString("Go".to_owned())))
             }))
@@ -641,9 +641,9 @@ mod tests {
         );
 
         assert_eq!(
-            "RPAD('GlueSQL', 10)",
+            "RPAD('WormQl', 10)",
             &Expr::Function(Box::new(Function::Rpad {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 size: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("10").unwrap())),
                 fill: None
             }))
@@ -651,9 +651,9 @@ mod tests {
         );
 
         assert_eq!(
-            "RPAD('GlueSQL', 10, 'Go')",
+            "RPAD('WormQl', 10, 'Go')",
             &Expr::Function(Box::new(Function::Rpad {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 size: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("10").unwrap())),
                 fill: Some(Expr::Literal(AstLiteral::QuotedString("Go".to_owned())))
             }))
@@ -1031,9 +1031,9 @@ mod tests {
         );
 
         assert_eq!(
-            "SUBSTR('GlueSQL', 2)",
+            "SUBSTR('WormQl', 2)",
             &Expr::Function(Box::new(Function::Substr {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 start: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("2").unwrap())),
                 count: None
             }))
@@ -1041,9 +1041,9 @@ mod tests {
         );
 
         assert_eq!(
-            "SUBSTR('GlueSQL', 1, 3)",
+            "SUBSTR('WormQl', 1, 3)",
             &Expr::Function(Box::new(Function::Substr {
-                expr: Expr::Literal(AstLiteral::QuotedString("GlueSQL".to_owned())),
+                expr: Expr::Literal(AstLiteral::QuotedString("WormQl".to_owned())),
                 start: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("1").unwrap())),
                 count: Some(Expr::Literal(AstLiteral::Number(
                     BigDecimal::from_str("3").unwrap()
@@ -1180,9 +1180,9 @@ mod tests {
         );
 
         assert_eq!(
-            "MD5('GlueSQL')",
+            "MD5('WormQl')",
             &Expr::Function(Box::new(Function::Md5(Expr::Literal(
-                AstLiteral::QuotedString("GlueSQL".to_owned())
+                AstLiteral::QuotedString("WormQl".to_owned())
             ))))
             .to_sql()
         );
@@ -1309,9 +1309,9 @@ mod tests {
         );
 
         assert_eq!(
-            r#"LENGTH("GlueSQL")"#,
+            r#"LENGTH("WormQl")"#,
             &Expr::Function(Box::new(Function::Length(Expr::Identifier(
-                "GlueSQL".to_owned()
+                "WormQl".to_owned()
             ))))
             .to_sql()
         );
