@@ -184,11 +184,6 @@ impl<'a, W: Write> Print<W> {
         writeln!(self.output, "{}\n", table)
     }
 
-    // pub fn clear(&mut self)  -> IOResult<()>  {
-
-    // //   Ok(())
-    // }
-
     fn write_rows(
         &mut self,
         rows: impl Iterator<Item = impl Iterator<Item = String>>,

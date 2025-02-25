@@ -90,6 +90,7 @@ pub enum Command {
     SpoolOn(String),
     SpoolOff,
     Set(SetOption),
+    Show(ShowOption),
     Edit(Option<String>),
     Run,
 }
@@ -131,6 +132,10 @@ impl Command {
                 Some(&".set") => match (params.get(1), params.get(2)) {
                     (Some(key), value) => Ok(Self::Set(SetOption::parse(key, value, option)?)),
                     (None, _) => Err(CommandError::LackOfOption),
+                },
+                Some(&".show") => match params.get(1) {
+                    Some(key) => Ok(Self::Show(ShowOption::parse(key)?)),
+                    None => Err(CommandError::LackOfOption),
                 },
                 Some(&".run")=>  Ok(Self::Run),
                 _ => Err(CommandError::NotSupported),

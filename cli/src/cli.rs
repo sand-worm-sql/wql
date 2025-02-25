@@ -130,7 +130,7 @@ where
                                     }
                                     None => {
                                         let mut builder = Builder::new();
-                                        builder.prefix("Glue_").suffix(".sql");
+                                        builder.prefix("worm_").suffix(".wql");
                                         let last = rl.history().last().map_or_else(|| "", String::as_str);
                                         let edited = edit_with_builder(last, &builder)?;
                                         rl.add_history_entry(edited);
@@ -138,6 +138,7 @@ where
                                 };
                             }
                 Command::Set(option) => self.print.set_option(option),
+                Command::Show(option) => self.print.show_option(option)?,
                 Command::Run => {
                                 let sql = rl.history().last().ok_or(CommandError::LackOfSQLHistory);
 
