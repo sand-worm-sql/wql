@@ -7,11 +7,10 @@ pub use crate::{
         StringExtError, TableError, ValueError,
     },
     executor::{
-        AggregateError, AlterError, DeleteError, EvaluateError, ExecuteError, FetchError,
-        InsertError, SelectError, SortError, UpdateError, ValidateError,
+        AggregateError, EvaluateError, ExecuteError, FetchError, SelectError, SortError,
+        ValidateError,
     },
     plan::PlanError,
-    store::{AlterTableError, IndexError},
     translate::TranslateError,
 };
 
@@ -29,14 +28,9 @@ pub enum Error {
     #[error("ast-builder: {0}")]
     AstBuilder(#[from] AstBuilderError),
 
-    #[error("alter-table: {0}")]
-    AlterTable(#[from] AlterTableError),
-    #[error("index: {0}")]
-    Index(#[from] IndexError),
     #[error("execute: {0}")]
     Execute(#[from] ExecuteError),
-    #[error("alter: {0}")]
-    Alter(#[from] AlterError),
+
     #[error("fetch: {0}")]
     Fetch(#[from] FetchError),
     #[error("select: {0}")]
@@ -47,12 +41,6 @@ pub enum Error {
     Aggregate(#[from] AggregateError),
     #[error("sort: {0}")]
     Sort(#[from] SortError),
-    #[error("insert: {0}")]
-    Insert(#[from] InsertError),
-    #[error("update: {0}")]
-    Delete(#[from] DeleteError),
-    #[error("delete: {0}")]
-    Update(#[from] UpdateError),
     #[error("table: {0}")]
     Table(#[from] TableError),
     #[error("validate: {0}")]
