@@ -5,9 +5,8 @@ use {
     },
     crate::ast::DataType,
     chrono::{NaiveDate, NaiveDateTime, NaiveTime},
-    rust_decimal::prelude::{Decimal, FromPrimitive, FromStr, ToPrimitive},
+    rust_decimal::prelude::ToPrimitive,
     serde::Serialize,
-    std::net::IpAddr,
     uuid::Uuid,
 };
 
@@ -34,15 +33,14 @@ macro_rules! try_from_owned_value {
 }
 
 try_from_owned_value!(
-    bool, i8, i16, i32, i64, i128, f32, f64, u8, u16, u32, u64, u128, usize, Decimal
+    bool, i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, usize
 );
 
 impl From<&Value> for String {
     fn from(v: &Value) -> Self {
         match v {
             Value::Str(value) => value.to_owned(),
-            Value::Bytea(value) => hex::encode(value),
-            Value::Inet(value) => value.to_string(),
+            Value::Bytes(value) => hex::encode(value),
             Value::Bool(value) => (if *value { "TRUE" } else { "FALSE" }).to_owned(),
             Value::I8(value) => value.to_string(),
             Value::I16(value) => value.to_string(),
@@ -54,8 +52,6 @@ impl From<&Value> for String {
             Value::U32(value) => value.to_string(),
             Value::U64(value) => value.to_string(),
             Value::U128(value) => value.to_string(),
-            Value::F32(value) => value.to_string(),
-            Value::F64(value) => value.to_string(),
             Value::Date(value) => value.to_string(),
             Value::Timestamp(value) => value.to_string(),
             Value::Time(value) => value.to_string(),
@@ -67,8 +63,6 @@ impl From<&Value> for String {
             Value::List(_) => TryInto::<serde_json::Value>::try_into(v.clone())
                 .unwrap_or_default()
                 .to_string(),
-            Value::Decimal(value) => value.to_string(),
-            Value::Point(value) => value.to_string(),
             Value::Null => "NULL".to_owned(),
         }
     }
@@ -114,30 +108,6 @@ impl TryFrom<&Value> for bool {
             Value::U32(value) => int_to_bool!(value),
             Value::U64(value) => int_to_bool!(value),
             Value::U128(value) => int_to_bool!(value),
-            Value::F32(value) => {
-                if value.eq(&1.0_f32) {
-                    true
-                } else if value.eq(&0.0_f32) {
-                    false
-                } else {
-                    return Err(ConvertError {
-                        value: v.clone(),
-                        data_type: DataType::Boolean,
-                    });
-                }
-            }
-            Value::F64(value) => {
-                if value.eq(&1.0) {
-                    true
-                } else if value.eq(&0.0) {
-                    false
-                } else {
-                    return Err(ConvertError {
-                        value: v.clone(),
-                        data_type: DataType::Boolean,
-                    });
-                }
-            }
             Value::Str(value) => match value.to_uppercase().as_str() {
                 "TRUE" => true,
                 "FALSE" => false,
@@ -148,18 +118,6 @@ impl TryFrom<&Value> for bool {
                     })
                 }
             },
-            Value::Decimal(value) => {
-                if value == &rust_decimal::Decimal::ONE {
-                    true
-                } else if value == &rust_decimal::Decimal::ZERO {
-                    false
-                } else {
-                    return Err(ConvertError {
-                        value: v.clone(),
-                        data_type: DataType::Boolean,
-                    });
-                }
-            }
 
             Value::Date(_)
             | Value::Timestamp(_)
@@ -168,9 +126,7 @@ impl TryFrom<&Value> for bool {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -206,13 +162,7 @@ impl TryFrom<&Value> for i8 {
             Value::U32(value) => num_to_i8!(value),
             Value::U64(value) => num_to_i8!(value),
             Value::U128(value) => num_to_i8!(value),
-            Value::F32(value) => num_to_i8!(value),
-            Value::F64(value) => num_to_i8!(value),
             Value::Str(value) => value.parse::<i8>().map_err(|_| ConvertError {
-                value: v.clone(),
-                data_type: DataType::Int8,
-            })?,
-            Value::Decimal(value) => value.to_i8().ok_or_else(|| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Int8,
             })?,
@@ -224,9 +174,7 @@ impl TryFrom<&Value> for i8 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -262,13 +210,7 @@ impl TryFrom<&Value> for i16 {
             Value::U32(value) => num_to_i16!(value),
             Value::U64(value) => num_to_i16!(value),
             Value::U128(value) => num_to_i16!(value),
-            Value::F32(value) => num_to_i16!(value),
-            Value::F64(value) => num_to_i16!(value),
             Value::Str(value) => value.parse::<i16>().map_err(|_| ConvertError {
-                value: v.clone(),
-                data_type: DataType::Int16,
-            })?,
-            Value::Decimal(value) => value.to_i16().ok_or_else(|| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Int16,
             })?,
@@ -280,9 +222,7 @@ impl TryFrom<&Value> for i16 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -318,14 +258,10 @@ impl TryFrom<&Value> for i32 {
             Value::U32(value) => num_to_i32!(value),
             Value::U64(value) => num_to_i32!(value),
             Value::U128(value) => num_to_i32!(value),
-            Value::F32(value) => num_to_i32!(value),
-            Value::F64(value) => num_to_i32!(value),
             Value::Str(value) => value.parse::<i32>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Int32,
             })?,
-            Value::Decimal(value) => num_to_i32!(value),
-
             Value::Date(_)
             | Value::Timestamp(_)
             | Value::Time(_)
@@ -333,9 +269,7 @@ impl TryFrom<&Value> for i32 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -371,13 +305,10 @@ impl TryFrom<&Value> for i64 {
             Value::U32(value) => num_to_i64!(value),
             Value::U64(value) => num_to_i64!(value),
             Value::U128(value) => num_to_i64!(value),
-            Value::F32(value) => num_to_i64!(value),
-            Value::F64(value) => num_to_i64!(value),
             Value::Str(value) => value.parse::<i64>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Int,
             })?,
-            Value::Decimal(value) => num_to_i64!(value),
 
             Value::Date(_)
             | Value::Timestamp(_)
@@ -386,9 +317,7 @@ impl TryFrom<&Value> for i64 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -424,13 +353,10 @@ impl TryFrom<&Value> for i128 {
             Value::U32(value) => num_to_i128!(value),
             Value::U64(value) => num_to_i128!(value),
             Value::U128(value) => num_to_i128!(value),
-            Value::F32(value) => num_to_i128!(value),
-            Value::F64(value) => num_to_i128!(value),
             Value::Str(value) => value.parse::<i128>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Int128,
             })?,
-            Value::Decimal(value) => num_to_i128!(value),
 
             Value::Date(_)
             | Value::Timestamp(_)
@@ -439,9 +365,7 @@ impl TryFrom<&Value> for i128 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -477,13 +401,10 @@ impl TryFrom<&Value> for u8 {
             Value::U32(value) => num_to_u8!(value),
             Value::U64(value) => num_to_u8!(value),
             Value::U128(value) => num_to_u8!(value),
-            Value::F32(value) => num_to_u8!(value),
-            Value::F64(value) => num_to_u8!(value),
             Value::Str(value) => value.parse::<u8>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Uint8,
             })?,
-            Value::Decimal(value) => num_to_u8!(value),
 
             Value::Date(_)
             | Value::Timestamp(_)
@@ -492,9 +413,7 @@ impl TryFrom<&Value> for u8 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -529,13 +448,10 @@ impl TryFrom<&Value> for u16 {
             Value::U32(value) => num_to_u16!(value),
             Value::U64(value) => num_to_u16!(value),
             Value::U128(value) => num_to_u16!(value),
-            Value::F32(value) => num_to_u16!(value),
-            Value::F64(value) => num_to_u16!(value),
             Value::Str(value) => value.parse::<u16>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Uint16,
             })?,
-            Value::Decimal(value) => num_to_u16!(value),
 
             Value::Date(_)
             | Value::Timestamp(_)
@@ -544,9 +460,7 @@ impl TryFrom<&Value> for u16 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -582,25 +496,19 @@ impl TryFrom<&Value> for u32 {
             Value::U32(value) => *value,
             Value::U64(value) => num_to_u32!(value),
             Value::U128(value) => num_to_u32!(value),
-            Value::F32(value) => num_to_u32!(value),
-            Value::F64(value) => num_to_u32!(value),
             Value::Str(value) => value.parse::<u32>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Uint32,
             })?,
-            Value::Decimal(value) => num_to_u32!(value),
-            Value::Inet(IpAddr::V4(value)) => u32::from(*value),
 
             Value::Date(_)
             | Value::Timestamp(_)
             | Value::Time(_)
             | Value::Interval(_)
             | Value::Uuid(_)
-            | Value::Inet(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -636,24 +544,19 @@ impl TryFrom<&Value> for u64 {
             Value::U32(value) => u64::from(*value),
             Value::U64(value) => *value,
             Value::U128(value) => num_to_u64!(value),
-            Value::F32(value) => num_to_u64!(value),
-            Value::F64(value) => num_to_u64!(value),
             Value::Str(value) => value.parse::<u64>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Uint64,
             })?,
-            Value::Decimal(value) => num_to_u64!(value),
 
             Value::Date(_)
             | Value::Timestamp(_)
             | Value::Time(_)
             | Value::Interval(_)
             | Value::Uuid(_)
-            | Value::Inet(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -689,14 +592,10 @@ impl TryFrom<&Value> for u128 {
             Value::U32(value) => u128::from(*value),
             Value::U64(value) => u128::from(*value),
             Value::U128(value) => *value,
-            Value::F32(value) => num_to_u128!(value),
-            Value::F64(value) => num_to_u128!(value),
             Value::Str(value) => value.parse::<u128>().map_err(|_| ConvertError {
                 value: v.clone(),
                 data_type: DataType::Uint128,
             })?,
-            Value::Decimal(value) => num_to_u128!(value),
-            Value::Inet(IpAddr::V6(v)) => u128::from(*v),
             Value::Uuid(value) => *value,
             Value::Date(_)
             | Value::Timestamp(_)
@@ -704,9 +603,7 @@ impl TryFrom<&Value> for u128 {
             | Value::Interval(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Inet(IpAddr::V4(_))
-            | Value::Bytea(_)
-            | Value::Point(_)
+            | Value::Bytes(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -748,10 +645,7 @@ impl TryFrom<&Value> for usize {
             Value::U32(value) => num_to_usize!(value),
             Value::U64(value) => num_to_usize!(value),
             Value::U128(value) => num_to_usize!(value),
-            Value::F32(value) => num_to_usize!(value),
-            Value::F64(value) => num_to_usize!(value),
             Value::Str(value) => value.parse::<usize>().map_err(|_| err())?,
-            Value::Decimal(value) => num_to_usize!(value),
 
             Value::Date(_)
             | Value::Timestamp(_)
@@ -760,9 +654,7 @@ impl TryFrom<&Value> for usize {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytea(_)
-            | Value::Point(_)
-            | Value::Inet(_)
+            | Value::Bytes(_)
             | Value::Null => return Err(err()),
         })
     }
@@ -844,12 +736,7 @@ mod tests {
         super::{ConvertError, Result, Value},
         crate::{ast::DataType, data::Interval as I},
         chrono::{self, NaiveDate, NaiveDateTime, NaiveTime},
-        rust_decimal::Decimal,
-        std::{
-            collections::HashMap,
-            net::{IpAddr, Ipv4Addr, Ipv6Addr},
-            str::FromStr,
-        },
+        std::collections::HashMap,
     };
 
     fn timestamp(y: i32, m: u32, d: u32, hh: u32, mm: u32, ss: u32, ms: u32) -> NaiveDateTime {
@@ -876,8 +763,7 @@ mod tests {
         }
 
         test!(Value::Str("text".to_owned()), "text");
-        test!(Value::Bytea(hex::decode("1234").unwrap()), "1234");
-        test!(Value::Inet(IpAddr::from_str("::1").unwrap()), "::1");
+        test!(Value::Bytes(hex::decode("1234").unwrap()), "1234");
         test!(Value::Bool(true), "TRUE");
         test!(Value::I8(122), "122");
         test!(Value::I16(122), "122");
@@ -889,8 +775,6 @@ mod tests {
         test!(Value::U32(122), "122");
         test!(Value::U64(122), "122");
         test!(Value::U128(122), "122");
-        test!(Value::F32(123456.1_f32), "123456.1");
-        test!(Value::F64(1234567890.0987), "1234567890.0987");
         test!(Value::Date(date(2021, 11, 20)), "2021-11-20");
         test!(
             Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)),
@@ -909,7 +793,6 @@ mod tests {
         map.insert("abc".to_owned(), Value::I32(123));
         test!(Value::Map(map), "{\"abc\":123}");
         test!(Value::List(vec![Value::I32(1), Value::I32(2)]), "[1,2]");
-        test!(Value::Decimal(Decimal::new(2000, 1)), "200.0");
         test!(Value::Null, "NULL");
     }
 
@@ -957,14 +840,8 @@ mod tests {
         test!(Value::U128(1), Ok(true));
         test!(Value::U128(0), Ok(false));
 
-        test!(Value::F32(1.0_f32), Ok(true));
-        test!(Value::F32(0.0_f32), Ok(false));
-        test!(Value::F64(1.0), Ok(true));
-        test!(Value::F64(0.0), Ok(false));
         test!(Value::Str("true".to_owned()), Ok(true));
         test!(Value::Str("false".to_owned()), Ok(false));
-        test!(Value::Decimal(Decimal::new(10, 1)), Ok(true));
-        test!(Value::Decimal(Decimal::new(0, 1)), Ok(false));
 
         err!(Value::I8(3));
         err!(Value::I16(3));
@@ -976,12 +853,8 @@ mod tests {
         err!(Value::U32(3));
         err!(Value::U64(3));
         err!(Value::U128(3));
-        err!(Value::F32(2.0_f32));
-        err!(Value::F64(2.0));
-        err!(Value::Decimal(Decimal::new(2, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1025,10 +898,7 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
-        test!(Value::Decimal(Decimal::new(123, 0)), Ok(123));
 
         err!(Value::I16(128));
         err!(Value::I32(128));
@@ -1039,12 +909,8 @@ mod tests {
         err!(Value::U32(128));
         err!(Value::U64(128));
         err!(Value::U128(128));
-        err!(Value::F32(128.0_f32));
-        err!(Value::F64(128.0));
-        err!(Value::Decimal(Decimal::new(128, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1089,12 +955,7 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F32(122.1_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
-        test!(Value::F64(122.1), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
-        test!(Value::Decimal(Decimal::new(122, 0)), Ok(122));
 
         err!(Value::I32(i32::MAX));
         err!(Value::I64(i64::MAX));
@@ -1105,12 +966,8 @@ mod tests {
         err!(Value::U64(u64::MAX));
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MAX));
-        err!(Value::F64(f64::MAX));
-        err!(Value::Decimal(Decimal::new(i64::MAX, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1156,12 +1013,7 @@ mod tests {
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
         test!(Value::I64(1234567890), Ok(1234567890));
-        test!(Value::F32(1234567890.0_f32), Ok(1234567890.0_f32 as i32));
-        test!(Value::F32(1234567890.1_f32), Ok(1234567890.1_f32 as i32));
-        test!(Value::F64(1234567890.0), Ok(1234567890));
-        test!(Value::F64(1234567890.1), Ok(1234567890));
         test!(Value::Str("1234567890".to_owned()), Ok(1234567890));
-        test!(Value::Decimal(Decimal::new(1234567890, 0)), Ok(1234567890));
 
         err!(Value::I64(i64::MAX));
         err!(Value::I128(i128::MAX));
@@ -1170,13 +1022,8 @@ mod tests {
         err!(Value::U64(u64::MAX));
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MAX));
-        err!(Value::F64(f64::MAX));
-
-        err!(Value::Decimal(Decimal::new(i64::MAX, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1222,24 +1069,15 @@ mod tests {
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
         test!(Value::I64(1234567890), Ok(1234567890));
-        test!(Value::F32(1234567890.0_f32), Ok(1234567890.0_f32 as i64));
-        test!(Value::F32(1234567890.1_f32), Ok(1234567890.1_f32 as i64));
-        test!(Value::F64(1234567890.0), Ok(1234567890));
-        test!(Value::F64(1234567890.1), Ok(1234567890));
         test!(Value::Str("1234567890".to_owned()), Ok(1234567890));
-        test!(Value::Decimal(Decimal::new(1234567890, 0)), Ok(1234567890));
 
         err!(Value::I128(i128::MAX));
 
         err!(Value::U64(u64::MAX));
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MAX));
-        err!(Value::F64(f64::MAX));
-
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1284,20 +1122,12 @@ mod tests {
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
         test!(Value::I64(1234567890), Ok(1234567890));
-        test!(Value::F32(1234567890.0_f32), Ok(1234567890.0_f32 as i128));
-        test!(Value::F32(1234567890.9_f32), Ok(1234567890.9_f32 as i128));
-        test!(Value::F64(1234567890.0), Ok(1234567890));
-        test!(Value::F64(1234567890.9), Ok(1234567890));
         test!(Value::Str("1234567890".to_owned()), Ok(1234567890));
 
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MAX));
-        err!(Value::F64(f64::MAX));
-
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1341,10 +1171,6 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F32(122.9_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
-        test!(Value::F64(122.9), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
 
         // impossible casts to u8
@@ -1358,13 +1184,9 @@ mod tests {
         err!(Value::U64(256));
         err!(Value::U128(256));
 
-        err!(Value::F32(256.0_f32));
-        err!(Value::F64(256.0));
-
-        err!(Value::Decimal(Decimal::new(256, 0)));
+    
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::List(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
@@ -1409,12 +1231,7 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F32(122.1_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
-        test!(Value::F64(122.1), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
-        test!(Value::Decimal(Decimal::new(122, 0)), Ok(122));
 
         err!(Value::I32(65536));
         err!(Value::I64(65536));
@@ -1424,13 +1241,8 @@ mod tests {
         err!(Value::U64(65536));
         err!(Value::U128(65536));
 
-        err!(Value::F32(65536.0_f32));
-        err!(Value::F64(65536.0));
-
-        err!(Value::Decimal(Decimal::new(65536, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1474,12 +1286,7 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F32(122.1_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
-        test!(Value::F64(122.1), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
-        test!(Value::Decimal(Decimal::new(122, 0)), Ok(122));
 
         err!(Value::I64(i64::MAX));
         err!(Value::I128(i128::MAX));
@@ -1487,13 +1294,9 @@ mod tests {
         err!(Value::U64(u64::MAX));
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MAX));
-        err!(Value::F64(f64::MAX));
 
-        err!(Value::Decimal(Decimal::new(i64::MAX, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::0").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1503,10 +1306,6 @@ mod tests {
         err!(Value::List(Vec::new()));
         err!(Value::Null);
 
-        assert_eq!(
-            u32::try_from(&Value::Inet(IpAddr::from_str("0.0.0.0").unwrap())),
-            Ok(u32::from(Ipv4Addr::from(0)))
-        );
     }
 
     #[test]
@@ -1542,24 +1341,14 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F32(122.1_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
-        test!(Value::F64(122.1), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
-        test!(Value::Decimal(Decimal::new(122, 0)), Ok(122));
 
         err!(Value::I128(i128::MIN));
 
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MIN));
-        err!(Value::F64(f64::MIN));
-
-        err!(Value::Decimal(Decimal::new(i64::MIN, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1604,19 +1393,10 @@ mod tests {
         test!(Value::U32(122), Ok(122));
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
-        test!(Value::F32(122.0_f32), Ok(122));
-        test!(Value::F32(122.1_f32), Ok(122));
-        test!(Value::F64(122.0), Ok(122));
-        test!(Value::F64(122.1), Ok(122));
         test!(Value::Str("122".to_owned()), Ok(122));
-        test!(Value::Decimal(Decimal::new(122, 0)), Ok(122));
 
-        err!(Value::F32(f32::MIN));
-        err!(Value::F64(f64::MIN));
-
-        err!(Value::Decimal(Decimal::new(i64::MIN, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
+        err!(Value::Bytes(Vec::new()));
 
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
@@ -1630,11 +1410,6 @@ mod tests {
         assert_eq!((&Value::Uuid(uuid)).try_into() as Result<u128>, Ok(uuid));
         assert_eq!(u128::try_from(&Value::Uuid(uuid)), Ok(uuid));
 
-        let ip = Ipv6Addr::from(9876543210);
-        assert_eq!(
-            u128::try_from(&Value::Inet(IpAddr::V6(ip))),
-            Ok(u128::from(ip))
-        );
     }
 
     #[test]
@@ -1672,24 +1447,14 @@ mod tests {
         test!(Value::U64(122), Ok(122));
         test!(Value::U128(122), Ok(122));
         test!(Value::I64(1234567890), Ok(1234567890));
-        test!(Value::F32(1234567890.0_f32), Ok(1234567890.0_f32 as usize));
-        test!(Value::F32(1234567890.1_f32), Ok(1234567890.1_f32 as usize));
-        test!(Value::F64(1234567890.0), Ok(1234567890));
-        test!(Value::F64(1234567890.1), Ok(1234567890));
         test!(Value::Str("1234567890".to_owned()), Ok(1234567890));
-        test!(Value::Decimal(Decimal::new(1234567890, 0)), Ok(1234567890));
 
         err!(Value::I128(i128::MIN));
 
         err!(Value::U128(u128::MAX));
 
-        err!(Value::F32(f32::MIN));
-        err!(Value::F64(f64::MIN));
-
-        err!(Value::Decimal(Decimal::new(i64::MIN, 0)));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytea(Vec::new()));
-        err!(Value::Inet(IpAddr::from_str("::1").unwrap()));
+        err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1728,9 +1493,6 @@ mod tests {
             Ok(date(2021, 11, 20))
         );
         test!(Value::Str("2021-11-20".to_owned()), Ok(date(2021, 11, 20)));
-
-        err!(Value::F32(1.0_f32));
-        err!(Value::F64(1.0));
     }
 
     #[test]
@@ -1757,8 +1519,6 @@ mod tests {
         test!(Value::Time(time(10, 0, 0, 0)), Ok(time(10, 0, 0, 0)));
         test!(Value::Str("10:00:00".to_owned()), Ok(time(10, 0, 0, 0)));
 
-        err!(Value::F32(1.0_f32));
-        err!(Value::F64(1.0));
     }
 
     #[test]
@@ -1796,8 +1556,6 @@ mod tests {
             Ok(datetime(date(2021, 11, 20), time(0, 0, 0, 0)))
         );
 
-        err!(Value::F32(1.0_f32));
-        err!(Value::F64(1.0));
     }
 
 }
