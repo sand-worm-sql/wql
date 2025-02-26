@@ -1,17 +1,14 @@
 use {
-    super::{
-        data_type::translate_data_type, expr::translate_expr, TranslateError,
-    },
+    super::{data_type::translate_data_type, expr::translate_expr, TranslateError},
     crate::{
-        ast::{ ColumnDef,  OperateFunctionArg},
+        ast::{ColumnDef, OperateFunctionArg},
         result::Result,
     },
     sqlparser::ast::{
-        ColumnDef as SqlColumnDef,ColumnOption as SqlColumnOption,
+        ColumnDef as SqlColumnDef, ColumnOption as SqlColumnOption,
         OperateFunctionArg as SqlOperateFunctionArg,
     },
 };
-
 
 pub fn translate_column_def(sql_column_def: &SqlColumnDef) -> Result<ColumnDef> {
     let SqlColumnDef {
@@ -36,7 +33,9 @@ pub fn translate_column_def(sql_column_def: &SqlColumnDef) -> Result<ColumnDef> 
                 comment = Some(value.to_string());
             }
             _ => {
-                return Err(TranslateError::UnsupportedColumnOption(option_def.option.to_string()).into());
+                return Err(
+                    TranslateError::UnsupportedColumnOption(option_def.option.to_string()).into(),
+                );
             }
         }
     }
@@ -49,7 +48,6 @@ pub fn translate_column_def(sql_column_def: &SqlColumnDef) -> Result<ColumnDef> 
         comment,
     })
 }
-
 
 pub fn translate_operate_function_arg(arg: &SqlOperateFunctionArg) -> Result<OperateFunctionArg> {
     let name = arg

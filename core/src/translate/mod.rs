@@ -22,9 +22,8 @@ use {
     },
     sqlparser::ast::{
         Assignment as SqlAssignment, AssignmentTarget as SqlAssignmentTarget,
-        CreateFunctionBody as SqlCreateFunctionBody,
-        CreateIndex as SqlCreateIndex, Ident as SqlIdent,
-        ObjectName as SqlObjectName, ObjectType as SqlObjectType,
+        CreateFunctionBody as SqlCreateFunctionBody, CreateIndex as SqlCreateIndex,
+        Ident as SqlIdent, ObjectName as SqlObjectName, ObjectType as SqlObjectType,
         ReferentialAction as SqlReferentialAction, Statement as SqlStatement,
         TableConstraint as SqlTableConstraint, TableFactor, TableWithJoins,
     },
@@ -32,7 +31,7 @@ use {
 
 pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
     match sql_statement {
-        SqlStatement::Query(query) => translate_query(query).map(Statement::Query), 
+        SqlStatement::Query(query) => translate_query(query).map(Statement::Query),
         SqlStatement::DropFunction {
             if_exists,
             func_desc,
@@ -275,6 +274,4 @@ pub fn translate_foreign_key(table_constraint: &SqlTableConstraint) -> Result<Fo
 }
 
 #[cfg(test)]
-mod tests {
-
-}
+mod tests {}

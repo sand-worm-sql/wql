@@ -70,9 +70,7 @@ mod tests {
 
         test!("INT8 UNSIGNED" => SqlDataType::UnsignedInt8(None) => Ok(DataType::Uint8));
 
-
         test!("TEXT" => SqlDataType::Text => Ok(DataType::Text));
-
 
         test!("DATE" => SqlDataType::Date => Ok(DataType::Date));
         test!("TIMESTAMP" => SqlDataType::Timestamp(None, SqlTimezoneInfo::None) => Ok(DataType::Timestamp));
@@ -97,6 +95,5 @@ mod tests {
 
         test!("MAP" => Ok(DataType::Map));
         test!("LIST" => Ok(DataType::List));
-       
     }
 }
