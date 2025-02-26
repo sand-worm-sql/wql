@@ -52,7 +52,7 @@ pub enum Statement {
     },
     /// SELECT, VALUES
     Query(Query),
-    
+
     /// CREATE FUNCTION
     CreateFunction {
         or_replace: bool,
@@ -61,7 +61,7 @@ pub enum Statement {
         args: Vec<OperateFunctionArg>,
         return_: Expr,
     },
-    
+
     /// DROP FUNCTION
     DropFunction {
         /// An optional `IF EXISTS` clause. (Non-standard.)
@@ -201,9 +201,9 @@ pub struct Array {
 mod tests {
     use {
         crate::ast::{
-            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr,
-            ForeignKey, OperateFunctionArg, OrderByExpr, Query, ReferentialAction, Select,
-            SelectItem, SetExpr, Statement, TableFactor, TableWithJoins, ToSql, Values, Variable,
+            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr, ForeignKey,
+            OperateFunctionArg, OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr,
+            Statement, TableFactor, TableWithJoins, ToSql, Values, Variable,
         },
         bigdecimal::BigDecimal,
         std::str::FromStr,
@@ -219,7 +219,6 @@ mod tests {
             .to_sql()
         )
     }
-
 
     #[test]
     fn to_sql_create_index() {

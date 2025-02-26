@@ -4,7 +4,6 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ColumnDef {
     pub name: String,
@@ -22,7 +21,6 @@ pub struct OperateFunctionArg {
     /// `DEFAULT <restricted-expr>`
     pub default: Option<Expr>,
 }
-
 
 impl ToSql for ColumnDef {
     fn to_sql(&self) -> String {
@@ -55,7 +53,6 @@ impl ToSql for ColumnDef {
     }
 }
 
-
 impl ToSql for OperateFunctionArg {
     fn to_sql(&self) -> String {
         let OperateFunctionArg {
@@ -73,9 +70,7 @@ impl ToSql for OperateFunctionArg {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast::{
-        AstLiteral, ColumnDef, DataType, Expr, OperateFunctionArg, ToSql,
-    };
+    use crate::ast::{AstLiteral, ColumnDef, DataType, Expr, OperateFunctionArg, ToSql};
 
     #[test]
     fn to_sql_column_def() {
