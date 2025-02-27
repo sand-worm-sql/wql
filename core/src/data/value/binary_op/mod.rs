@@ -1,7 +1,6 @@
 use crate::{prelude::Value, result::Result};
 
-mod f32;
-mod f64;
+
 
 mod integer;
 

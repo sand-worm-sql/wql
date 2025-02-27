@@ -70,14 +70,8 @@ impl TryFrom<Value> for JsonValue {
             Value::U128(v) => JsonNumber::from_str(&v.to_string())
                 .map(JsonValue::Number)
                 .map_err(|_| ValueError::UnreachableJsonNumberParseFailure(v.to_string()).into()),
-            Value::F32(v) => Ok(v.into()),
-            Value::F64(v) => Ok(v.into()),
-            Value::Decimal(v) => JsonNumber::from_str(&v.to_string())
-                .map(JsonValue::Number)
-                .map_err(|_| ValueError::UnreachableJsonNumberParseFailure(v.to_string()).into()),
             Value::Str(v) => Ok(v.into()),
-            Value::Bytea(v) => Ok(hex::encode(v).into()),
-            Value::Inet(v) => Ok(v.to_string().into()),
+            Value::Bytes(v) => Ok(hex::encode(v).into()),
             Value::Date(v) => Ok(v.to_string().into()),
             Value::Timestamp(v) => Ok(Utc.from_utc_datetime(&v).to_string().into()),
             Value::Time(v) => Ok(v.to_string().into()),
@@ -93,7 +87,6 @@ impl TryFrom<Value> for JsonValue {
                 .map(|value| value.try_into())
                 .collect::<Result<Vec<JsonValue>>>()
                 .map(|v| v.into()),
-            Value::Point(v) => Ok(v.to_string().into()),
             Value::Null => Ok(JsonValue::Null),
         }
     }
@@ -111,9 +104,7 @@ impl TryFrom<JsonValue> for Value {
                     return Ok(value);
                 }
 
-                v.as_f64().map(Value::F64).ok_or_else(|| {
-                    ValueError::UnreachableJsonNumberParseFailure(v.to_string()).into()
-                })
+                Err(ValueError::UnreachableJsonNumberParseFailure(v.to_string()).into())
             }
             JsonValue::String(v) => Ok(Value::Str(v)),
             JsonValue::Array(json_array) => json_array
@@ -135,9 +126,7 @@ mod tests {
     use {
         crate::data::{value::uuid::parse_uuid, Interval, Value, ValueError},
         chrono::{NaiveDate, NaiveTime},
-        rust_decimal::Decimal,
-        serde_json::{json, Number as JsonNumber, Value as JsonValue},
-        std::{net::IpAddr, str::FromStr},
+        serde_json::{json, Value as JsonValue},
     };
 
     #[test]
@@ -192,30 +181,12 @@ mod tests {
         assert!(JsonValue::try_from(Value::I128(i128::MAX)).is_ok());
 
         assert_eq!(
-            Value::F32(1.23_f32).try_into(),
-            Ok(JsonValue::Number(
-                JsonNumber::from_f64(1.23_f32 as f64).unwrap()
-            ))
-        );
-        assert_eq!(
-            Value::F64(1.23).try_into(),
-            Ok(JsonValue::Number(JsonNumber::from_f64(1.23).unwrap()))
-        );
-        assert_eq!(
-            Value::Decimal(Decimal::ONE).try_into(),
-            Ok(JsonValue::Number(1.into()))
-        );
-        assert_eq!(
             Value::Str("abc".to_owned()).try_into(),
             Ok(JsonValue::String("abc".to_owned()))
         );
         assert_eq!(
-            Value::Bytea(hex::decode("a1b2").unwrap()).try_into(),
+            Value::Bytes(hex::decode("a1b2").unwrap()).try_into(),
             Ok(JsonValue::String("a1b2".to_owned()))
-        );
-        assert_eq!(
-            Value::Inet(IpAddr::from_str("::1").unwrap()).try_into(),
-            Ok(JsonValue::String("::1".to_owned()))
         );
         assert_eq!(
             Value::Date(NaiveDate::from_ymd_opt(2020, 1, 3).unwrap()).try_into(),
@@ -282,11 +253,6 @@ mod tests {
         assert!(Value::try_from(JsonValue::Number(54321.into()))
             .unwrap()
             .evaluate_eq(&Value::I128(54321)));
-        assert!(
-            Value::try_from(JsonValue::Number(JsonNumber::from_f64(3.21).unwrap()))
-                .unwrap()
-                .evaluate_eq(&Value::F64(3.21))
-        );
         assert!(Value::try_from(JsonValue::String("world".to_owned()))
             .unwrap()
             .evaluate_eq(&Value::Str("world".to_owned())));

@@ -50,19 +50,8 @@ impl TryFrom<Value> for Expr {
             Value::U128(v) => Expr::Literal(AstLiteral::Number(
                 BigDecimal::from_u128(v).ok_or(ValueToExprConversionFailure)?,
             )),
-            Value::F32(v) => Expr::Literal(AstLiteral::Number(
-                BigDecimal::from_f32(v).ok_or(ValueToExprConversionFailure)?,
-            )),
-            Value::F64(v) => Expr::Literal(AstLiteral::Number(
-                BigDecimal::from_f64(v).ok_or(ValueToExprConversionFailure)?,
-            )),
-            Value::Decimal(v) => Expr::Literal(AstLiteral::Number(
-                BigDecimal::from_f64(v.try_into().map_err(|_| ValueToExprConversionFailure)?)
-                    .ok_or(ValueToExprConversionFailure)?,
-            )),
             Value::Str(v) => Expr::Literal(AstLiteral::QuotedString(v)),
-            Value::Bytea(v) => Expr::Literal(AstLiteral::HexString(hex::encode(v))),
-            Value::Inet(v) => Expr::Literal(AstLiteral::QuotedString(v.to_string())),
+            Value::Bytes(v) => Expr::Literal(AstLiteral::HexString(hex::encode(v))),
             Value::Date(v) => Expr::TypedString {
                 data_type: DataType::Date,
                 value: v.to_string(),
@@ -114,7 +103,6 @@ impl TryFrom<Value> for Expr {
 
                 Expr::Literal(AstLiteral::QuotedString(json.to_string()))
             }
-            Value::Point(v) => Expr::Literal(AstLiteral::QuotedString(v.to_string())),
             Value::Null => Expr::Literal(AstLiteral::Null),
         };
 
@@ -127,12 +115,11 @@ mod tests {
     use {
         crate::{
             ast::{AstLiteral, DateTimeField, Expr},
-            data::{Interval, Point},
+            data::Interval,
             prelude::{DataType, Value},
         },
         bigdecimal::{BigDecimal, FromPrimitive},
         chrono::{NaiveDate, NaiveTime},
-        rust_decimal::Decimal,
         std::collections::HashMap,
     };
 
@@ -205,29 +192,11 @@ mod tests {
         );
 
         assert_eq!(
-            Value::F32(64.4_f32).try_into(),
-            Ok(Expr::Literal(AstLiteral::Number(
-                BigDecimal::from_f32(64.4).unwrap()
-            )))
-        );
-        assert_eq!(
-            Value::F64(64.4).try_into(),
-            Ok(Expr::Literal(AstLiteral::Number(
-                BigDecimal::from_f64(64.4).unwrap()
-            )))
-        );
-        assert_eq!(
-            Value::Decimal(Decimal::new(315, 2)).try_into(),
-            Ok(Expr::Literal(AstLiteral::Number(
-                BigDecimal::from_f64(3.15).unwrap()
-            )))
-        );
-        assert_eq!(
             Value::Str("data".to_owned()).try_into(),
             Ok(Expr::Literal(AstLiteral::QuotedString("data".to_owned())))
         );
         assert_eq!(
-            Value::Bytea(hex::decode("1234").unwrap()).try_into(),
+            Value::Bytes(hex::decode("1234").unwrap()).try_into(),
             Ok(Expr::Literal(AstLiteral::HexString("1234".to_owned())))
         );
         assert_eq!(
@@ -291,11 +260,5 @@ mod tests {
             )))
         );
         assert_eq!(Value::Null.try_into(), Ok(Expr::Literal(AstLiteral::Null)));
-        assert_eq!(
-            Value::Point(Point::new(0.31413, 0.3415)).try_into(),
-            Ok(Expr::Literal(AstLiteral::QuotedString(
-                "POINT(0.31413 0.3415)".to_owned()
-            )))
-        );
     }
 }
