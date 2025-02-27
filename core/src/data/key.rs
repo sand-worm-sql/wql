@@ -404,10 +404,7 @@ mod tests {
 
     #[test]
     fn cmp() {
-        use {
-            std::{net::IpAddr, str::FromStr},
-            uuid::Uuid,
-        };
+        use uuid::Uuid;
 
         let date = |y, m, d| NaiveDate::from_ymd_opt(y, m, d).unwrap();
         let timestamp = |v| DateTime::from_timestamp_millis(v).unwrap().naive_utc();
