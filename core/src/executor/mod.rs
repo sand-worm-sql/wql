@@ -21,9 +21,10 @@ use {
 
 
 mod aggregate;
-
+mod select;
 
 pub use aggregate::AggregateError;
+pub use select::SelectError;
 
 pub async fn evaluate_stateless(expr: Expr) -> Result<()> {
     Ok(())
