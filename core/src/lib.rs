@@ -12,7 +12,6 @@ pub mod ast_builder;
 pub mod data;
 pub mod parse_sql;
 pub mod plan;
-pub mod result;
 pub mod translate;
 pub mod executor;
 

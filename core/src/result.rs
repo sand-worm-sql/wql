@@ -3,12 +3,13 @@ use {serde::Serialize, std::fmt::Debug, thiserror::Error as ThisError};
 pub use crate::{
     ast_builder::AstBuilderError,
     data::{
-        ConvertError, IntervalError, KeyError, LiteralError, RowError, SchemaParseError,
-        StringExtError, TableError, ValueError,
+        ConvertError, IntervalError, KeyError, LiteralError, StringExtError, ValueError
+        // RowError, SchemaParseError,
+        // StringExtError, TableError, ValueError,
     },
     executor::{
-        AggregateError, EvaluateError, ExecuteError, FetchError, SelectError, SortError,
-        ValidateError,
+        AggregateError, SelectError,
+       // EvaluateError, ExecuteError, FetchError,  SortError, ValidateError,
     },
     plan::PlanError,
     translate::TranslateError,
@@ -28,25 +29,25 @@ pub enum Error {
     #[error("ast-builder: {0}")]
     AstBuilder(#[from] AstBuilderError),
 
-    #[error("execute: {0}")]
-    Execute(#[from] ExecuteError),
+    // #[error("execute: {0}")]
+    // Execute(#[from] ExecuteError),
 
-    #[error("fetch: {0}")]
-    Fetch(#[from] FetchError),
+    // #[error("fetch: {0}")]
+    // Fetch(#[from] FetchError),
     #[error("select: {0}")]
     Select(#[from] SelectError),
-    #[error("evaluate: {0}")]
-    Evaluate(#[from] EvaluateError),
+    // #[error("evaluate: {0}")]
+    // Evaluate(#[from] EvaluateError),
     #[error("aggregate: {0}")]
     Aggregate(#[from] AggregateError),
-    #[error("sort: {0}")]
-    Sort(#[from] SortError),
-    #[error("table: {0}")]
-    Table(#[from] TableError),
-    #[error("validate: {0}")]
-    Validate(#[from] ValidateError),
-    #[error("row: {0}")]
-    Row(#[from] RowError),
+    // #[error("sort: {0}")]
+    // Sort(#[from] SortError),
+    // #[error("table: {0}")]
+    // Table(#[from] TableError),
+    // #[error("validate: {0}")]
+    // Validate(#[from] ValidateError),
+    // #[error("row: {0}")]
+    // Row(#[from] RowError),
     #[error("key: {0}")]
     Key(#[from] KeyError),
     #[error("value: {0}")]
@@ -61,8 +62,8 @@ pub enum Error {
     StringExt(#[from] StringExtError),
     #[error("plan: {0}")]
     Plan(#[from] PlanError),
-    #[error("schema-parse: {0}")]
-    Schema(#[from] SchemaParseError),
+    // #[error("schema-parse: {0}")]
+    // Schema(#[from] SchemaParseError),
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
