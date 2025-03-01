@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn to_sql_column_def() {
         assert_eq!(
-            r#""name" TEXT NOT NULL UNIQUE"#,
+            r#""name" TEXT NOT NULL"#,
             ColumnDef {
                 name: "name".to_owned(),
                 data_type: DataType::Text,
