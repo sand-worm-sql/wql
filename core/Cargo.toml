@@ -9,6 +9,7 @@ documentation.workspace = true
 
 [dependencies]
 
+alloy = { version = "0.6.4", features = ["std", "contract", "provider-http", "network", "rpc-types"] }
 regex = "1"
 async-trait = "0.1"
 async-recursion = "1"

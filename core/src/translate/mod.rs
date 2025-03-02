@@ -99,7 +99,7 @@ pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
             filter: None,
             db_name: None,
             ..
-        } => Ok(Statement::ShowVariable(Variable::Tables)),
+        } => Ok(Statement::ShowVariable(Variable::Chains)),
         SqlStatement::ShowFunctions { filter: None } => {
             Ok(Statement::ShowVariable(Variable::Functions))
         }
