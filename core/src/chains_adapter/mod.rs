@@ -1,2 +1,3 @@
-mod sui;
+mod error;
 mod evm;
+mod sui;
