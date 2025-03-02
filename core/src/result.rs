@@ -2,6 +2,7 @@ use {serde::Serialize, std::fmt::Debug, thiserror::Error as ThisError};
 
 pub use crate::{
     ast_builder::AstBuilderError,
+    chains_adapter::ChainAdapterError,
     data::{
         ConvertError,
         IntervalError,
@@ -11,7 +12,6 @@ pub use crate::{
         ValueError, // RowError, SchemaParseError,
                     // StringExtError, TableError, ValueError,
     },
-    chains_adapter::ChainAdapterError,
     executor::{
         AggregateError,
         SelectError,

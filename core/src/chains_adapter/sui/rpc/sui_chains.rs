@@ -1,7 +1,7 @@
 use {
     crate::{
+        chains_adapter::error::ChainAdapterError,
         data::{Interval, Value},
-        chains_adapter::error::ChainAdapterError
     },
     alloy::{
         providers::{Provider, ProviderBuilder},
@@ -14,7 +14,6 @@ use {
 };
 
 type Result<T> = std::result::Result<T, ChainAdapterError>;
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SuiChain {
@@ -33,7 +32,6 @@ impl SuiChain {
     }
 }
 
-
 impl TryFrom<&str> for SuiChain {
     type Error = ChainAdapterError;
 
@@ -44,7 +42,7 @@ impl TryFrom<&str> for SuiChain {
             "sui_devnet" => SuiChain::SuiDevnet,
             _ => {
                 return Err(ChainAdapterError::InvalidChain(v.to_string()));
-            },
+            }
         })
     }
 }

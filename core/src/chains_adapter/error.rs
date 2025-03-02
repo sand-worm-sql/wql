@@ -10,5 +10,4 @@ pub enum ChainAdapterError {
 
     #[error("failed to parse chain: {0}")]
     ChainConvertFailed(String),
-
 }

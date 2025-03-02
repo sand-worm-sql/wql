@@ -1,8 +1,8 @@
 use {
     crate::{
+        
+        chains_adapter::error::ChainAdapterError,
         data::{Interval, Value},
-        result::{},
-        chains_adapter::error::ChainAdapterError
     },
     alloy::{
         providers::{Provider, ProviderBuilder},
@@ -13,7 +13,6 @@ use {
     std,
     thiserror::Error as ThisError,
 };
-
 
 type Result<T> = std::result::Result<T, ChainAdapterError>;
 
@@ -76,7 +75,6 @@ impl EvmChain {
     }
 }
 
-
 impl TryFrom<&str> for EvmChain {
     type Error = ChainAdapterError;
 
@@ -107,7 +105,7 @@ impl TryFrom<&str> for EvmChain {
             "mekong" => EvmChain::Mekong,
             _ => {
                 return Err(ChainAdapterError::InvalidChain(v.to_string()));
-            },
+            }
         })
     }
 }
