@@ -7,4 +7,8 @@ pub enum ChainAdapterError {
 
     #[error("adapter failed to parse query: {0}")]
     ChainFailedToParse(String),
+
+    #[error("failed to parse chain: {0}")]
+    ChainConvertFailed(String),
+
 }

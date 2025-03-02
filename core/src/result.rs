@@ -11,6 +11,7 @@ pub use crate::{
         ValueError, // RowError, SchemaParseError,
                     // StringExtError, TableError, ValueError,
     },
+    chains_adapter::ChainAdapterError,
     executor::{
         AggregateError,
         SelectError,
@@ -33,6 +34,9 @@ pub enum Error {
 
     #[error("ast-builder: {0}")]
     AstBuilder(#[from] AstBuilderError),
+
+    #[error("ast-builder: {0}")]
+    ChainAdapter(#[from] ChainAdapterError),
 
     // #[error("execute: {0}")]
     // Execute(#[from] ExecuteError),

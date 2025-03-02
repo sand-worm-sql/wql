@@ -1,3 +1,7 @@
-mod error;
-mod evm;
 mod sui;
+mod evm;
+mod error;
+
+
+
+pub use error::ChainAdapterError;
