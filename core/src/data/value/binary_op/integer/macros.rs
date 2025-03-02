@@ -424,7 +424,7 @@ macro_rules! generate_binary_op_tests {
             #[test]
             fn try_add() {
                 let base: $primitive = 1;
-                
+
                 assert_eq!(base.try_add(&I8(1)), Ok($variant(2)));
                 assert_eq!(base.try_add(&I16(1)), Ok($variant(2)));
                 assert_eq!(base.try_add(&I32(1)), Ok($variant(2)));
@@ -642,7 +642,6 @@ macro_rules! generate_cmp_ord_tests {
                 assert_eq!(base.partial_cmp(&U64(1)), Some(Ordering::Equal));
                 assert_eq!(base.partial_cmp(&U128(1)), Some(Ordering::Equal));
 
-                
                 assert_eq!(base.partial_cmp(&I8(2)), Some(Ordering::Less));
                 assert_eq!(base.partial_cmp(&I16(2)), Some(Ordering::Less));
                 assert_eq!(base.partial_cmp(&I32(2)), Some(Ordering::Less));

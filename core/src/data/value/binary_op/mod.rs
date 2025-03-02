@@ -1,7 +1,5 @@
 use crate::{prelude::Value, result::Result};
 
-
-
 mod integer;
 
 pub trait TryBinaryOperator {

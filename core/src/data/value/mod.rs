@@ -39,7 +39,7 @@ pub enum Value {
     U16(u16),
     U32(u32),
     U64(u64),
-    U128(u128), 
+    U128(u128),
     Str(String),
     Bytes(Vec<u8>),
     Date(NaiveDate),
@@ -598,7 +598,7 @@ impl Value {
 
         match self {
             I8(_) | I16(_) | I32(_) | I64(_) | I128(_) | U8(_) | U16(_) | U32(_) | U64(_)
-            | U128(_)  | Interval(_) | Null => Ok(Null),
+            | U128(_) | Interval(_) | Null => Ok(Null),
             _ => Err(ValueError::UnaryPlusOnNonNumeric.into()),
         }
     }
@@ -666,7 +666,7 @@ impl Value {
         }
     }
 
-   pub fn like(&self, other: &Value, case_sensitive: bool) -> Result<Value> {
+    pub fn like(&self, other: &Value, case_sensitive: bool) -> Result<Value> {
         use Value::*;
 
         match (self, other) {
@@ -713,7 +713,7 @@ impl Value {
         use Value::*;
         match self {
             I8(_) | I16(_) | I64(_) | I128(_) | U8(_) | U16(_) | U32(_) | U64(_) | U128(_)
-            |Null => Ok(Value::Null),
+            | Null => Ok(Value::Null),
             _ => Err(ValueError::SqrtOnNonNumeric(self.clone()).into()),
         }
     }
@@ -791,7 +791,7 @@ fn str_position(from_str: &str, sub_str: &str) -> usize {
 mod tests {
     use {
         super::{Interval, Value::*},
-        crate::data::{ value::uuid::parse_uuid, NumericBinaryOperator, ValueError},
+        crate::data::{value::uuid::parse_uuid, NumericBinaryOperator, ValueError},
         chrono::{NaiveDate, NaiveTime},
     };
 
@@ -890,7 +890,6 @@ mod tests {
             Some(Ordering::Less)
         );
 
-
         assert_eq!(
             Interval(Interval::Month(1)).evaluate_cmp(&Interval(Interval::Month(1))),
             Some(Ordering::Equal)
@@ -915,7 +914,6 @@ mod tests {
             bytes("10").evaluate_cmp(&bytes("10")),
             Some(Ordering::Equal)
         );
-
     }
 
     #[test]
@@ -999,7 +997,6 @@ mod tests {
                 Interval(Interval::Month($n))
             };
         }
-
 
         test!(add I8(1),    I8(2)    => I8(3));
         test!(add I8(1),    I16(2)    => I16(3));
@@ -1193,13 +1190,11 @@ mod tests {
         test!(subtract I32(3),   I64(2)   => I64(1));
         test!(subtract I32(3),   I128(2)  => I128(1));
 
-
         test!(subtract I64(3),   I8(2)    => I64(1));
         test!(subtract I64(3),   I16(2)    => I64(1));
         test!(subtract I64(3),   I32(2)   => I64(1));
         test!(subtract I64(3),   I64(2)   => I64(1));
         test!(subtract I64(3),   I128(2)   => I64(1));
-
 
         test!(subtract
             Date(NaiveDate::from_ymd_opt(2021, 11, 11).unwrap()),
@@ -1290,7 +1285,6 @@ mod tests {
         test!(multiply U64(3),   I64(2)    => U64(6));
         test!(multiply U64(3),   I128(2)   => U64(6));
         test!(multiply U64(3),   U8(2)     => U64(6));
-
 
         test!(multiply U128(3),   I8(2)     => U128(6));
         test!(multiply U128(3),   I16(2)    => U128(6));
@@ -1973,7 +1967,7 @@ mod tests {
         cast!(Null                  => Int128, Null);
 
         cast!(Bool(true)            => Uint8, U8(1));
-        cast!(Bool(false)           => Uint8, U8(0)); 
+        cast!(Bool(false)           => Uint8, U8(0));
         cast!(Str("11".to_owned())  => Uint8, U8(11));
         cast!(Null                  => Uint8, Null);
 
@@ -2095,7 +2089,7 @@ mod tests {
         assert_eq!(Str("A".to_owned()).concat(U32(1)), Str("A1".to_owned()));
         assert_eq!(Str("A".to_owned()).concat(U64(1)), Str("A1".to_owned()));
         assert_eq!(Str("A".to_owned()).concat(U128(1)), Str("A1".to_owned()));
-            assert_eq!(
+        assert_eq!(
             List(vec![I64(1)]).concat(List(vec![I64(2)])),
             List(vec![I64(1), I64(2)])
         );

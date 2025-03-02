@@ -325,7 +325,7 @@ impl Key {
 mod tests {
     use {
         crate::{
-            data::{Interval, Key, KeyError,  Value},
+            data::{Interval, Key, KeyError, Value},
             executor::evaluate_stateless,
             parse_sql::parse_expr,
             result::Result,
@@ -614,7 +614,6 @@ mod tests {
         assert_eq!(cmp(&n1, &n4), Ordering::Less);
         assert_eq!(cmp(&n3, &n4), Ordering::Equal);
 
-
         let n1 = Str("a".to_owned()).to_cmp_be_bytes();
         let n2 = Str("ab".to_owned()).to_cmp_be_bytes();
         let n3 = Str("aaa".to_owned()).to_cmp_be_bytes();
@@ -642,7 +641,6 @@ mod tests {
         assert_eq!(cmp(&n3, &n4), Ordering::Less);
         assert_eq!(cmp(&n5, &n4), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
-
 
         let n1 = Date(NaiveDate::from_ymd_opt(2021, 1, 1).unwrap()).to_cmp_be_bytes();
         let n2 = Date(NaiveDate::from_ymd_opt(1989, 3, 20).unwrap()).to_cmp_be_bytes();
@@ -695,7 +693,6 @@ mod tests {
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n2, &n1), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
-
     }
 
     #[test]
@@ -718,7 +715,7 @@ mod tests {
             Value::Str("abc".to_owned())
         );
         assert_eq!(Value::from(Key::Bytes(vec![])), Value::Bytes(vec![]));
-    
+
         assert_eq!(
             Value::from(Key::Date(NaiveDate::from_ymd_opt(2023, 1, 23).unwrap())),
             Value::Date(NaiveDate::from_ymd_opt(2023, 1, 23).unwrap())

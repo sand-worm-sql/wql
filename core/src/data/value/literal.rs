@@ -6,7 +6,7 @@ use {
     },
     crate::{
         ast::DataType,
-        data::{value::uuid::parse_uuid,  Interval, Literal, BigDecimalExt},
+        data::{value::uuid::parse_uuid, BigDecimalExt, Interval, Literal},
         result::{Error, Result},
     },
     bigdecimal::BigDecimal,
@@ -378,11 +378,7 @@ mod tests {
         crate::data::{Literal, Value},
         bigdecimal::BigDecimal,
         chrono::{NaiveDate, NaiveDateTime, NaiveTime},
-        std::{
-            borrow::Cow,
-            cmp::Ordering,
-            str::FromStr,
-        },
+        std::{borrow::Cow, cmp::Ordering, str::FromStr},
     };
 
     fn date(year: i32, month: u32, day: u32) -> NaiveDate {
@@ -592,7 +588,11 @@ mod tests {
             Literal::Bytes(to_bytes("1234")),
             Value::Bytes(to_bytes("1234"))
         );
-        test!(DataType::Bytes, text!("1234"), Value::Bytes(to_bytes("1234")));
+        test!(
+            DataType::Bytes,
+            text!("1234"),
+            Value::Bytes(to_bytes("1234"))
+        );
         assert_eq!(
             Value::try_from_literal(&DataType::Bytes, &text!("123")),
             Err(ValueError::FailedToParseHexString("123".to_owned()).into())
@@ -685,8 +685,14 @@ mod tests {
 
         test!(text!("hello"), Value::Str("hello".to_owned()));
         test!(&text!("hallo"), Value::Str("hallo".to_owned()));
-        test!(Literal::Bytes(to_bytes("1234")), Value::Bytes(to_bytes("1234")));
-        test!(&Literal::Bytes(to_bytes("1234")), Value::Bytes(to_bytes("1234")));
+        test!(
+            Literal::Bytes(to_bytes("1234")),
+            Value::Bytes(to_bytes("1234"))
+        );
+        test!(
+            &Literal::Bytes(to_bytes("1234")),
+            Value::Bytes(to_bytes("1234"))
+        );
         test!(num!("1234567890"), Value::I64(1234567890));
         test!(&Literal::Boolean(false), Value::Bool(false));
         assert!(matches!(Value::try_from(&Literal::Null), Ok(Value::Null)))

@@ -32,9 +32,7 @@ macro_rules! try_from_owned_value {
     )*}
 }
 
-try_from_owned_value!(
-    bool, i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, usize
-);
+try_from_owned_value!(bool, i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, usize);
 
 impl From<&Value> for String {
     fn from(v: &Value) -> Self {
@@ -614,7 +612,6 @@ impl TryFrom<&Value> for u128 {
     }
 }
 
-
 impl TryFrom<&Value> for usize {
     type Error = ConvertError;
 
@@ -659,7 +656,6 @@ impl TryFrom<&Value> for usize {
         })
     }
 }
-
 
 impl TryFrom<&Value> for NaiveDate {
     type Error = ConvertError;
@@ -728,7 +724,6 @@ impl TryFrom<&Value> for NaiveDateTime {
         })
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -1184,7 +1179,6 @@ mod tests {
         err!(Value::U64(256));
         err!(Value::U128(256));
 
-    
         err!(Value::Str("text".to_owned()));
         err!(Value::Bytes(Vec::new()));
         err!(Value::List(Vec::new()));
@@ -1294,7 +1288,6 @@ mod tests {
         err!(Value::U64(u64::MAX));
         err!(Value::U128(u128::MAX));
 
-
         err!(Value::Str("text".to_owned()));
         err!(Value::Bytes(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
@@ -1305,7 +1298,6 @@ mod tests {
         err!(Value::Map(HashMap::new()));
         err!(Value::List(Vec::new()));
         err!(Value::Null);
-
     }
 
     #[test]
@@ -1409,7 +1401,6 @@ mod tests {
         let uuid = 195965723427462096757863453463987888808;
         assert_eq!((&Value::Uuid(uuid)).try_into() as Result<u128>, Ok(uuid));
         assert_eq!(u128::try_from(&Value::Uuid(uuid)), Ok(uuid));
-
     }
 
     #[test]
@@ -1518,7 +1509,6 @@ mod tests {
 
         test!(Value::Time(time(10, 0, 0, 0)), Ok(time(10, 0, 0, 0)));
         test!(Value::Str("10:00:00".to_owned()), Ok(time(10, 0, 0, 0)));
-
     }
 
     #[test]
@@ -1555,7 +1545,5 @@ mod tests {
             Value::Str("2021-11-20".to_owned()),
             Ok(datetime(date(2021, 11, 20), time(0, 0, 0, 0)))
         );
-
     }
-
 }
