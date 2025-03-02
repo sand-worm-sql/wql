@@ -5,7 +5,7 @@ use {
         ast::{Aggregate, Expr, Function},
         // data::{CustomFunction, Interval, Literal, Row, Value},
         // mock::MockStorage,
-        result::{Error, Result}, 
+        result::{Error, Result},
         // store::GStore,
     },
     async_recursion::async_recursion,
@@ -17,8 +17,6 @@ use {
     im_rc::HashMap,
     std::{borrow::Cow, ops::ControlFlow, rc::Rc},
 };
-
-
 
 mod aggregate;
 mod select;
