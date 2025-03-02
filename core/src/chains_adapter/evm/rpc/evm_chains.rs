@@ -1,7 +1,8 @@
 use {
     crate::{
         data::{Interval, Value},
-        result::{Error, Result},
+        result::{},
+        chains_adapter::error::ChainAdapterError
     },
     alloy::{
         providers::{Provider, ProviderBuilder},
@@ -9,9 +10,12 @@ use {
     },
     chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike},
     serde::{Deserialize, Serialize},
-    std::{cmp::Ordering, fmt::Debug},
+    std,
     thiserror::Error as ThisError,
 };
+
+
+type Result<T> = std::result::Result<T, ChainAdapterError>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EvmChain {
@@ -69,5 +73,41 @@ impl EvmChain {
             EvmChain::Gnosis => "https://gnosis.drpc.org",
             EvmChain::Mekong => "https://rpc.mekong.ethpandaops.io",
         }
+    }
+}
+
+
+impl TryFrom<&str> for EvmChain {
+    type Error = ChainAdapterError;
+
+    fn try_from(v: &str) -> Result<Self> {
+        Ok(match v {
+            "eth" => EvmChain::Ethereum,
+            "sepolia" => EvmChain::Sepolia,
+            "arb" => EvmChain::Arbitrum,
+            "base" => EvmChain::Base,
+            "blast" => EvmChain::Blast,
+            "op" => EvmChain::Optimism,
+            "polygon" => EvmChain::Polygon,
+            "mantle" => EvmChain::Mantle,
+            "zksync" => EvmChain::Zksync,
+            "taiko" => EvmChain::Taiko,
+            "celo" => EvmChain::Celo,
+            "avalanche" => EvmChain::Avalanche,
+            "scroll" => EvmChain::Scroll,
+            "bnb" => EvmChain::Bnb,
+            "linea" => EvmChain::Linea,
+            "zora" => EvmChain::Zora,
+            "moonbeam" => EvmChain::Moonbeam,
+            "moonriver" => EvmChain::Moonriver,
+            "ronin" => EvmChain::Ronin,
+            "fantom" => EvmChain::Fantom,
+            "kava" => EvmChain::Kava,
+            "gnosis" => EvmChain::Gnosis,
+            "mekong" => EvmChain::Mekong,
+            _ => {
+                return Err(ChainAdapterError::InvalidChain(v.to_string()));
+            },
+        })
     }
 }
