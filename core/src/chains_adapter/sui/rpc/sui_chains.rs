@@ -34,7 +34,6 @@ impl SuiChain {
 
 impl TryFrom<&str> for SuiChain {
     type Error = ChainAdapterError;
-
     fn try_from(v: &str) -> Result<Self> {
         Ok(match v {
             "sui" => SuiChain::SuiMainnet,

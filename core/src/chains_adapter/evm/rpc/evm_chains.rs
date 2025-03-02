@@ -1,8 +1,7 @@
 use {
     crate::{
-        
-        chains_adapter::error::ChainAdapterError,
         data::{Interval, Value},
+        chains_adapter::error::ChainAdapterError
     },
     alloy::{
         providers::{Provider, ProviderBuilder},
@@ -13,6 +12,7 @@ use {
     std,
     thiserror::Error as ThisError,
 };
+
 
 type Result<T> = std::result::Result<T, ChainAdapterError>;
 
@@ -75,6 +75,7 @@ impl EvmChain {
     }
 }
 
+
 impl TryFrom<&str> for EvmChain {
     type Error = ChainAdapterError;
 
@@ -105,6 +106,72 @@ impl TryFrom<&str> for EvmChain {
             "mekong" => EvmChain::Mekong,
             _ => {
                 return Err(ChainAdapterError::InvalidChain(v.to_string()));
+            },
+        })
+    }
+}
+
+
+impl From<&EvmChain> for u64 {
+    fn from(v: &EvmChain) -> Self {
+        match v {
+            EvmChain::Ethereum => 1,
+            EvmChain::Sepolia => 11155111,
+            EvmChain::Arbitrum => 42161,
+            EvmChain::Base => 8453,
+            EvmChain::Blast => 238,
+            EvmChain::Optimism => 10,
+            EvmChain::Polygon => 137,
+            EvmChain::Mantle => 5000,
+            EvmChain::Zksync => 324,
+            EvmChain::Taiko => 167000,
+            EvmChain::Celo => 42220,
+            EvmChain::Avalanche => 43114,
+            EvmChain::Scroll => 534352,
+            EvmChain::Bnb => 56,
+            EvmChain::Linea => 59144,
+            EvmChain::Zora => 7777777,
+            EvmChain::Moonbeam => 1284,
+            EvmChain::Moonriver => 1285,
+            EvmChain::Ronin => 2020,
+            EvmChain::Fantom => 250,
+            EvmChain::Kava => 2222,
+            EvmChain::Gnosis => 100,
+            EvmChain::Mekong => 7078815900,
+        }
+    }
+}
+
+impl TryFrom<u64> for EvmChain {
+    type Error = ChainAdapterError;
+
+    fn try_from(chain_id: u64) -> Result<Self> {
+        Ok(
+        match chain_id {
+            1 => EvmChain::Ethereum,
+            11155111 => EvmChain::Sepolia,
+            42161 => EvmChain::Arbitrum,
+            8453 => EvmChain::Base,
+            238 => EvmChain::Blast,
+            10 => EvmChain::Optimism,
+            137 => EvmChain::Polygon,
+            5000 => EvmChain::Mantle,
+            324 => EvmChain::Zksync,
+            167000 => EvmChain::Taiko,
+            42220 => EvmChain::Celo,
+            43114 => EvmChain::Avalanche,
+            534352 => EvmChain::Scroll,
+            56 => EvmChain::Bnb,
+            59144 => EvmChain::Linea,
+            7777777 => EvmChain::Zora,
+            1284 => EvmChain::Moonbeam,
+            1285 => EvmChain::Moonriver,
+            2020 => EvmChain::Ronin,
+            250 => EvmChain::Fantom,
+            2222 => EvmChain::Kava,
+            100 => EvmChain::Gnosis,
+            _ => {
+               return  Err(ChainAdapterError::InvalidChain(chain_id.to_string()));
             }
         })
     }
