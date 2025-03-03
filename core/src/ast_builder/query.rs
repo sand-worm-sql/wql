@@ -1,7 +1,7 @@
 use {
     super::{
-        select::{Prebuild, ValuesNode},
         chain_factor::TableType,
+        select::{Prebuild, ValuesNode},
         ExprList, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode, JoinNode,
         LimitNode, OffsetLimitNode, OffsetNode, OrderByNode, ProjectNode, SelectNode,
         TableFactorNode,

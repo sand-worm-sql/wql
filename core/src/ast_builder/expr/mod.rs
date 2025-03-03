@@ -395,7 +395,7 @@ mod tests {
         crate::{
             ast::Expr,
             ast_builder::{
-                bytes, col, date, expr, null, num, subquery, chain, test_expr, text, time,
+                bytes, chain, col, date, expr, null, num, subquery, test_expr, text, time,
                 timestamp, uuid, QueryNode,
             },
         },
