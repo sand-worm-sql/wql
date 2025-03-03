@@ -13,10 +13,8 @@ use {
     thiserror::Error as ThisError,
 };
 
-
 mod common;
 mod graphql;
 mod rpc;
-
 
 pub use rpc::SuiChain;

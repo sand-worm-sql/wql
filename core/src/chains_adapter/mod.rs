@@ -4,7 +4,6 @@ mod sui;
 
 pub use error::ChainAdapterError;
 
-
 type Result<T> = std::result::Result<T, ChainAdapterError>;
 
 pub enum ChainAdapter {

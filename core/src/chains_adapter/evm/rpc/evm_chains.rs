@@ -1,7 +1,7 @@
 use {
     crate::{
+        chains_adapter::error::ChainAdapterError,
         data::{Interval, Value},
-        chains_adapter::error::ChainAdapterError
     },
     alloy::{
         providers::{Provider, ProviderBuilder},
@@ -12,7 +12,6 @@ use {
     std,
     thiserror::Error as ThisError,
 };
-
 
 type Result<T> = std::result::Result<T, ChainAdapterError>;
 
@@ -75,7 +74,6 @@ impl EvmChain {
     }
 }
 
-
 impl TryFrom<&str> for EvmChain {
     type Error = ChainAdapterError;
 
@@ -106,11 +104,10 @@ impl TryFrom<&str> for EvmChain {
             "mekong" => EvmChain::Mekong,
             _ => {
                 return Err(ChainAdapterError::InvalidChain(v.to_string()));
-            },
+            }
         })
     }
 }
-
 
 impl From<&EvmChain> for u64 {
     fn from(v: &EvmChain) -> Self {
@@ -146,8 +143,7 @@ impl TryFrom<u64> for EvmChain {
     type Error = ChainAdapterError;
 
     fn try_from(chain_id: u64) -> Result<Self> {
-        Ok(
-        match chain_id {
+        Ok(match chain_id {
             1 => EvmChain::Ethereum,
             11155111 => EvmChain::Sepolia,
             42161 => EvmChain::Arbitrum,
@@ -171,7 +167,7 @@ impl TryFrom<u64> for EvmChain {
             2222 => EvmChain::Kava,
             100 => EvmChain::Gnosis,
             _ => {
-               return  Err(ChainAdapterError::InvalidChain(chain_id.to_string()));
+                return Err(ChainAdapterError::InvalidChain(chain_id.to_string()));
             }
         })
     }
