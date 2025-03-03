@@ -47,8 +47,12 @@ pub enum ReferentialAction {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Statement {
-    ShowColumns {
-        table_name: String,
+    ShowChainEntitiesColumns {
+        chain_name: String,
+        entity_name: String,
+    },
+    ShowChainEntities {
+        chain_name: String,
     },
     /// SELECT, VALUES
     Query(Query),
@@ -107,8 +111,8 @@ pub enum Variable {
 impl ToSql for Statement {
     fn to_sql(&self) -> String {
         match self {
-            Statement::ShowColumns { table_name } => {
-                format!("SHOW COLUMNS FROM {table_name};")
+            Statement::ShowChainEntities { chain_name } => {
+                format!("SHOW CHAIN ENTITIES FROM {chain_name};")
             }
             Statement::CreateFunction {
                 or_replace,
@@ -212,9 +216,9 @@ mod tests {
     #[test]
     fn to_sql_show_columns() {
         assert_eq!(
-            "SHOW COLUMNS FROM Bar;",
-            Statement::ShowColumns {
-                table_name: "Bar".into()
+            "SHOW CHAIN ENTITIES FROM base;",
+            Statement::ShowChainEntities {
+                chain_name: "base".into()
             }
             .to_sql()
         )
