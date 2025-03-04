@@ -1,6 +1,6 @@
 use super::{
     show_chain_entities::ShowChainEntitiesNode,
-    show_chain_entities_columns::ShowChainEntitiesColumnsNode,
+    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode,
 };
 
 #[derive(Clone, Debug)]
@@ -21,6 +21,15 @@ impl ChainNode {
 
     pub fn show_chain_entities_columns(self, entity_name: &str) -> ShowChainEntitiesColumnsNode {
         ShowChainEntitiesColumnsNode::new(self.chain_name, entity_name.to_owned())
+    }
+
+    pub fn alias_as(self, chain_alias: &str) -> ChainFactorNode<'a> {
+        ChainFactorNode {
+            chain_name: self.chain_name,
+            table_type: TableType::Table,
+            chain_alias: Some(chain_alias.to_owned()),
+            index: None,
+        }
     }
 
     pub fn select(self) -> SelectNode<'a> {

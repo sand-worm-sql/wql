@@ -1,20 +1,19 @@
 mod build;
 mod chain;
 mod chain_factor;
+mod data_type;
 mod error;
 mod expr;
 mod expr_list;
 mod expr_with_alias;
+mod order_by_expr;
+mod order_by_expr_list;
 mod query;
 mod select;
 mod select_item;
 mod select_item_list;
-mod data_type;
 mod show_chain_entities;
 mod show_chain_entities_columns;
-mod order_by_expr;
-mod order_by_expr_list;
-
 
 pub use error::AstBuilderError;
 
@@ -27,14 +26,17 @@ pub use expr::{
 /// Available expression builder functions
 pub use {
     chain::chain,
+    chain_factor::ChainFactorNode,
+    data_type::DataTypeNode,
     expr::{
         bitwise_not, bytes, case, col, date, exists, expr, factorial, minus, nested, not,
         not_exists, null, num, numeric::NumericNode, plus, subquery, text, time, timestamp, uuid,
         ExprNode,
     },
-    data_type::DataTypeNode,
     expr_list::ExprList,
     expr_with_alias::ExprWithAliasNode,
+    order_by_expr::OrderByExprNode,
+    order_by_expr_list::OrderByExprList,
     query::QueryNode,
     select::{
         select, values, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
@@ -42,8 +44,6 @@ pub use {
     },
     select_item::SelectItemNode,
     select_item_list::SelectItemList,
-    order_by_expr::OrderByExprNode,
-    order_by_expr_list::OrderByExprList,
     show_chain_entities::ShowChainEntitiesNode,
     show_chain_entities_columns::ShowChainEntitiesColumnsNode,
 };

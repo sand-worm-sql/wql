@@ -2,9 +2,9 @@ use {
     super::{
         chain_factor::TableType,
         select::{Prebuild, ValuesNode},
-        ExprList, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode, JoinNode,
-        LimitNode, OffsetLimitNode, OffsetNode, OrderByNode, ProjectNode, SelectNode,
-        TableFactorNode,
+        ChainFactorNode, ExprList, FilterNode, GroupByNode, HashJoinNode, HavingNode,
+        JoinConstraintNode, JoinNode, LimitNode, OffsetLimitNode, OffsetNode, OrderByNode,
+        ProjectNode, SelectNode,
     },
     crate::{
         ast::{Expr, Query, SetExpr, Values},
@@ -34,14 +34,14 @@ pub enum QueryNode<'a> {
 }
 
 impl<'a> QueryNode<'a> {
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode<'a> {
-        TableFactorNode {
-            table_name: table_alias.to_owned(),
-            table_type: TableType::Derived {
-                subquery: Box::new(self),
-                alias: table_alias.to_owned(),
-            },
-            table_alias: None,
+    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode<'a> {
+        ChainFactorNode {
+            chain_name: chain_alias.to_owned(),
+            // table_type: TableType::Derived {
+            //     subquery: Box::new(self),
+            //     alias: chain_alias.to_owned(),
+            // },
+            chain_alias: None,
             index: None,
         }
     }
@@ -129,7 +129,7 @@ mod test {
                 TableFactor, TableWithJoins,
             },
             ast_builder::{
-                col, glue_indexes, glue_objects, glue_table_columns, glue_tables, series, table,
+                chain, col, glue_indexes, glue_objects, glue_table_columns, glue_tables, series,
                 test_query, SelectItemList,
             },
         },
