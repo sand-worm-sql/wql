@@ -24,14 +24,14 @@ impl ChainNode {
     }
 
     pub fn select(self) -> SelectNode<'a> {
-        let table_factor = TableFactorNode {
-            table_name: self.table_name,
-            table_type: TableType::Table,
-            table_alias: None,
-            index: None,
-        };
+        // let table_factor = TableFactorNode {
+        //     table_name: self.table_name,
+        //     table_type: TableType::Table,
+        //     table_alias: None,
+        //     index: None,
+        // };
 
-        SelectNode::new(table_factor)
+        // SelectNode::new(table_factor)
     }
 }
 

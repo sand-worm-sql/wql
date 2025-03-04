@@ -119,149 +119,149 @@ impl<'a> TryFrom<QueryNode<'a>> for Query {
     }
 }
 
-// #[cfg(test)]
-// mod test {
-//     use {
-//         super::QueryNode,
-//         crate::{
-//             ast::{
-//                 Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
-//                 TableFactor, TableWithJoins,
-//             },
-//             ast_builder::{
-//                 col, glue_indexes, glue_objects, glue_table_columns, glue_tables, series, table,
-//                 test_query, SelectItemList,
-//             },
-//         },
-//         pretty_assertions::assert_eq,
-//     };
+#[cfg(test)]
+mod test {
+    use {
+        super::QueryNode,
+        crate::{
+            ast::{
+                Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
+                TableFactor, TableWithJoins,
+            },
+            ast_builder::{
+                col, glue_indexes, glue_objects, glue_table_columns, glue_tables, series, table,
+                test_query, SelectItemList,
+            },
+        },
+        pretty_assertions::assert_eq,
+    };
 
-//     #[test]
-//     fn query() {
-//         let actual = table("FOO").select().into();
-//         let expected = "SELECT * FROM FOO";
-//         test_query(actual, expected);
+    #[test]
+    fn query() {
+        let actual = table("FOO").select().into();
+        let expected = "SELECT * FROM FOO";
+        test_query(actual, expected);
 
-//         let actual = table("Bar").select().join("Foo").into();
-//         let expected = "SELECT * FROM Bar JOIN Foo";
-//         test_query(actual, expected);
+        let actual = table("Bar").select().join("Foo").into();
+        let expected = "SELECT * FROM Bar JOIN Foo";
+        test_query(actual, expected);
 
-//         let actual = table("Bar")
-//             .select()
-//             .join("Foo")
-//             .on("Foo.id = Bar.foo_id")
-//             .into();
-//         let expected = "SELECT * FROM Bar JOIN Foo ON Foo.id = Bar.foo_id";
-//         test_query(actual, expected);
+        let actual = table("Bar")
+            .select()
+            .join("Foo")
+            .on("Foo.id = Bar.foo_id")
+            .into();
+        let expected = "SELECT * FROM Bar JOIN Foo ON Foo.id = Bar.foo_id";
+        test_query(actual, expected);
 
-//         let actual: QueryNode = table("Player")
-//             .select()
-//             .join("PlayerItem")
-//             .hash_executor("PlayerItem.user_id", "Player.id")
-//             .into();
-//         let expected = {
-//             let join = Join {
-//                 relation: TableFactor::Table {
-//                     name: "PlayerItem".to_owned(),
-//                     alias: None,
-//                     index: None,
-//                 },
-//                 join_operator: JoinOperator::Inner(JoinConstraint::None),
-//                 join_executor: JoinExecutor::Hash {
-//                     key_expr: col("PlayerItem.user_id").try_into().unwrap(),
-//                     value_expr: col("Player.id").try_into().unwrap(),
-//                     where_clause: None,
-//                 },
-//             };
-//             let select = Select {
-//                 projection: SelectItemList::from("*").try_into().unwrap(),
-//                 from: TableWithJoins {
-//                     relation: TableFactor::Table {
-//                         name: "Player".to_owned(),
-//                         alias: None,
-//                         index: None,
-//                     },
-//                     joins: vec![join],
-//                 },
-//                 selection: None,
-//                 group_by: Vec::new(),
-//                 having: None,
-//             };
+        let actual: QueryNode = table("Player")
+            .select()
+            .join("PlayerItem")
+            .hash_executor("PlayerItem.user_id", "Player.id")
+            .into();
+        let expected = {
+            let join = Join {
+                relation: TableFactor::Table {
+                    name: "PlayerItem".to_owned(),
+                    alias: None,
+                    index: None,
+                },
+                join_operator: JoinOperator::Inner(JoinConstraint::None),
+                join_executor: JoinExecutor::Hash {
+                    key_expr: col("PlayerItem.user_id").try_into().unwrap(),
+                    value_expr: col("Player.id").try_into().unwrap(),
+                    where_clause: None,
+                },
+            };
+            let select = Select {
+                projection: SelectItemList::from("*").try_into().unwrap(),
+                from: TableWithJoins {
+                    relation: TableFactor::Table {
+                        name: "Player".to_owned(),
+                        alias: None,
+                        index: None,
+                    },
+                    joins: vec![join],
+                },
+                selection: None,
+                group_by: Vec::new(),
+                having: None,
+            };
 
-//             Query {
-//                 body: SetExpr::Select(Box::new(select)),
-//                 order_by: Vec::new(),
-//                 limit: None,
-//                 offset: None,
-//             }
-//         };
-//         assert_eq!(Query::try_from(actual).unwrap(), expected);
+            Query {
+                body: SetExpr::Select(Box::new(select)),
+                order_by: Vec::new(),
+                limit: None,
+                offset: None,
+            }
+        };
+        assert_eq!(Query::try_from(actual).unwrap(), expected);
 
-//         let actual = table("FOO").select().group_by("id").into();
-//         let expected = "SELECT * FROM FOO GROUP BY id";
-//         test_query(actual, expected);
+        let actual = table("FOO").select().group_by("id").into();
+        let expected = "SELECT * FROM FOO GROUP BY id";
+        test_query(actual, expected);
 
-//         let actual = table("FOO")
-//             .select()
-//             .group_by("id")
-//             .having("COUNT(id) > 10")
-//             .into();
-//         let expected = "SELECT * FROM FOO GROUP BY id HAVING COUNT(id) > 10";
-//         test_query(actual, expected);
+        let actual = table("FOO")
+            .select()
+            .group_by("id")
+            .having("COUNT(id) > 10")
+            .into();
+        let expected = "SELECT * FROM FOO GROUP BY id HAVING COUNT(id) > 10";
+        test_query(actual, expected);
 
-//         let actual = table("FOO")
-//             .select()
-//             .group_by("city")
-//             .having("COUNT(name) < 100")
-//             .limit(3)
-//             .into();
-//         let expected = "SELECT * FROM FOO GROUP BY city HAVING COUNT(name) < 100 LIMIT 3";
-//         test_query(actual, expected);
+        let actual = table("FOO")
+            .select()
+            .group_by("city")
+            .having("COUNT(name) < 100")
+            .limit(3)
+            .into();
+        let expected = "SELECT * FROM FOO GROUP BY city HAVING COUNT(name) < 100 LIMIT 3";
+        test_query(actual, expected);
 
-//         let actual = table("FOO").select().offset(10).into();
-//         let expected = "SELECT * FROM FOO OFFSET 10";
-//         test_query(actual, expected);
+        let actual = table("FOO").select().offset(10).into();
+        let expected = "SELECT * FROM FOO OFFSET 10";
+        test_query(actual, expected);
 
-//         let actual = table("FOO")
-//             .select()
-//             .group_by("city")
-//             .having("COUNT(name) < 100")
-//             .offset(1)
-//             .limit(3)
-//             .into();
-//         let expected = "SELECT * FROM FOO GROUP BY city HAVING COUNT(name) < 100 OFFSET 1 LIMIT 3";
-//         test_query(actual, expected);
+        let actual = table("FOO")
+            .select()
+            .group_by("city")
+            .having("COUNT(name) < 100")
+            .offset(1)
+            .limit(3)
+            .into();
+        let expected = "SELECT * FROM FOO GROUP BY city HAVING COUNT(name) < 100 OFFSET 1 LIMIT 3";
+        test_query(actual, expected);
 
-//         let actual = table("FOO").select().project("id, name").limit(10).into();
-//         let expected = r#"SELECT id, name FROM FOO LIMIT 10"#;
-//         test_query(actual, expected);
+        let actual = table("FOO").select().project("id, name").limit(10).into();
+        let expected = r#"SELECT id, name FROM FOO LIMIT 10"#;
+        test_query(actual, expected);
 
-//         let actual = table("Foo").select().order_by("score DESC").into();
-//         let expected = "SELECT * FROM Foo ORDER BY score DESC";
-//         test_query(actual, expected);
+        let actual = table("Foo").select().order_by("score DESC").into();
+        let expected = "SELECT * FROM Foo ORDER BY score DESC";
+        test_query(actual, expected);
 
-//         let actual = glue_objects().select().into();
-//         let expected = "SELECT * FROM GLUE_OBJECTS";
-//         test_query(actual, expected);
+        let actual = glue_objects().select().into();
+        let expected = "SELECT * FROM GLUE_OBJECTS";
+        test_query(actual, expected);
 
-//         let actual = glue_tables().select().into();
-//         let expected = "SELECT * FROM GLUE_TABLES";
-//         test_query(actual, expected);
+        let actual = glue_tables().select().into();
+        let expected = "SELECT * FROM GLUE_TABLES";
+        test_query(actual, expected);
 
-//         let actual = glue_indexes().select().into();
-//         let expected = "SELECT * FROM GLUE_INDEXES";
-//         test_query(actual, expected);
+        let actual = glue_indexes().select().into();
+        let expected = "SELECT * FROM GLUE_INDEXES";
+        test_query(actual, expected);
 
-//         let actual = glue_table_columns().select().into();
-//         let expected = "SELECT * FROM GLUE_TABLE_COLUMNS";
-//         test_query(actual, expected);
+        let actual = glue_table_columns().select().into();
+        let expected = "SELECT * FROM GLUE_TABLE_COLUMNS";
+        test_query(actual, expected);
 
-//         let actual = series("1 + 2").select().into();
-//         let expected = "SELECT * FROM SERIES(1 + 2)";
-//         test_query(actual, expected);
+        let actual = series("1 + 2").select().into();
+        let expected = "SELECT * FROM SERIES(1 + 2)";
+        test_query(actual, expected);
 
-//         let actual = table("Items").select().alias_as("Sub").select().into();
-//         let expected = "SELECT * FROM (SELECT * FROM Items) AS Sub";
-//         test_query(actual, expected);
-//     }
-// }
+        let actual = table("Items").select().alias_as("Sub").select().into();
+        let expected = "SELECT * FROM (SELECT * FROM Items) AS Sub";
+        test_query(actual, expected);
+    }
+}

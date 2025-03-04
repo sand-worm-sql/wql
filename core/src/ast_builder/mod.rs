@@ -3,10 +3,18 @@ mod chain;
 mod chain_factor;
 mod error;
 mod expr;
+mod expr_list;
+mod expr_with_alias;
 mod query;
 mod select;
+mod select_item;
+mod select_item_list;
+mod data_type;
 mod show_chain_entities;
 mod show_chain_entities_columns;
+mod order_by_expr;
+mod order_by_expr_list;
+
 
 pub use error::AstBuilderError;
 
@@ -24,12 +32,18 @@ pub use {
         not_exists, null, num, numeric::NumericNode, plus, subquery, text, time, timestamp, uuid,
         ExprNode,
     },
+    data_type::DataTypeNode,
+    expr_list::ExprList,
     expr_with_alias::ExprWithAliasNode,
     query::QueryNode,
     select::{
         select, values, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
         JoinNode, LimitNode, OffsetLimitNode, OffsetNode, OrderByNode, ProjectNode, SelectNode,
     },
+    select_item::SelectItemNode,
+    select_item_list::SelectItemList,
+    order_by_expr::OrderByExprNode,
+    order_by_expr_list::OrderByExprList,
     show_chain_entities::ShowChainEntitiesNode,
     show_chain_entities_columns::ShowChainEntitiesColumnsNode,
 };

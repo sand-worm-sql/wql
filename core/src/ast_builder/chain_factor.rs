@@ -16,9 +16,9 @@ pub enum TableType<'a> {
 
 #[derive(Clone, Debug)]
 pub struct ChainFactorNode<'a> {
-    pub table_name: String,
-    pub table_type: TableType<'a>,
-    pub table_alias: Option<String>,
+    pub chain_name: String,
+    pub chain__type: TableType<'a>,
+    pub chain_alias: Option<String>,
     pub index: Option<IndexItemNode<'a>>,
 }
 
