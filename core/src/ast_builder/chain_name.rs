@@ -8,7 +8,7 @@ pub struct ChainNode {
     pub chain_name: String,
 }
 
-impl ChainNode {
+impl<'a> ChainNode {
     pub fn new(chain_name: &str) -> Self {
         Self {
             chain_name: chain_name.to_owned(),
@@ -28,20 +28,32 @@ impl ChainNode {
             chain_name: self.chain_name,
             chain_query_type: ChainQueryType::Table,
             chain_alias: Some(chain_alias.to_owned()),
+            entity_name: None,
+            index: None,
+        }
+    }
+    
+    pub fn entity(self, entity_name: &str) -> ChainFactorNode {
+        ChainFactorNode {
+            chain_name: self.chain_name,
+            chain_query_type: ChainQueryType::Table,
+            chain_alias: None,
+            entity_name: Some(entity_name.to_owned()),
             index: None,
         }
     }
 
-    // pub fn select(self) -> SelectNode<'a> {
-    //     // let table_factor = TableFactorNode {
-    //     //     table_name: self.table_name,
-    //     //     table_type: TableType::Table,
-    //     //     table_alias: None,
-    //     //     index: None,
-    //     // };
+    pub fn select(self, entity_name: &str) -> SelectNode<'a> {
+        let chain_factor = ChainFactorNode {
+            chain_name: self.chain_name,
+            chain_query_type: ChainQueryType::Table,
+            entity_name: Some(entity_name.to_owned()),
+            chain_alias: None,
+            index: None,
+        };
 
-    //     // SelectNode::new(table_factor)
-    // }
+        SelectNode::new(chain_factor)
+    }
 }
 
 pub fn chain(chain_name: &str) -> ChainNode {

@@ -19,6 +19,7 @@ pub struct ChainFactorNode<'a> {
     pub chain_name: String,
     pub chain_query_type: ChainQueryType<'a>,
     pub chain_alias: Option<String>,
+    pub entity_name: Option<String>,
     pub index: Option<IndexItemNode<'a>>,
 }
 
