@@ -2,7 +2,7 @@ use {
     super::Prebuild,
     crate::{
         ast::Query,
-        ast_builder::{ExprNode, OffsetNode, QueryNode, ChainFactorNode},
+        ast_builder::{ChainFactorNode, ExprNode, OffsetNode, QueryNode},
         result::Result,
     },
 };

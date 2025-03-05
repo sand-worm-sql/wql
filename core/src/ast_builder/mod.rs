@@ -1,19 +1,19 @@
 mod build;
-mod chain_name;
 mod chain_factor;
+mod chain_name;
 mod data_type;
 mod error;
 mod expr;
 mod expr_list;
 mod expr_with_alias;
+mod index;
+mod index_item;
 mod order_by_expr;
 mod order_by_expr_list;
 mod query;
 mod select;
 mod select_item;
 mod select_item_list;
-mod index;
-mod index_item;
 mod show_chain_entities;
 mod show_chain_entities_columns;
 
@@ -27,8 +27,8 @@ pub use expr::{
 
 /// Available expression builder functions
 pub use {
-    chain_name::chain,
     chain_factor::ChainFactorNode,
+    chain_name::chain,
     data_type::DataTypeNode,
     expr::{
         bitwise_not, bytes, case, col, date, exists, expr, factorial, minus, nested, not,
@@ -37,16 +37,16 @@ pub use {
     },
     expr_list::ExprList,
     expr_with_alias::ExprWithAliasNode,
+    index::{CreateIndexNode, DropIndexNode},
+    index_item::{
+        non_clustered, primary_key, CmpExprNode, IndexItemNode, NonClusteredNode, PrimaryKeyNode,
+    },
     order_by_expr::OrderByExprNode,
     order_by_expr_list::OrderByExprList,
     query::QueryNode,
     select::{
         select, values, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
         JoinNode, LimitNode, OffsetLimitNode, OffsetNode, OrderByNode, ProjectNode, SelectNode,
-    },
-    index::{CreateIndexNode, DropIndexNode},
-    index_item::{
-        non_clustered, primary_key, CmpExprNode, IndexItemNode, NonClusteredNode, PrimaryKeyNode,
     },
     select_item::SelectItemNode,
     select_item_list::SelectItemList,

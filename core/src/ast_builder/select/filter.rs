@@ -3,9 +3,9 @@ use {
     crate::{
         ast::Select,
         ast_builder::{
-            ExprList, ExprNode, GroupByNode, HashJoinNode, JoinConstraintNode, JoinNode, LimitNode,
-            OffsetNode, OrderByExprList, OrderByNode, ProjectNode, QueryNode, SelectItemList,
-            SelectNode, ChainFactorNode,
+            ChainFactorNode, ExprList, ExprNode, GroupByNode, HashJoinNode, JoinConstraintNode,
+            JoinNode, LimitNode, OffsetNode, OrderByExprList, OrderByNode, ProjectNode, QueryNode,
+            SelectItemList, SelectNode,
         },
         result::Result,
     },

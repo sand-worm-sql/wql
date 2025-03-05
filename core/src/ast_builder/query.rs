@@ -1,6 +1,6 @@
 use {
     super::{
-        chain_factor::TableType,
+        chain_factor::ChainQueryType,
         select::{Prebuild, ValuesNode},
         ChainFactorNode, ExprList, FilterNode, GroupByNode, HashJoinNode, HavingNode,
         JoinConstraintNode, JoinNode, LimitNode, OffsetLimitNode, OffsetNode, OrderByNode,

@@ -5,9 +5,9 @@ use {
             AstLiteral, Expr, Query, Select, SelectItem, TableAlias, TableFactor, TableWithJoins,
         },
         ast_builder::{
-            chain_factor::TableType, ExprList, ExprNode, FilterNode, GroupByNode, JoinNode,
-            LimitNode, OffsetNode, OrderByExprList, OrderByNode, ProjectNode, QueryNode,
-            SelectItemList, ChainFactorNode,
+            chain_factor::ChainQueryType, ChainFactorNode, ExprList, ExprNode, FilterNode,
+            GroupByNode, JoinNode, LimitNode, OffsetNode, OrderByExprList, OrderByNode,
+            ProjectNode, QueryNode, SelectItemList,
         },
         result::Result,
         translate::alias_or_name,
@@ -91,21 +91,21 @@ impl<'a> Prebuild<Select> for SelectNode<'a> {
             None => None,
         };
 
-        let relation = match self.chain_node.table_type {
-            TableType::Table => TableFactor::Table {
-                name: self.chain_node.table_name,
+        let relation = match self.chain_node.chain_type {
+            ChainQueryType::Table => TableFactor::Table {
+                name: self.chain_node.chain_name,
                 alias,
                 index,
             },
-            TableType::Dictionary(dict) => TableFactor::Dictionary {
+            ChainQueryType::Dictionary(dict) => TableFactor::Dictionary {
                 dict,
-                alias: alias_or_name(alias, self.chain_node.table_name),
+                alias: alias_or_name(alias, self.chain_node.chain_name),
             },
-            TableType::Series(args) => TableFactor::Series {
-                alias: alias_or_name(alias, self.chain_node.table_name),
+            ChainQueryType::Series(args) => TableFactor::Series {
+                alias: alias_or_name(alias, self.chain_node.chain_name),
                 size: args.try_into()?,
             },
-            TableType::Derived { subquery, alias } => TableFactor::Derived {
+            ChainQueryType::Derived { subquery, alias } => TableFactor::Derived {
                 subquery: Query::try_from(*subquery)?,
                 alias: TableAlias {
                     name: alias,
@@ -132,9 +132,9 @@ impl<'a> Prebuild<Select> for SelectNode<'a> {
 pub fn select<'a>() -> SelectNode<'a> {
     SelectNode {
         chain_node: ChainFactorNode {
-            table_name: "Series".to_owned(),
-            table_type: TableType::Series(Expr::Literal(AstLiteral::Number(1.into())).into()),
-            table_alias: None,
+            chain_name: "Series".to_owned(),
+            chain_type: ChainQueryType::Series(Expr::Literal(AstLiteral::Number(1.into())).into()),
+            chain_alias: None,
             index: None,
         },
     }

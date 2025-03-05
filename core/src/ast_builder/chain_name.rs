@@ -1,5 +1,6 @@
 use super::{
-    chain_factor::ChainType, show_chain_entities::ShowChainEntitiesNode, show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode, SelectNode
+    chain_factor::ChainQueryType, show_chain_entities::ShowChainEntitiesNode,
+    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode, SelectNode,
 };
 
 #[derive(Clone, Debug)]
@@ -25,7 +26,7 @@ impl ChainNode {
     pub fn alias_as(self, chain_alias: &str) -> ChainFactorNode {
         ChainFactorNode {
             chain_name: self.chain_name,
-            chain_type: ChainType::Table,
+            chain_type: ChainQueryType::Table,
             chain_alias: Some(chain_alias.to_owned()),
             index: None,
         }

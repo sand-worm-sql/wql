@@ -3,8 +3,8 @@ use {
     crate::{
         ast::Select,
         ast_builder::{
-            ExprNode, GroupByNode, LimitNode, OffsetNode, OrderByExprList, OrderByNode,
-            ProjectNode, QueryNode, SelectItemList, ChainFactorNode,
+            ChainFactorNode, ExprNode, GroupByNode, LimitNode, OffsetNode, OrderByExprList,
+            OrderByNode, ProjectNode, QueryNode, SelectItemList,
         },
         result::Result,
     },

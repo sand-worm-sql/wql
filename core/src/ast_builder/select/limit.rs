@@ -3,8 +3,8 @@ use {
     crate::{
         ast::Query,
         ast_builder::{
-            ExprNode, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
-            JoinNode, OrderByNode, ProjectNode, QueryNode, SelectNode, ChainFactorNode,
+            ChainFactorNode, ExprNode, FilterNode, GroupByNode, HashJoinNode, HavingNode,
+            JoinConstraintNode, JoinNode, OrderByNode, ProjectNode, QueryNode, SelectNode,
         },
         result::Result,
     },
