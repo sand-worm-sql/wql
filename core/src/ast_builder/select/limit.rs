@@ -4,7 +4,7 @@ use {
         ast::Query,
         ast_builder::{
             ExprNode, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
-            JoinNode, OrderByNode, ProjectNode, QueryNode, SelectNode, TableFactorNode,
+            JoinNode, OrderByNode, ProjectNode, QueryNode, SelectNode, ChainFactorNode,
         },
         result::Result,
     },
@@ -115,7 +115,7 @@ impl<'a> LimitNode<'a> {
         }
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
         QueryNode::LimitNode(self).alias_as(table_alias)
     }
 }

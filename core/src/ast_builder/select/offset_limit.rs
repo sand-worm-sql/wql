@@ -2,7 +2,7 @@ use {
     super::Prebuild,
     crate::{
         ast::Query,
-        ast_builder::{ExprNode, OffsetNode, QueryNode, TableFactorNode},
+        ast_builder::{ExprNode, OffsetNode, QueryNode, ChainFactorNode},
         result::Result,
     },
 };
@@ -40,7 +40,7 @@ impl<'a> OffsetLimitNode<'a> {
         }
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
         QueryNode::OffsetLimitNode(self).alias_as(table_alias)
     }
 }

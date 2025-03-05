@@ -5,9 +5,9 @@ use {
             AstLiteral, Expr, Query, Select, SelectItem, TableAlias, TableFactor, TableWithJoins,
         },
         ast_builder::{
-            table_factor::TableType, ExprList, ExprNode, FilterNode, GroupByNode, JoinNode,
+            chain_factor::TableType, ExprList, ExprNode, FilterNode, GroupByNode, JoinNode,
             LimitNode, OffsetNode, OrderByExprList, OrderByNode, ProjectNode, QueryNode,
-            SelectItemList, TableFactorNode,
+            SelectItemList, ChainFactorNode,
         },
         result::Result,
         translate::alias_or_name,
@@ -16,12 +16,12 @@ use {
 
 #[derive(Clone, Debug)]
 pub struct SelectNode<'a> {
-    table_node: TableFactorNode<'a>,
+    chain_node: ChainFactorNode<'a>,
 }
 
 impl<'a> SelectNode<'a> {
-    pub fn new(table_node: TableFactorNode<'a>) -> Self {
-        Self { table_node }
+    pub fn new(chain_node: ChainFactorNode<'a>) -> Self {
+        Self { chain_node }
     }
 
     pub fn filter<T: Into<ExprNode<'a>>>(self, expr: T) -> FilterNode<'a> {
@@ -74,35 +74,35 @@ impl<'a> SelectNode<'a> {
         )
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode {
-        QueryNode::SelectNode(self).alias_as(table_alias)
+    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode<'a> {
+        QueryNode::SelectNode(self).alias_as(chain_alias)
     }
 }
 
 impl<'a> Prebuild<Select> for SelectNode<'a> {
     fn prebuild(self) -> Result<Select> {
-        let alias = self.table_node.table_alias.map(|name| TableAlias {
+        let alias = self.chain_node.chain_alias.map(|name| TableAlias {
             name,
             columns: Vec::new(),
         });
 
-        let index = match self.table_node.index {
+        let index = match self.chain_node.index {
             Some(index) => Some(index.prebuild()?),
             None => None,
         };
 
-        let relation = match self.table_node.table_type {
+        let relation = match self.chain_node.table_type {
             TableType::Table => TableFactor::Table {
-                name: self.table_node.table_name,
+                name: self.chain_node.table_name,
                 alias,
                 index,
             },
             TableType::Dictionary(dict) => TableFactor::Dictionary {
                 dict,
-                alias: alias_or_name(alias, self.table_node.table_name),
+                alias: alias_or_name(alias, self.chain_node.table_name),
             },
             TableType::Series(args) => TableFactor::Series {
-                alias: alias_or_name(alias, self.table_node.table_name),
+                alias: alias_or_name(alias, self.chain_node.table_name),
                 size: args.try_into()?,
             },
             TableType::Derived { subquery, alias } => TableFactor::Derived {
@@ -131,7 +131,7 @@ impl<'a> Prebuild<Select> for SelectNode<'a> {
 
 pub fn select<'a>() -> SelectNode<'a> {
     SelectNode {
-        table_node: TableFactorNode {
+        chain_node: ChainFactorNode {
             table_name: "Series".to_owned(),
             table_type: TableType::Series(Expr::Literal(AstLiteral::Number(1.into())).into()),
             table_alias: None,

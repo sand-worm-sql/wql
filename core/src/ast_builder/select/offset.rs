@@ -5,7 +5,7 @@ use {
         ast_builder::{
             ExprNode, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
             JoinNode, OffsetLimitNode, OrderByNode, ProjectNode, QueryNode, SelectNode,
-            TableFactorNode,
+            ChainFactorNode,
         },
         result::Result,
     },
@@ -120,7 +120,7 @@ impl<'a> OffsetNode<'a> {
         OffsetLimitNode::new(self, expr)
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
         QueryNode::OffsetNode(self).alias_as(table_alias)
     }
 }

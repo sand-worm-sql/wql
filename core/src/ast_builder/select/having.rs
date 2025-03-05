@@ -4,7 +4,7 @@ use {
         ast::Select,
         ast_builder::{
             ExprNode, GroupByNode, LimitNode, OffsetNode, OrderByExprList, OrderByNode,
-            ProjectNode, QueryNode, SelectItemList, TableFactorNode,
+            ProjectNode, QueryNode, SelectItemList, ChainFactorNode,
         },
         result::Result,
     },
@@ -59,7 +59,7 @@ impl<'a> HavingNode<'a> {
         OrderByNode::new(self, expr_list)
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
         QueryNode::HavingNode(self).alias_as(table_alias)
     }
 }
