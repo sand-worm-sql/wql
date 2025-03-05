@@ -5,7 +5,7 @@ use {
         ast_builder::{
             select::Prebuild, ExprList, ExprNode, FilterNode, GroupByNode, HashJoinNode,
             JoinConstraintNode, LimitNode, OffsetNode, OrderByExprList, OrderByNode, ProjectNode,
-            QueryNode, SelectItemList, SelectNode, TableFactorNode,
+            QueryNode, SelectItemList, SelectNode, ChainFactorNode,
         },
         result::Result,
     },
@@ -151,7 +151,7 @@ impl<'a> JoinNode<'a> {
         OrderByNode::new(self, order_by_exprs)
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> TableFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
         QueryNode::JoinNode(self).alias_as(table_alias)
     }
 
