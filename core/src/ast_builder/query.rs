@@ -37,10 +37,10 @@ impl<'a> QueryNode<'a> {
     pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode<'a> {
         ChainFactorNode {
             chain_name: chain_alias.to_owned(),
-            // table_type: TableType::Derived {
-            //     subquery: Box::new(self),
-            //     alias: chain_alias.to_owned(),
-            // },
+            chain_query_type: ChainQueryType::Derived {
+                subquery: Box::new(self),
+                alias: chain_alias.to_owned(),
+            },
             chain_alias: None,
             index: None,
         }

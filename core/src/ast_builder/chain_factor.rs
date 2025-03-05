@@ -17,7 +17,7 @@ pub enum ChainQueryType<'a> {
 #[derive(Clone, Debug)]
 pub struct ChainFactorNode<'a> {
     pub chain_name: String,
-    pub chain_type: ChainQueryType<'a>,
+    pub chain_query_type: ChainQueryType<'a>,
     pub chain_alias: Option<String>,
     pub index: Option<IndexItemNode<'a>>,
 }

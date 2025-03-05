@@ -91,7 +91,7 @@ impl<'a> Prebuild<Select> for SelectNode<'a> {
             None => None,
         };
 
-        let relation = match self.chain_node.chain_type {
+        let relation = match self.chain_node.chain_query_type {
             ChainQueryType::Table => TableFactor::Table {
                 name: self.chain_node.chain_name,
                 alias,
@@ -133,7 +133,7 @@ pub fn select<'a>() -> SelectNode<'a> {
     SelectNode {
         chain_node: ChainFactorNode {
             chain_name: "Series".to_owned(),
-            chain_type: ChainQueryType::Series(Expr::Literal(AstLiteral::Number(1.into())).into()),
+            chain_query_type: ChainQueryType::Series(Expr::Literal(AstLiteral::Number(1.into())).into()),
             chain_alias: None,
             index: None,
         },

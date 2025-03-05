@@ -26,7 +26,7 @@ impl ChainNode {
     pub fn alias_as(self, chain_alias: &str) -> ChainFactorNode {
         ChainFactorNode {
             chain_name: self.chain_name,
-            chain_type: ChainQueryType::Table,
+            chain_query_type: ChainQueryType::Table,
             chain_alias: Some(chain_alias.to_owned()),
             index: None,
         }
