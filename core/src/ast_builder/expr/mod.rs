@@ -403,8 +403,8 @@ mod tests {
 
     #[test]
     fn into_expr_node() {
-        let actual: ExprNode = "id IS NOT NULL".into();
-        let expected = "id IS NOT NULL";
+        let actual: ExprNode = "sender IS NOT NULL".into();
+        let expected = "a IS NOT NULL";
         test_expr(actual, expected);
 
         let actual: ExprNode = String::from("1 + 10)").into();
@@ -419,8 +419,8 @@ mod tests {
         let expected = "True";
         test_expr(actual, expected);
 
-        let actual: ExprNode = QueryNode::from(table("Foo").select().project("id")).into();
-        let expected = "(SELECT id FROM Foo)";
+        let actual: ExprNode = QueryNode::from(chain("sui").select("transations").project("sender")).into();
+        let expected = "(SELECT sender FROM sui.transations)";
         test_expr(actual, expected);
 
         let expr = Expr::Identifier("id".to_owned());
@@ -482,8 +482,8 @@ mod tests {
         let expected = "BYTES '68656c6c6f20776f726c64'";
         test_expr(actual, expected);
 
-        let actual = subquery(table("Foo").select().filter("id IS NOT NULL"));
-        let expected = "(SELECT * FROM Foo WHERE id IS NOT NULL)";
+        let actual = subquery(chain("sui").select("trasactions").filter("sender IS NOT NULL"));
+        let expected = "(SELECT * FROM sui.transactions WHERE sender IS NOT NULL)";
         test_expr(actual, expected);
 
         let actual = null();

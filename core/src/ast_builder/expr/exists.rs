@@ -16,25 +16,25 @@ pub fn not_exists<'a, T: Into<QueryNode<'a>>>(query: T) -> ExprNode<'a> {
 
 #[cfg(test)]
 mod test {
-    use crate::ast_builder::{col, exists, not_exists, table, test, test_expr, Build};
+    use crate::ast_builder::{col, exists, not_exists, chain, test, test_expr, Build};
 
     #[test]
     fn exist() {
-        let actual = table("FOO")
-            .select()
+        let actual = chain("sui")
+            .select("transations")
             .filter(exists(
-                table("BAR")
-                    .select()
-                    .filter("id IS NOT NULL")
-                    .group_by("name"),
+                chain("sui")
+                    .select("coins")
+                    .filter("address IS NOT NULL")
+                    .group_by("address"),
             ))
             .build();
         let expected =
-            "SELECT * FROM Blocks ON SUI WHERE EXISTS (SELECT * FROM Transations ON SUI WHERE id IS NOT NULL GROUP BY address)";
+            "SELECT * FROM sui.transations WHERE EXISTS (SELECT * FROM sui.coins WHERE address IS NOT NULL GROUP BY address)";
         test(actual, expected);
 
-        let actual = table("FOO")
-            .select()
+        let actual = chain("sui")
+            .select("checkouts")
             .filter(not_exists(table("BAR").select().filter("id IS NOT NULL")))
             .build();
         let expected =
@@ -49,12 +49,12 @@ mod test {
         let expected = "NOT EXISTS (SELECT * FROM FOO WHERE id > 2)";
         test_expr(actual, expected);
 
-        let actual = exists("SELECT * FROM FOO");
+        let actual = exists("SELECT * FROM ");
         let expected = "EXISTS (SELECT * FROM FOO)";
         test_expr(actual, expected);
 
-        let actual = not_exists("SELECT * FROM FOO");
-        let expected = "NOT EXISTS (SELECT * FROM FOO)";
+        let actual = not_exists("SELECT * FROM sui.transations");
+        let expected = "NOT EXISTS (SELECT * FROM sui.transations)";
         test_expr(actual, expected);
     }
 }
