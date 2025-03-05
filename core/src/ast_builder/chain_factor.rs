@@ -4,7 +4,7 @@ use {
 };
 
 #[derive(Clone, Debug)]
-pub enum TableType<'a> {
+pub enum ChainType<'a> {
     Table,
     Series(ExprNode<'a>),
     Dictionary(Dictionary),
@@ -17,7 +17,7 @@ pub enum TableType<'a> {
 #[derive(Clone, Debug)]
 pub struct ChainFactorNode<'a> {
     pub chain_name: String,
-    pub chain_type: TableType<'a>,
+    pub chain_type: ChainType<'a>,
     pub chain_alias: Option<String>,
     pub index: Option<IndexItemNode<'a>>,
 }

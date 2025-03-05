@@ -30,7 +30,7 @@ mod tests {
     #[test]
     fn show_columns() {
         let actual = chain("base").show_chain_entities().build();
-        let expected = "SHOW CHAIN ENTITIES ON base";
+        let expected = "SHOW CHAIN ENTITIES FROM base";
         test(actual, expected);
     }
 }

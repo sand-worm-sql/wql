@@ -1,5 +1,5 @@
 mod build;
-mod chain;
+mod chain_name;
 mod chain_factor;
 mod data_type;
 mod error;
@@ -12,6 +12,8 @@ mod query;
 mod select;
 mod select_item;
 mod select_item_list;
+mod index;
+mod index_item;
 mod show_chain_entities;
 mod show_chain_entities_columns;
 
@@ -25,7 +27,7 @@ pub use expr::{
 
 /// Available expression builder functions
 pub use {
-    chain::chain,
+    chain_name::chain,
     chain_factor::ChainFactorNode,
     data_type::DataTypeNode,
     expr::{
@@ -41,6 +43,10 @@ pub use {
     select::{
         select, values, FilterNode, GroupByNode, HashJoinNode, HavingNode, JoinConstraintNode,
         JoinNode, LimitNode, OffsetLimitNode, OffsetNode, OrderByNode, ProjectNode, SelectNode,
+    },
+    index::{CreateIndexNode, DropIndexNode},
+    index_item::{
+        non_clustered, primary_key, CmpExprNode, IndexItemNode, NonClusteredNode, PrimaryKeyNode,
     },
     select_item::SelectItemNode,
     select_item_list::SelectItemList,
