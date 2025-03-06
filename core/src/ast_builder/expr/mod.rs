@@ -419,7 +419,8 @@ mod tests {
         let expected = "True";
         test_expr(actual, expected);
 
-        let actual: ExprNode = QueryNode::from(chain("sui").select("transations").project("sender")).into();
+        let actual: ExprNode =
+            QueryNode::from(chain("sui").select("transations").project("sender")).into();
         let expected = "(SELECT sender FROM sui.transations)";
         test_expr(actual, expected);
 
@@ -482,7 +483,11 @@ mod tests {
         let expected = "BYTES '68656c6c6f20776f726c64'";
         test_expr(actual, expected);
 
-        let actual = subquery(chain("sui").select("trasactions").filter("sender IS NOT NULL"));
+        let actual = subquery(
+            chain("sui")
+                .select("trasactions")
+                .filter("sender IS NOT NULL"),
+        );
         let expected = "(SELECT * FROM sui.transactions WHERE sender IS NOT NULL)";
         test_expr(actual, expected);
 

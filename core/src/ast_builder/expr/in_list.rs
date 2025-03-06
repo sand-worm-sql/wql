@@ -79,7 +79,7 @@ mod test {
             Expr, Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
             TableFactor, TableWithJoins,
         },
-        ast_builder::{col, chain, test_expr, text, QueryNode, SelectItemList},
+        ast_builder::{chain, col, test_expr, text, QueryNode, SelectItemList},
     };
 
     #[test]

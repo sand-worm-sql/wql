@@ -32,7 +32,7 @@ impl<'a> ChainNode {
             index: None,
         }
     }
-    
+
     pub fn entity(self, entity_name: &str) -> ChainFactorNode {
         ChainFactorNode {
             chain_name: self.chain_name,

@@ -133,7 +133,9 @@ pub fn select<'a>() -> SelectNode<'a> {
     SelectNode {
         chain_node: ChainFactorNode {
             chain_name: "Series".to_owned(),
-            chain_query_type: ChainQueryType::Series(Expr::Literal(AstLiteral::Number(1.into())).into()),
+            chain_query_type: ChainQueryType::Series(
+                Expr::Literal(AstLiteral::Number(1.into())).into(),
+            ),
             chain_alias: None,
             index: None,
         },
