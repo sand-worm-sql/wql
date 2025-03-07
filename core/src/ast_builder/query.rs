@@ -138,15 +138,15 @@ mod test {
 
     #[test]
     fn query() {
-        let actual = table("FOO").select().into();
-        let expected = "SELECT * FROM FOO";
+        let actual = chain("sui").select("checkpoints").into();
+        let expected = "SELECT * FROM sui.checkpoints";
         test_query(actual, expected);
 
-        let actual = table("Bar").select().join("Foo").into();
-        let expected = "SELECT * FROM Bar JOIN Foo";
+        let actual = chain("sui").select("blocks").join("chackpoints").into();
+        let expected = "SELECT * FROM sui.blocks JOIN chackpoints";
         test_query(actual, expected);
 
-        let actual = table("Bar")
+        let actual = chain("Bar")
             .select()
             .join("Foo")
             .on("Foo.id = Bar.foo_id")
@@ -260,8 +260,8 @@ mod test {
         let expected = "SELECT * FROM SERIES(1 + 2)";
         test_query(actual, expected);
 
-        let actual = table("Items").select().alias_as("Sub").select().into();
-        let expected = "SELECT * FROM (SELECT * FROM Items) AS Sub";
+        let actual = chain("sui").select("transations").alias_as("transations").select().into();
+        let expected = "SELECT * FROM (SELECT * FROM sui.transations) AS transations";
         test_query(actual, expected);
     }
 }
