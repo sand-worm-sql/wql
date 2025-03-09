@@ -35,7 +35,9 @@ mod test {
 
         let actual = chain("sui")
             .select("checkpoints")
-            .filter(not_exists(chain("sui").select("checkpoints").filter("tnx IS NOT NULL")))
+            .filter(not_exists(
+                chain("sui").select("checkpoints").filter("tnx IS NOT NULL"),
+            ))
             .build();
         let expected =
             "SELECT * FROM sui.checkpoints WHERE NOT EXISTS (SELECT * FROM sui.checkpoints WHERE tnx IS NOT NULL)";
