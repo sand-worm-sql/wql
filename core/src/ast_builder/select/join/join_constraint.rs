@@ -141,7 +141,7 @@ mod tests {
                 Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
                 Statement, TableFactor, TableWithJoins,
             },
-            ast_builder::{col, table, test, Build, SelectItemList},
+            ast_builder::{chain, col, test, Build, SelectItemList},
         },
         pretty_assertions::assert_eq,
     };
@@ -149,21 +149,21 @@ mod tests {
     #[test]
     fn join_constraint() {
         // join node ->  join constarint node -> build
-        let actual = table("Foo")
-            .select()
-            .join("Bar")
-            .on("Foo.id = Bar.id")
+        let actual = chain("sui")
+            .select("checkpoints")
+            .join("transations")
+            .on("checkpoints.digest = transations.digest")
             .build();
-        let expected = "SELECT * FROM Foo INNER JOIN Bar ON Foo.id = Bar.id";
+        let expected = "SELECT * FROM sui.checkpoints INNER JOIN  transations ON checkpoints.digest = transations.digest";
         test(actual, expected);
 
         // join node ->  join constraint node -> build
-        let actual = table("Foo")
-            .select()
-            .join_as("Bar", "B")
-            .on("Foo.id = B.id")
+        let actual = chain("sui")
+            .select("checkpoints")
+            .join_as("transations", "tnx")
+            .on("checkpoints.digest = transations.digest")
             .build();
-        let expected = "SELECT * FROM Foo INNER JOIN Bar B ON Foo.id = B.id";
+        let expected = "SELECT * FROM sui.checkpoints INNER JOIN transations AS tnx ON checkpoints.digest = tnx.digest";
         test(actual, expected);
 
         // join node -> join constraint node -> build
