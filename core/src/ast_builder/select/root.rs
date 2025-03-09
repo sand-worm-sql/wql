@@ -154,7 +154,6 @@ mod tests {
         let expected = "SELECT * FROM sui.transations";
         test(actual, expected);
 
-
         // select -> derived subquery
         let actual = chain("sui")
             .select("transations")

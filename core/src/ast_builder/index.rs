@@ -61,11 +61,11 @@ mod tests {
 
     #[test]
     fn create_index() {
-        let actual = chain("Foo").create_index("nameIndex", "name asc").build();
+        let actual = chain("sui").create_index("nameIndex", "name asc").build();
         let expected = "CREATE INDEX nameIndex ON Foo (name Asc)";
         test(actual, expected);
 
-        let actual = chain("Foo").create_index("nameIndex", "name desc").build();
+        let actual = chain("sui").create_index("nameIndex", "name desc").build();
         let expected = "CREATE INDEX nameIndex ON Foo (name Desc)";
         test(actual, expected);
     }
