@@ -34,22 +34,22 @@ mod test {
         test(actual, expected);
 
         let actual = chain("sui")
-            .select("checkouts")
-            .filter(not_exists(table("BAR").select().filter("id IS NOT NULL")))
+            .select("checkpoints")
+            .filter(not_exists(chain("sui").select("checkpoints").filter("tnx IS NOT NULL")))
             .build();
         let expected =
-            "SELECT * FROM FOO WHERE NOT EXISTS (SELECT * FROM BAR WHERE id IS NOT NULL)";
+            "SELECT * FROM sui.checkpoints WHERE NOT EXISTS (SELECT * FROM sui.checkpoints WHERE tnx IS NOT NULL)";
         test(actual, expected);
 
-        let actual = exists(table("FOO").select().filter(col("id").gt(2)));
-        let expected = "EXISTS (SELECT * FROM FOO WHERE id > 2)";
+        let actual = exists(chain("sui").select("checkpoints").filter(col("tnx").gt(2)));
+        let expected = "EXISTS (SELECT * FROM sui.checkpoints WHERE tnx > 4)";
         test_expr(actual, expected);
 
-        let actual = not_exists(table("FOO").select().filter(col("id").gt(2)));
-        let expected = "NOT EXISTS (SELECT * FROM FOO WHERE id > 2)";
+        let actual = not_exists(chain("sui").select("transations").filter(col("tnx").gt(2)));
+        let expected = "NOT EXISTS (SELECT * FROM sui.transations WHERE tnx > 2)";
         test_expr(actual, expected);
 
-        let actual = exists("SELECT * FROM ");
+        let actual = exists("SELECT * FROM sui.transations");
         let expected = "EXISTS (SELECT * FROM FOO)";
         test_expr(actual, expected);
 
