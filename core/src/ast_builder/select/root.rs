@@ -136,6 +136,7 @@ pub fn select<'a>() -> SelectNode<'a> {
             chain_query_type: ChainQueryType::Series(
                 Expr::Literal(AstLiteral::Number(1.into())).into(),
             ),
+            entity_name: None,
             chain_alias: None,
             index: None,
         },
@@ -144,22 +145,23 @@ pub fn select<'a>() -> SelectNode<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast_builder::{select, table, test, Build};
+    use crate::ast_builder::{chain, select, test, Build};
 
     #[test]
     fn select_root() {
         // select node -> build
-        let actual = table("App").select().build();
-        let expected = "SELECT * FROM App";
+        let actual = chain("sui").select("transations").build();
+        let expected = "SELECT * FROM sui.transations";
         test(actual, expected);
 
-        let actual = table("Item").alias_as("i").select().build();
-        let expected = "SELECT * FROM Item i";
-        test(actual, expected);
 
         // select -> derived subquery
-        let actual = table("App").select().alias_as("Sub").select().build();
-        let expected = "SELECT * FROM (SELECT * FROM App) Sub";
+        let actual = chain("sui")
+            .select("transations")
+            .alias_as("transations")
+            .select()
+            .build();
+        let expected = "SELECT * FROM (SELECT * FROM sui.transations) transations";
         test(actual, expected);
 
         // select without table
