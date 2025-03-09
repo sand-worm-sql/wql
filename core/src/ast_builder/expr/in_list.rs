@@ -116,26 +116,31 @@ mod test {
         test_expr(actual, expected);
 
         // from SelectNode
-        let actual = col("id").in_list(table("FOO").select());
-        let expected = "id IN (SELECT * FROM FOO)";
+        let actual = col("sequence_number").in_list(chain("sui").select("checkpoints").into());
+        let expected = "total_gas_cost IN (SELECT * FROM sui.checkpoints)";
         test_expr(actual, expected);
 
         // from JoinNode
-        let actual = col("id").in_list(table("Bar").select().join("Foo"));
-        let expected = "id IN (SELECT * FROM Bar JOIN Foo)";
+        let actual = col("id").in_list(chain("sui").select("checkpoints").join("transations"));
+        let expected = "timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations)";
         test_expr(actual, expected);
 
         // from JoinConstraintNode
-        let actual = col("id").in_list(table("Bar").select().join("Foo").on("Foo.id = Bar.foo_id"));
-        let expected = "id IN (SELECT * FROM Bar JOIN Foo ON Foo.id = Bar.foo_id)";
+        let actual = col("timestamp_ms").in_list(
+            chain("sui")
+                .select("checkpoints")
+                .join("transations")
+                .on("checkpoints.sender = transation.sender"),
+        );
+        let expected = " timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations ON checkpoints.sender = transation.sender)";
         test_expr(actual, expected);
 
         // from HashJoinNode
         let actual = col("id").in_list(
-            table("Player")
-                .select()
-                .join("PlayerItem")
-                .hash_executor("PlayerItem.user_id", "Player.id"),
+            chain("sui")
+                .select("checkpoints")
+                .join("transations")
+                .hash_executor("checkpoints.sender", "transation.sender"),
         );
         let expected = {
             let join = Join {

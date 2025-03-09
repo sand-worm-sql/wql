@@ -260,7 +260,11 @@ mod test {
         let expected = "SELECT * FROM SERIES(1 + 2)";
         test_query(actual, expected);
 
-        let actual = chain("sui").select("transations").alias_as("transations").select().into();
+        let actual = chain("sui")
+            .select("transations")
+            .alias_as("transations")
+            .select()
+            .into();
         let expected = "SELECT * FROM (SELECT * FROM sui.transations) AS transations";
         test_query(actual, expected);
     }
