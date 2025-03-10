@@ -149,17 +149,17 @@ mod tests {
                 Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
                 Statement, TableAlias, TableFactor, TableWithJoins,
             },
-            ast_builder::{col, expr, table, Build, SelectItemList},
+            ast_builder::{chain, col, expr, Build, SelectItemList},
         },
         pretty_assertions::assert_eq,
     };
 
     #[test]
     fn hash_join() {
-        let actual = table("Player")
-            .select()
-            .join("PlayerItem")
-            .hash_executor("PlayerItem.user_id", col("Player.id"))
+        let actual = chain("sui")
+            .select("transations")
+            .join("checkpoints")
+            .hash_executor("transations.digest", col("checkpoints.transaction_digest"))
             .build();
         let expected = {
             let join = Join {

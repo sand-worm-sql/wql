@@ -176,12 +176,12 @@ mod tests {
         test(actual, expected);
 
         // join node -> join constraint node -> build
-        let actual = table("Foo")
-            .select()
-            .left_join_as("Bar", "b")
-            .on("Foo.id = b.id")
+        let actual = chain("sui")
+            .select("checkpoints")
+            .left_join_as("transations", "t")
+            .on("checkpoints.digest = transations.digest")
             .build();
-        let expected = "SELECT * FROM Foo LEFT OUTER JOIN Bar b ON Foo.id = b.id";
+        let expected = "SELECT * FROM sui.checkpoints LEFT OUTER JOIN transations AS t ON checkpoints.digest = t.digest";
         test(actual, expected);
 
         // hash join node -> join constraint node -> build
@@ -232,18 +232,18 @@ mod tests {
         assert_eq!(actual, expected, "hash join -> join constraint");
 
         // join -> on -> derived subquery
-        let actual = table("Foo")
-            .select()
-            .join("Bar")
-            .on("Foo.id = Bar.id")
-            .alias_as("Sub")
+        let actual = chain("sui")
+            .select("checkpoints")
+            .join("transations")
+            .on("checkpoints.digest = transations.digest")
+            .alias_as("Transationx")
             .select()
             .build();
         let expected = "
             SELECT * FROM (
-                SELECT * FROM Foo
-                INNER JOIN Bar ON Foo.id = Bar.id
-            ) Sub
+                SELECT * FROM sui.checkpoints
+                INNER JOIN transations ON checkpoints.digest = transations.digest
+            ) Transationx
             ";
         test(actual, expected);
     }
