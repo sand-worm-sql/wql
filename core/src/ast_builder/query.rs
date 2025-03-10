@@ -233,12 +233,19 @@ mod test {
         let expected = "SELECT * FROM FOO GROUP BY city HAVING COUNT(name) < 100 OFFSET 1 LIMIT 3";
         test_query(actual, expected);
 
-        let actual = table("FOO").select().project("id, name").limit(10).into();
-        let expected = r#"SELECT id, name FROM FOO LIMIT 10"#;
+        let actual = chain("sui")
+            .select("transactions")
+            .project("digest, tnx")
+            .limit(10)
+            .into();
+        let expected = r#"SELECT digest, tnx FROM sui.transactions LIMIT 10"#;
         test_query(actual, expected);
 
-        let actual = table("Foo").select().order_by("score DESC").into();
-        let expected = "SELECT * FROM Foo ORDER BY score DESC";
+        let actual = chain("sui")
+            .select("tranastions")
+            .order_by("tnx DESC")
+            .into();
+        let expected = "SELECT * FROM sui.tranastions ORDER BY tnx DESC";
         test_query(actual, expected);
 
         let actual = chain_query_objects().select().into();
