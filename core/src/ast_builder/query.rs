@@ -129,8 +129,8 @@ mod test {
                 TableFactor, TableWithJoins,
             },
             ast_builder::{
-                chain, col, glue_indexes, glue_objects, glue_table_columns, glue_tables, series,
-                test_query, SelectItemList,
+                chain, chain_query_objects, chain_table_columns, chain_table_indexes, chain_tables,
+                col, series, test_query, SelectItemList,
             },
         },
         pretty_assertions::assert_eq,
@@ -240,20 +240,20 @@ mod test {
         let expected = "SELECT * FROM Foo ORDER BY score DESC";
         test_query(actual, expected);
 
-        let actual = glue_objects().select().into();
-        let expected = "SELECT * FROM GLUE_OBJECTS";
+        let actual = chain_query_objects().select().into();
+        let expected = "SELECT * FROM chain.query_objects";
         test_query(actual, expected);
 
-        let actual = glue_tables().select().into();
-        let expected = "SELECT * FROM GLUE_TABLES";
+        let actual = chain_tables().select().into();
+        let expected = "SELECT * FROM chain.entity_tables";
         test_query(actual, expected);
 
-        let actual = glue_indexes().select().into();
-        let expected = "SELECT * FROM GLUE_INDEXES";
+        let actual = chain_table_indexes().select().into();
+        let expected = "SELECT * FROM chain.entity_indexes";
         test_query(actual, expected);
 
-        let actual = glue_table_columns().select().into();
-        let expected = "SELECT * FROM GLUE_TABLE_COLUMNS";
+        let actual = chain_table_columns().select().into();
+        let expected = "SELECT * FROM chain.entity_columns";
         test_query(actual, expected);
 
         let actual = series("1 + 2").select().into();
