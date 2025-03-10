@@ -116,12 +116,13 @@ mod test {
         test_expr(actual, expected);
 
         // from SelectNode
-        let actual = col("sequence_number").in_list(chain("sui").select("checkpoints").into());
-        let expected = "total_gas_cost IN (SELECT * FROM sui.checkpoints)";
+        let actual = col("sequence_number").in_list(chain("sui").select("checkpoints"));
+        let expected = "sequence_number IN (SELECT * FROM sui.checkpoints)";
         test_expr(actual, expected);
 
         // from JoinNode
-        let actual = col("id").in_list(chain("sui").select("checkpoints").join("transations"));
+        let actual =
+            col("timestamp_ms").in_list(chain("sui").select("checkpoints").join("transations"));
         let expected = "timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations)";
         test_expr(actual, expected);
 
@@ -188,19 +189,19 @@ mod test {
 
         // from GroupByNode
         let actual = col("id").not_in_list(
-            table("Bar")
-                .select()
-                .filter(col("id").is_null())
+            chain("base")
+                .select("erc20")
+                .filter(col("volume_24h").is_null())
                 .group_by("id, (a + name)"),
         );
         let expected =
-            "id NOT IN (SELECT * FROM Block ON sui WHERE id IS NULL GROUP BY id, (a + name))";
+            "id NOT IN (SELECT * FROM baese.erc20 WHERE id IS NULL GROUP BY id, (a + name))";
         test_expr(actual, expected);
 
         // from HavingNode
         let actual = col("id").in_list(
-            table("Bar")
-                .select()
+            chain("sui")
+                .select("transations")
                 .filter("id IS NULL")
                 .group_by("id, (a + name)")
                 .having("COUNT(id) > 10"),
@@ -216,33 +217,39 @@ mod test {
         test_expr(actual, expected);
 
         // from FilterNode
-        let actual = col("id").in_list(table("Bar").select().filter("num > 10"));
-        let expected = "id IN (SELECT * FROM Bar WHERE num > 10)";
+        let actual = col("digest").in_list(chain("sui").select("transations").filter("tnx > 10"));
+        let expected = "digest IN (SELECT * FROM sui.transations WHERE tnx > 10)";
         test_expr(actual, expected);
 
         // from LimitNode
-        let actual = col("id").in_list(table("FOO").select().filter("id IS NULL").limit(10));
-        let expected = "id IN (SELECT * FROM FOO WHERE id IS NULL LIMIT 10)";
+        let actual = col("min_tx_sequence_number").in_list(
+            chain("sui")
+                .select("transations")
+                .filter("tnx IS NULL")
+                .limit(10),
+        );
+        let expected =
+            "min_tx_sequence_number IN (SELECT * FROM sui.transations WHERE tnx IS NULL LIMIT 10)";
         test_expr(actual, expected);
 
         // from OffsetNode
-        let actual = col("id").not_in_list(table("Hello").select().offset(10));
-        let expected = "id NOT IN (SELECT * FROM Hello OFFSET 10)";
+        let actual = col("id").not_in_list(chain("sui").select("transations").offset(10));
+        let expected = "tnx NOT IN (SELECT * FROM sui.transations OFFSET 10)";
         test_expr(actual, expected);
 
         // from OffsetLimitNode
-        let actual = col("id").in_list(table("Bar").select().offset(1).limit(3));
-        let expected = "id IN (SELECT * FROM Bar OFFSET 1 LIMIT 3)";
+        let actual = col("id").in_list(chain("sui").select("transations").offset(1).limit(3));
+        let expected = "tnx IN (SELECT * FROM sui.transations OFFSET 1 LIMIT 3)";
         test_expr(actual, expected);
 
         // from ProjectNode
-        let actual = col("name").in_list(table("Item").select().project("name"));
-        let expected = "name IN (SELECT name FROM Item)";
+        let actual = col("tnx").in_list(chain("sui").select("transations").project("tnx"));
+        let expected = "tnx IN (SELECT name FROM sui.transations)";
         test_expr(actual, expected);
 
         // from OrderByNode
-        let actual = col("id").in_list(table("Item").select().order_by("score ASC"));
-        let expected = "id IN (SELECT * FROM Item ORDER BY score ASC)";
+        let actual = col("digest").in_list(chain("sui").select("transations").order_by("tnx ASC"));
+        let expected = "digest IN (SELECT * FROM sui.transations ORDER BY tnx ASC)";
         test_expr(actual, expected);
     }
 }

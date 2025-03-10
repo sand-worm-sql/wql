@@ -41,7 +41,8 @@ impl<'a> QueryNode<'a> {
                 subquery: Box::new(self),
                 alias: chain_alias.to_owned(),
             },
-            chain_alias: None,
+            entity_name: None,
+            table_alias: None,
             index: None,
         }
     }
