@@ -28,6 +28,9 @@ pub use expr::{
 /// Available expression builder functions
 pub use {
     chain_factor::ChainFactorNode,
+    chain_factor::{
+        chain_query_objects, chain_table_columns, chain_table_indexes, chain_tables, series,
+    },
     chain_name::chain,
     data_type::DataTypeNode,
     expr::{
