@@ -81,7 +81,7 @@ impl<'a> SelectNode<'a> {
 
 impl<'a> Prebuild<Select> for SelectNode<'a> {
     fn prebuild(self) -> Result<Select> {
-        let alias = self.chain_node.chain_alias.map(|name| TableAlias {
+        let alias = self.chain_node.table_alias.map(|name| TableAlias {
             name,
             columns: Vec::new(),
         });
@@ -137,7 +137,7 @@ pub fn select<'a>() -> SelectNode<'a> {
                 Expr::Literal(AstLiteral::Number(1.into())).into(),
             ),
             entity_name: None,
-            chain_alias: None,
+            table_alias: None,
             index: None,
         },
     }
