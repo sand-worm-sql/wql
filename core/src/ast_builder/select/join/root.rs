@@ -189,7 +189,7 @@ impl<'a> Prebuild<Select> for JoinNode<'a> {
 #[cfg(test)]
 mod tests {
     use {
-        crate::ast_builder::{table, test, Build},
+        crate::ast_builder::{chain, test, Build},
         pretty_assertions::assert_eq,
     };
 

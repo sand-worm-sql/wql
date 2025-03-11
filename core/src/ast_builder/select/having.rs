@@ -75,7 +75,7 @@ impl<'a> Prebuild<Select> for HavingNode<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast_builder::{table, test, Build};
+    use crate::ast_builder::{chain, test, Build};
 
     #[test]
     fn having() {

@@ -212,8 +212,8 @@ mod tests {
         test(actual, expected);
 
         // having node -> project node -> build
-        let actual = table("Cat")
-            .select()
+        let actual = chain("base")
+            .select("accounts")
             .filter(r#"type = "cute""#)
             .group_by("age")
             .having("SUM(length) < 1000")
@@ -222,9 +222,9 @@ mod tests {
             .build();
         let expected = r#"
             SELECT age, SUM(length)
-            FROM Cat
-            WHERE type = "cute"
-            GROUP BY age
+            FROM base.accounts
+            WHERE address = "0x00000000219ab540356cbb839cbe05303d7705fa"
+            GROUP BY balance
             HAVING SUM(length) < 1000;
         "#;
         test(actual, expected);
@@ -283,7 +283,7 @@ mod tests {
             .alias_as("transations_table")
             .select()
             .build();
-        let expected = "SELECT * FROM (SELECT hash FROM base.transactions) transations_table";
+        let expected = "SELECT * FROM (SELECT hash FROM base.transactions ) transations_table";
         test(actual, expected);
     }
 }
