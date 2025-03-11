@@ -142,7 +142,7 @@ mod tests {
                 Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
                 Statement, TableFactor, TableWithJoins,
             },
-            ast_builder::{col, table, test, Build, SelectItemList},
+            ast_builder::{chain, col, test, Build, SelectItemList},
         },
         pretty_assertions::assert_eq,
     };
@@ -150,18 +150,21 @@ mod tests {
     #[test]
     fn project() {
         // select node -> project node -> build
-        let actual = table("Good").select().project("id").build();
-        let expected = "SELECT id FROM Good";
+        let actual = chain("sui").select("transactions").project("id").build();
+        let expected = "SELECT checkpoint_sequence_number FROM sui.transactions";
         test(actual, expected);
 
         // select node -> project node -> build
-        let actual = table("Group").select().project("*, Group.*, name").build();
-        let expected = "SELECT *, Group.*, name FROM Group";
+        let actual = chain("base")
+            .select("accounts")
+            .project("*, accounts.*, address")
+            .build();
+        let expected = "SELECT *, accounts.*, address FROM base.accounts";
         test(actual, expected);
 
         // project node -> project node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .project(vec!["col1", "col2"])
             .project("col3")
             .project(vec!["col4".into(), col("col5")])
@@ -174,37 +177,37 @@ mod tests {
                 col4, col5, col6,
                 col7 as hello
             FROM
-                Foo
+                sui.transactions
         ";
         test(actual, expected);
 
         // select node -> project node -> build
-        let actual = table("Aliased")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .project("1 + 1 as col1, col2")
             .build();
-        let expected = "SELECT 1 + 1 as col1, col2 FROM Aliased";
+        let expected = "SELECT 1 + 1 as col1, col2 FROM  sui.transactions";
         test(actual, expected);
     }
 
     #[test]
     fn prev_nodes() {
         // select node -> project node -> build
-        let actual = table("Foo").select().project("*").build();
-        let expected = "SELECT * FROM Foo";
+        let actual = chain("base").select("transactions").project("*").build();
+        let expected = "SELECT * FROM base.transactions";
         test(actual, expected);
 
         // group by node -> project node -> build
-        let actual = table("Bar")
-            .select()
-            .group_by("city")
-            .project("city, COUNT(name) as num")
+        let actual = chain("base")
+            .select("transactions")
+            .group_by("from")
+            .project("from, COUNT(hash) as unique_id")
             .build();
         let expected = "
             SELECT
-              city, COUNT(name) as num
-            FROM Bar
-            GROUP BY city
+              from, COUNT(hash) as unique_id
+            FROM base.transactions
+            GROUP BY from
         ";
         test(actual, expected);
 
@@ -274,13 +277,13 @@ mod tests {
         assert_eq!(actual, expected);
 
         // select -> project -> derived subquery
-        let actual = table("Foo")
-            .select()
-            .project("id")
-            .alias_as("Sub")
+        let actual = chain("base")
+            .select("transactions")
+            .project("hash")
+            .alias_as("transations_table")
             .select()
             .build();
-        let expected = "SELECT * FROM (SELECT id FROM Foo) Sub";
+        let expected = "SELECT * FROM (SELECT hash FROM base.transactions) transations_table";
         test(actual, expected);
     }
 }
