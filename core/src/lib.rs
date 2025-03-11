@@ -19,6 +19,7 @@ pub mod translate;
 pub mod prelude {
     pub use crate::{
         ast::DataType,
+        chains_adapter::ChainEnitityResolver,
         data::{Key, Value},
         //executor::{execute, Payload, PayloadVariable},
         //glue::Glue,
