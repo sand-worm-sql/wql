@@ -11,6 +11,12 @@ pub enum ChainAdapter {
     // Sui(sui::SuiChain),
 }
 
+pub enum ChainEnitityResolver {
+    GraphQL,
+    Rest,
+    RPC,
+}
+
 impl TryFrom<&str> for ChainAdapter {
     type Error = ChainAdapterError;
 
