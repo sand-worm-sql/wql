@@ -30,6 +30,19 @@ impl SuiChain {
             SuiChain::SuiMainnet => "https://fullnode.mainnet.sui.io:443",
         }
     }
+
+    fn graphql_fallback(&self) -> &str {
+        match self {
+            SuiChain::SuiDevnet => "https://fullnode.devnet.sui.io:443",
+            SuiChain::SuiTestnet => "https://fullnode.testnet.sui.io:443",
+            SuiChain::SuiMainnet => "https://fullnode.mainnet.sui.io:443",
+        }
+    }
+
+
+    pub fn is_supported(chain: &str) -> bool {
+        matches!(chain.try_into() as Result<SuiChain, ChainAdapterError>, Ok(_))
+    }
 }
 
 impl TryFrom<&str> for SuiChain {

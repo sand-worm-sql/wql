@@ -3282,7 +3282,7 @@ checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
 
 [[package]]
 name = "sand-worm-cli"
-version = "0.16.3"
+version = "0.0.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -3298,7 +3298,7 @@ dependencies = [
 
 [[package]]
 name = "sand-worm-core"
-version = "0.16.3"
+version = "0.0.1"
 dependencies = [
  "alloy",
  "async-recursion",
@@ -4569,7 +4569,7 @@ dependencies = [
 
 [[package]]
 name = "wql-evm-adapter"
-version = "0.16.3"
+version = "0.0.1"
 dependencies = [
  "async-trait",
  "futures",
@@ -4581,7 +4581,7 @@ dependencies = [
 
 [[package]]
 name = "wql-sui-adapter"
-version = "0.16.3"
+version = "0.0.1"
 dependencies = [
  "async-trait",
  "futures",
