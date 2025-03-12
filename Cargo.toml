@@ -3,12 +3,12 @@ resolver = "2"
 members = [
   "cli",
   "core",
-  "chains_support"
+  "chains-support/*"
 
 ]
 default-members = [
   "cli",
-  "chains_support",
+  "chains-support/*",
 ]
 
 # ref. https://github.com/rustwasm/wasm-pack/issues/1111
@@ -26,4 +26,5 @@ documentation = "https://docs.rs/gluesql/"
 
 [workspace.dependencies]
 cli = { package = "sand-worm-cli", path = "./cli", version = "0.0.1" }
-wql_evm_adapter = { path = "./chains_support/evm_adapter", version = "0.0.1" }
+wql_evm_adapter = { path = "./chains-support/evm-adapter", version = "0.0.1" }
+wql_sui_adapter = { path = "./chains-support/sui-adapter", version = "0.0.1" }
