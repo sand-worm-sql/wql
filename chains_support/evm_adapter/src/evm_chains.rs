@@ -72,6 +72,10 @@ impl EvmChain {
             EvmChain::Mekong => "https://rpc.mekong.ethpandaops.io",
         }
     }
+
+    pub fn is_supported(chain: &str) -> bool {
+        matches!(chain.try_into() as Result<EvmChain, ChainAdapterError>, Ok(_))
+    }
 }
 
 impl TryFrom<&str> for EvmChain {
