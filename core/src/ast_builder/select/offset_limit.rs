@@ -61,8 +61,8 @@ mod tests {
     #[test]
     fn offset_limit() {
         // offset node -> limit node -> build node
-        let actual = table("Bar")
-            .select()
+        let actual = chain("base")
+            .select("transactions")
             .group_by("city")
             .having("COUNT(name) < 100")
             .offset(1)

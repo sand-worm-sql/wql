@@ -142,7 +142,7 @@ mod tests {
                 Join, JoinConstraint, JoinExecutor, JoinOperator, Query, Select, SetExpr,
                 Statement, TableFactor, TableWithJoins,
             },
-            ast_builder::{col, num, chain, test, Build, SelectItemList},
+            ast_builder::{chain, col, num, test, Build, SelectItemList},
         },
         pretty_assertions::assert_eq,
     };

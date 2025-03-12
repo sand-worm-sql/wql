@@ -167,10 +167,10 @@ mod tests {
         test(actual, expected);
 
         // join node -> join constraint node -> build
-        let actual = table("Foo")
-            .select()
-            .left_join("Bar")
-            .on("Foo.id = Bar.id")
+        let actual = chain("sui")
+            .select("checkpoints")
+            .left_join("transations")
+            .on("chec.id = Bar.id")
             .build();
         let expected = "SELECT * FROM Foo LEFT OUTER JOIN Bar ON Foo.id = Bar.id";
         test(actual, expected);
