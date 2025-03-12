@@ -1,8 +1,9 @@
 mod common;
 mod graphql;
 mod rpc;
-mod evm_chains;
+mod chains;
 
-pub use evm_chains::EvmChain;
+pub use chains::EvmChain;
+
 
 
