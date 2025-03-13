@@ -1,10 +1,7 @@
+mod chains;
 mod common;
+mod entity;
 mod graphql;
 mod rpc;
-mod chains;
-mod entity;
 
 pub use chains::EvmChain;
-
-
-

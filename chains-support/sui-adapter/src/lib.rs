@@ -13,9 +13,9 @@ use {
     thiserror::Error as ThisError,
 };
 
+mod chains;
 mod common;
 mod graphql;
 mod rpc;
-mod chains;
 
 pub use chains::SuiChain;

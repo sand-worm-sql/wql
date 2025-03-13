@@ -39,9 +39,11 @@ impl SuiChain {
         }
     }
 
-
     pub fn is_supported(chain: &str) -> bool {
-        matches!(chain.try_into() as Result<SuiChain, ChainAdapterError>, Ok(_))
+        matches!(
+            chain.try_into() as Result<SuiChain, ChainAdapterError>,
+            Ok(_)
+        )
     }
 }
 

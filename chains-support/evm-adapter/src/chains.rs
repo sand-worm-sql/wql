@@ -73,7 +73,7 @@ impl EvmChain {
         }
     }
 
-      fn graphql_fallback(&self) -> &str {
+    fn graphql_fallback(&self) -> &str {
         match self {
             EvmChain::Ethereum => "https://ethereum.drpc.org",
             EvmChain::Sepolia => "https://rpc.ankr.com/eth_sepolia",
@@ -102,7 +102,10 @@ impl EvmChain {
     }
 
     pub fn is_supported(chain: &str) -> bool {
-        matches!(chain.try_into() as Result<EvmChain, ChainAdapterError>, Ok(_))
+        matches!(
+            chain.try_into() as Result<EvmChain, ChainAdapterError>,
+            Ok(_)
+        )
     }
 }
 
@@ -204,8 +207,6 @@ impl TryFrom<u64> for EvmChain {
         })
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
