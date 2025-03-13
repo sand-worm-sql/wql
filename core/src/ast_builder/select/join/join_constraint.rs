@@ -102,7 +102,7 @@ impl<'a> JoinConstraintNode<'a> {
         OrderByNode::new(self, order_by_exprs)
     }
 
-    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::JoinConstraintNode(self).alias_as(chain_alias)
     }
 }

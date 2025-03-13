@@ -96,7 +96,7 @@ impl<'a> GroupByNode<'a> {
         OrderByNode::new(self, expr_list)
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::GroupByNode(self).alias_as(table_alias)
     }
 }

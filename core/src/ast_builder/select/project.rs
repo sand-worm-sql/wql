@@ -101,7 +101,7 @@ impl<'a> ProjectNode<'a> {
         self
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::ProjectNode(self).alias_as(table_alias)
     }
 

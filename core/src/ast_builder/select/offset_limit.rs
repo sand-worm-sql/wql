@@ -40,7 +40,7 @@ impl<'a> OffsetLimitNode<'a> {
         }
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::OffsetLimitNode(self).alias_as(table_alias)
     }
 }

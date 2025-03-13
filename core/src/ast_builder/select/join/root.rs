@@ -151,7 +151,7 @@ impl<'a> JoinNode<'a> {
         OrderByNode::new(self, order_by_exprs)
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::JoinNode(self).alias_as(table_alias)
     }
 

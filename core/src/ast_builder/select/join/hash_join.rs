@@ -107,7 +107,7 @@ impl<'a> HashJoinNode<'a> {
         Ok(join_constraint_data)
     }
 
-    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::HashJoinNode(self).alias_as(chain_alias)
     }
 }
