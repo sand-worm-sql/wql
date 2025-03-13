@@ -125,9 +125,9 @@ pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
                 TranslateError::UnsupportedShowVariableStatement(sql_statement.to_string()).into(),
             ),
         },
-        SqlStatement::ShowColumns { table_name, .. } => Ok(Statement::ShowColumns {
-            table_name: translate_object_name(table_name)?,
-        }),
+        // SqlStatement::ShowColumns { table_name, .. } => Ok(Statement::ShowColumns {
+        //     table_name: translate_object_name(table_name)?,
+        // }),
         SqlStatement::CreateFunction {
             or_replace,
             name,
