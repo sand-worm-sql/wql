@@ -185,8 +185,8 @@ mod tests {
         test(actual, expected);
 
         // hash join node -> join constraint node -> build
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .on("PlayerItem.flag IS NOT NULL")

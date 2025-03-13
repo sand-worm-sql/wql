@@ -196,20 +196,20 @@ mod tests {
     #[test]
     fn inner_join() {
         // select node -> join node -> join constraint node
-        let actual = table("Item")
-            .select()
-            .join_as("Player", "p")
-            .on("p.id = Item.player_id")
+        let actual = chain("sui")
+            .select("transactions")
+            .join_as("blocks", "b")
+            .on("b.digest = transactions.digest")
             .filter("p.id = 1")
             .build();
         let expected = "
-        SELECT * FROM Item INNER JOIN Player AS p ON p.id = Item.player_id WHERE p.id = 1;
+        SELECT * FROM sui.transactions INNER JOIN blocks AS b ON b.digest = transactions.digest WHERE b.transaction = 1;
         ";
         test(actual, expected);
 
         // select node -> join node ->  join constraint node
-        let actual = table("Item")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .join_as("Player", "p")
             .on("p.id = Item.player_id")
             .filter("p.id = 1")
@@ -221,39 +221,42 @@ mod tests {
         test(actual, expected);
 
         // select node -> join node ->  build
-        let actual = table("Item").select().join_as("Player", "p").build();
+        let actual = chain("sui")
+            .select("transactions")
+            .join_as("trades", "t")
+            .build();
         let expected = "
-        SELECT * FROM Item INNER JOIN Player AS p;
+        SELECT * FROM sui.transactions INNER JOIN trades AS t;
         ";
         test(actual, expected);
 
         // join node -> join constraint node -> join node -> join constraint node
-        let actual = table("students")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .join("marks")
-            .on("students.id = marks.id")
+            .on("transactions.id = marks.id")
             .join("attendance")
             .on("marks.id = attendance.id")
             .filter("attendance.attendance >= 75")
             .project(vec![
-                "students.id",
-                "students.name",
+                "transactions.checkpoint",
+                "transactions.digest",
                 "marks.rank",
                 "attendance.attendance",
             ])
             .build();
         let expected = "
-            SELECT students.id, students.name, marks.rank, attendance.attendance
-            FROM students
-            INNER JOIN marks ON students.id=marks.id
+            SELECT transactions.checkpoint, transactions.digest, marks.rank, attendance.attendance
+            FROM  sui.transactions
+            INNER JOIN marks ON transactions.id=marks.id
             INNER JOIN attendance on marks.id=attendance.id
             WHERE attendance.attendance >= 75;
         ";
         test(actual, expected);
 
         // select node -> join node -> project node
-        let actual = table("Orders")
-            .select()
+        let actual = chain("arb")
+            .select("Orders")
             .join("Customers")
             .project(vec![
                 "Orders.OrderID",
@@ -263,7 +266,7 @@ mod tests {
             .build();
         let expected = "
             SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate 
-            FROM Orders INNER JOIN Customers
+            FROM arb.Orders INNER JOIN Customers
         ";
         test(actual, expected);
     }
@@ -271,23 +274,23 @@ mod tests {
     #[test]
     fn left_join() {
         // select node -> left join node -> join constraint node
-        let actual = table("player")
-            .select()
+        let actual = chain("mina")
+            .select("player")
             .left_join("item")
             .on("player.id = item.id")
             .project(vec!["player.id", "item.id"])
             .build();
         let expected = "
             SELECT player.id, item.id
-            FROM player
+            FROM mina.player
             LEFT JOIN item
             ON player.id = item.id
         ";
         test(actual, expected);
 
         // select node -> left join node -> join constraint node -> left join node
-        let actual = table("Item")
-            .select()
+        let actual = chain("sui")
+            .select("Item")
             .left_join("Player")
             .on("Player.id = Item.player_id")
             .left_join_as("Player", "p1")
@@ -311,7 +314,7 @@ mod tests {
             .filter("Player.id = 1")
             .build();
         let expected = "
-            SELECT * FROM Item
+            SELECT * FROM sui.Item
             LEFT JOIN Player ON Player.id = Item.player_id
             LEFT JOIN Player p1 ON p1.id = Item.player_id
             LEFT JOIN Player p2 ON p2.id = Item.player_id
@@ -327,21 +330,21 @@ mod tests {
         test(actual, expected);
 
         // select node -> left join node -> join constraint node -> left join node
-        let actual = table("Item")
-            .select()
+        let actual = chain("base")
+            .select("item")
             .left_join("Player")
             .on("Player.id = Item.player_id")
             .left_join("Player")
             .on("p1.id = Item.player_id")
             .build();
         let expected = "
-            SELECT * FROM Item
+            SELECT * FROM base.Item
             LEFT JOIN Player ON Player.id = Item.player_id
             LEFT JOIN Player ON p1.id = Item.player_id";
         test(actual, expected);
 
-        let actual = table("Item")
-            .select()
+        let actual = chain("base")
+            .select("T tem")
             .left_join("Player")
             .on("Player.id = Item.player_id")
             .left_join_as("Player", "p1")
@@ -355,7 +358,7 @@ mod tests {
             .filter("Player.id = 1")
             .build();
         let expected = "
-            SELECT * FROM Item
+            SELECT * FROM base.Item
             LEFT JOIN Player ON Player.id = Item.player_id
             LEFT JOIN Player p1 ON p1.id = Item.player_id
             LEFT JOIN Player p2 ON p2.id = Item.player_id
@@ -369,196 +372,204 @@ mod tests {
     #[test]
     fn join_join() {
         // join - join
-        let actual = table("Foo").select().join("Bar").join("Baz").build();
+        let actual = chain("sui").select("Foo").join("Bar").join("Baz").build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar
             INNER JOIN Baz
             ";
         test(actual, expected);
 
         // join - join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join("Bar")
             .join_as("Baz", "B")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar
             INNER JOIN Baz B
             ";
         test(actual, expected);
 
         // join - left join
-        let actual = table("Foo").select().join("Bar").left_join("Baz").build();
+        let actual = chain("sui")
+            .select("Foo")
+            .join("Bar")
+            .left_join("Baz")
+            .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar
             LEFT JOIN Baz
             ";
         test(actual, expected);
 
         // join - left join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join("Bar")
             .left_join_as("Baz", "B")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar
             LEFT JOIN Baz B
             ";
         test(actual, expected);
 
         // join as - join
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join_as("Bar", "B")
             .join("Baz")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar B
             INNER JOIN Baz
             ";
         test(actual, expected);
 
         // join as - join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join_as("Bar", "B")
             .join_as("Baz", "C")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar B
             INNER JOIN Baz C
             ";
         test(actual, expected);
 
         // join as - left join
-        let actual = table("Foo")
-            .select()
+        let actual = chain("base")
+            .select("transactions")
             .join_as("Bar", "B")
             .left_join("Baz")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM base.transactions
             INNER JOIN Bar B
             LEFT JOIN Baz
             ";
         test(actual, expected);
 
         // join as - left join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join_as("Bar", "B")
             .left_join_as("Baz", "C")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             INNER JOIN Bar B
             LEFT JOIN Baz C
             ";
         test(actual, expected);
 
         // left join - join
-        let actual = table("Foo").select().left_join("Bar").join("Baz").build();
+        let actual = chain("sui")
+            .select("Foo")
+            .left_join("Bar")
+            .join("Baz")
+            .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar
             INNER JOIN Baz
             ";
         test(actual, expected);
 
         // left join - join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join("Bar")
             .join_as("Baz", "B")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar
             INNER JOIN Baz B
             ";
         test(actual, expected);
 
         // left join - left join
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join("Bar")
             .left_join("Baz")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar
             LEFT JOIN Baz
             ";
         test(actual, expected);
 
         // left join - left join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join("Bar")
             .left_join_as("Baz", "B")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar
             LEFT JOIN Baz B
             ";
         test(actual, expected);
 
         // left join as - join
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join_as("Bar", "B")
             .join("Baz")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar B
             INNER JOIN Baz
             ";
         test(actual, expected);
 
         // left join as - join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join_as("Bar", "B")
             .join_as("Baz", "C")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar B
             INNER JOIN Baz C
             ";
         test(actual, expected);
 
         // left join as - left join
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join_as("Bar", "B")
             .left_join("Baz")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar B
             LEFT JOIN Baz
             ";
         test(actual, expected);
 
         // left join as - left join as
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .left_join_as("Bar", "B")
             .left_join_as("Baz", "C")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             LEFT JOIN Bar B
             LEFT JOIN Baz C
             ";
@@ -612,8 +623,8 @@ mod tests {
             }))
         };
 
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .join("OtherItem")
@@ -633,8 +644,8 @@ mod tests {
         };
         assert_eq!(actual, expected, "inner join");
 
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .join_as("OtherItem", "Ot")
@@ -657,8 +668,8 @@ mod tests {
         };
         assert_eq!(actual, expected, "inner join with alias");
 
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .left_join("OtherItem")
@@ -678,8 +689,8 @@ mod tests {
         };
         assert_eq!(actual, expected, "left join");
 
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .left_join_as("OtherItem", "Ot")
@@ -702,20 +713,20 @@ mod tests {
         };
         assert_eq!(actual, expected, "left join with alias");
 
-        let actual = table("App").select().alias_as("Sub").select().build();
-        let expected = "SELECT * FROM (SELECT * FROM App) Sub";
+        let actual = chain("sui").select("App").alias_as("Sub").select().build();
+        let expected = "SELECT * FROM (SELECT * FROM sui.App) Sub";
         test(actual, expected);
 
         // join -> derived subquery
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join("Bar")
             .alias_as("Sub")
             .select()
             .build();
         let expected = "
             SELECT * FROM (
-                SELECT * FROM Foo
+                SELECT * FROM sui.Foo
                 INNER JOIN Bar
             ) Sub
             ";

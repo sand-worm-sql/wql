@@ -199,8 +199,8 @@ mod tests {
         };
         assert_eq!(actual, expected, "without filter");
 
-        let actual = table("Player")
-            .select()
+        let actual = chain("base")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .hash_filter("PlayerItem.amount > 10")
@@ -249,8 +249,8 @@ mod tests {
         assert_eq!(actual, expected, "with filter");
 
         // join -> hash -> derived subquery
-        let actual = table("Foo")
-            .select()
+        let actual = chain("base")
+            .select("Foo")
             .join("Bar")
             .hash_executor("Foo.id", "Bar.id")
             .alias_as("Sub")

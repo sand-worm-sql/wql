@@ -198,83 +198,83 @@ mod tests {
         test(actual, expected);
 
         // group by node -> project node -> build
-        // let actual = chain("base")
-        //     .select("transactions")
-        //     .group_by("from")
-        //     .project("from, COUNT(hash) as unique_id")
-        //     .build();
-        // let expected = "
-        //     SELECT
-        //       from, COUNT(hash) as unique_id
-        //     FROM base.transactions
-        //     GROUP BY from
-        // ";
-        // test(actual, expected);
+        let actual = chain("base")
+            .select("transactions")
+            .group_by("from")
+            .project("from, COUNT(hash) as unique_id")
+            .build();
+        let expected = "
+            SELECT
+              from, COUNT(hash) as unique_id
+            FROM base.transactions
+            GROUP BY from
+        ";
+        test(actual, expected);
 
         // // having node -> project node -> build
-        // let actual = chain("base")
-        //     .select("accounts")
-        //     .filter(r#"type = "cute""#)
-        //     .group_by("age")
-        //     .having("SUM(length) < 1000")
-        //     .project(col("age"))
-        //     .project("SUM(length)")
-        //     .build();
-        // let expected = r#"
-        //     SELECT age, SUM(length)
-        //     FROM base.accounts
-        //     WHERE address = "0x00000000219ab540356cbb839cbe05303d7705fa"
-        //     GROUP BY balance
-        //     HAVING SUM(length) < 1000;
-        // "#;
-        // test(actual, expected);
+        let actual = chain("base")
+            .select("accounts")
+            .filter(r#"type = "cute""#)
+            .group_by("age")
+            .having("SUM(length) < 1000")
+            .project(col("age"))
+            .project("SUM(length)")
+            .build();
+        let expected = r#"
+            SELECT age, SUM(length)
+            FROM base.accounts
+            WHERE address = "0x00000000219ab540356cbb839cbe05303d7705fa"
+            GROUP BY balance
+            HAVING SUM(length) < 1000;
+        "#;
+        test(actual, expected);
 
         // // hash join node -> project node -> build
-        // let actual = table("Player")
-        //     .select()
-        //     .join("PlayerItem")
-        //     .hash_executor("PlayerItem.user_id", "Player.id")
-        //     .project("Player.name, PlayerItem.name")
-        //     .build();
-        // let expected = {
-        //     let join = Join {
-        //         relation: TableFactor::Table {
-        //             name: "PlayerItem".to_owned(),
-        //             alias: None,
-        //             index: None,
-        //         },
-        //         join_operator: JoinOperator::Inner(JoinConstraint::None),
-        //         join_executor: JoinExecutor::Hash {
-        //             key_expr: col("PlayerItem.user_id").try_into().unwrap(),
-        //             value_expr: col("Player.id").try_into().unwrap(),
-        //             where_clause: None,
-        //         },
-        //     };
-        //     let select = Select {
-        //         projection: SelectItemList::from("Player.name, PlayerItem.name")
-        //             .try_into()
-        //             .unwrap(),
-        //         from: TableWithJoins {
-        //             relation: TableFactor::Table {
-        //                 name: "Player".to_owned(),
-        //                 alias: None,
-        //                 index: None,
-        //             },
-        //             joins: vec![join],
-        //         },
-        //         selection: None,
-        //         group_by: Vec::new(),
-        //         having: None,
-        //     };
+        let actual = chain("sui")
+            .select("Player")
+            .join("PlayerItem")
+            .hash_executor("PlayerItem.user_id", "Player.id")
+            .project("Player.name, PlayerItem.name")
+            .build();
+        let expected = {
+            let join = Join {
+                relation: TableFactor::Table {
+                    name: "PlayerItem".to_owned(),
+                    alias: None,
+                    index: None,
+                },
+                join_operator: JoinOperator::Inner(JoinConstraint::None),
+                join_executor: JoinExecutor::Hash {
+                    key_expr: col("PlayerItem.user_id").try_into().unwrap(),
+                    value_expr: col("Player.id").try_into().unwrap(),
+                    where_clause: None,
+                },
+            };
+            let select = Select {
+                projection: SelectItemList::from("Player.name, PlayerItem.name")
+                    .try_into()
+                    .unwrap(),
+                from: TableWithJoins {
+                    relation: TableFactor::Table {
+                        name: "Player".to_owned(),
+                        alias: None,
+                        index: None,
+                    },
+                    joins: vec![join],
+                },
+                selection: None,
+                group_by: Vec::new(),
+                having: None,
+            };
 
-        //     Ok(Statement::Query(Query {
-        //         body: SetExpr::Select(Box::new(select)),
-        //         order_by: Vec::new(),
-        //         limit: None,
-        //         offset: None,
-        //     }))
-        // };
-        // assert_eq!(actual, expected);
+            Ok(Statement::Query(Query {
+                body: SetExpr::Select(Box::new(select)),
+                order_by: Vec::new(),
+                limit: None,
+                offset: None,
+            }))
+        };
+        assert_eq!(actual, expected);
 
         // select -> project -> derived subquery
         let actual = chain("base")

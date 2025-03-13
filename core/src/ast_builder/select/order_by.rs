@@ -149,29 +149,32 @@ mod tests {
     #[test]
     fn order_by() {
         // select node -> order by node(exprs vec) -> build
-        let actual = table("Foo").select().order_by(vec!["name desc"]).build();
+        let actual = chain("sui")
+            .select("Foo")
+            .order_by(vec!["name desc"])
+            .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             ORDER BY name DESC
         ";
         test(actual, expected);
 
         // select node -> order by node(exprs string) -> build
-        let actual = table("Bar")
-            .select()
+        let actual = chain("sui")
+            .select("Bar")
             .order_by("name asc, id desc, country")
             .offset(10)
             .build();
         let expected = "
-                SELECT * FROM Bar 
+                SELECT * FROM sui.Bar 
                 ORDER BY name asc, id desc, country 
                 OFFSET 10
             ";
         test(actual, expected);
 
         // group by node -> order by node -> build
-        let actual = table("Bar")
-            .select()
+        let actual = chain("sui")
+            .select("Bar")
             .group_by("name")
             .order_by(vec!["id desc"])
             .build();
@@ -183,8 +186,8 @@ mod tests {
         test(actual, expected);
 
         // having node -> order by node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .group_by("city")
             .having("COUNT(name) < 100")
             .order_by(ExprNode::Identifier("name".into()))
@@ -202,8 +205,8 @@ mod tests {
         test(actual, expected);
 
         // filter node -> order by node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .filter("id > 10")
             .filter("id < 20")
             .order_by("id asc")
@@ -215,8 +218,8 @@ mod tests {
         test(actual, expected);
 
         // project node -> order by node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .project("id")
             .order_by("id asc")
             .build();
@@ -224,8 +227,8 @@ mod tests {
         test(actual, expected);
 
         // join node -> order by node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join("Bar")
             .order_by("Foo.id desc")
             .build();
@@ -237,8 +240,8 @@ mod tests {
         test(actual, expected);
 
         // join constraint node -> order by node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .join("Bar")
             .on("Foo.id = Bar.id")
             .order_by("Foo.id desc")
@@ -251,8 +254,8 @@ mod tests {
         test(actual, expected);
 
         // hash join node -> order by node -> build
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .order_by("Player.score DESC")
@@ -298,8 +301,8 @@ mod tests {
         assert_eq!(actual, expected);
 
         // select -> order by node -> derived subquery
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("Foo")
             .order_by(vec!["name desc"])
             .alias_as("Sub")
             .select()

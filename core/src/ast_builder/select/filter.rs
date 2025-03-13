@@ -123,81 +123,84 @@ mod tests {
     #[test]
     fn filter() {
         // select node -> filter node -> build
-        let actual = table("Bar").select().filter("id IS NULL").build();
-        let expected = "SELECT * FROM Bar WHERE id IS NULL";
+        let actual = chain("sui")
+            .select("transations")
+            .filter("digest IS NULL")
+            .build();
+        let expected = "SELECT * FROM sui.transations WHERE digest IS NULL";
         test(actual, expected);
 
         // select node -> filter node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("base")
+            .select("transations")
             .filter(Expr::BinaryOp {
                 left: Box::new(Expr::Identifier("col1".to_owned())),
                 op: BinaryOperator::Gt,
                 right: Box::new(Expr::Identifier("col2".to_owned())),
             })
             .build();
-        let expected = "SELECT * FROM Foo WHERE col1 > col2";
+        let expected = "SELECT * FROM sui.transations WHERE col1 > col2";
         test(actual, expected);
 
         // filter node -> filter node -> build
-        let actual = table("Bar")
-            .select()
+        let actual = chain("base")
+            .select("transations")
             .filter("id IS NULL")
             .filter("id > 10")
             .filter("id < 20")
             .build();
-        let expected = "SELECT * FROM Bar WHERE id IS NULL AND id > 10 AND id < 20";
+        let expected = "SELECT * FROM base.transations WHERE id IS NULL AND id > 10 AND id < 20";
         test(actual, expected);
 
         // join node -> filter node -> build
-        let actual = table("Foo")
-            .select()
-            .join("Bar")
+        let actual = chain("base")
+            .select("accounts")
+            .join("transations")
             .filter("id IS NULL")
             .build();
-        let expected = "SELECT * FROM Foo JOIN Bar WHERE id IS NULL";
+        let expected = "SELECT * FROM base.accounts JOIN transations WHERE id IS NULL";
         test(actual, expected);
 
         // join node -> filter node -> build
-        let actual = table("Foo")
-            .select()
-            .join_as("Bar", "b")
-            .filter("id IS NULL")
+        let actual = chain("base")
+            .select("transations")
+            .join_as("blocks", "b")
+            .filter("hash IS NULL")
             .build();
-        let expected = "SELECT * FROM Foo JOIN Bar AS b WHERE id IS NULL";
+        let expected = "SELECT * FROM base.transations JOIN blocks AS b WHERE hash IS NULL";
         test(actual, expected);
 
         // join node -> filter node -> build
-        let actual = table("Foo")
-            .select()
-            .left_join("Bar")
-            .filter("id IS NULL")
+        let actual = chain("base")
+            .select("transations")
+            .left_join("blocks")
+            .filter("hash IS NULL")
             .build();
-        let expected = "SELECT * FROM Foo LEFT JOIN Bar WHERE id IS NULL";
+        let expected = "SELECT * FROM base.transations LEFT JOIN blocks WHERE hash IS NULL";
         test(actual, expected);
 
         // join node -> filter node -> build
-        let actual = table("Foo")
-            .select()
-            .left_join_as("Bar", "b")
-            .filter("id IS NULL")
+        let actual = chain("base")
+            .select("transations")
+            .left_join_as("blocks", "b")
+            .filter("hash IS NULL")
             .build();
-        let expected = "SELECT * FROM Foo LEFT JOIN Bar AS b WHERE id IS NULL";
+        let expected = "SELECT * FROM base.transations LEFT JOIN blocks AS b WHERE hash IS NULL";
         test(actual, expected);
 
         // join constraint node -> filter node -> build
-        let actual = table("Foo")
-            .select()
-            .join("Bar")
-            .on("Foo.id = Bar.id")
-            .filter("id IS NULL")
+        let actual = chain("base")
+            .select("dex")
+            .join("pool")
+            .on("pool.name = dex.name")
+            .filter("fee IS NULL")
             .build();
-        let expected = "SELECT * FROM Foo JOIN Bar ON Foo.id = Bar.id WHERE id IS NULL";
+        let expected = "SELECT * FROM base.dex JOIN pool ON pool.name = dex.name WHERE fee IS NULL";
         test(actual, expected);
 
         // hash join node -> filter node -> build
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .filter("PlayerItem.amount > 10")
@@ -241,13 +244,13 @@ mod tests {
         assert_eq!(actual, expected);
 
         // select node -> filter node -> derived subquery
-        let actual = table("Bar")
-            .select()
-            .filter("id IS NULL")
-            .alias_as("Sub")
+        let actual = chain("base")
+            .select("transations")
+            .filter("hash IS NULL")
+            .alias_as("NullHash")
             .select()
             .build();
-        let expected = "SELECT * FROM (SELECT * FROM Bar WHERE id IS NULL) Sub";
+        let expected = "SELECT * FROM (SELECT * FROM base.transations WHERE hash IS NULL) NullHash";
         test(actual, expected);
     }
 }

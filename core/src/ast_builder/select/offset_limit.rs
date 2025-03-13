@@ -69,7 +69,7 @@ mod tests {
             .limit(3)
             .build();
         let expected = "
-            SELECT * FROM Bar
+            SELECT * FROM base.transactions
             GROUP BY city
             HAVING COUNT(name) < 100
             OFFSET 1
@@ -78,8 +78,8 @@ mod tests {
         test(actual, expected);
 
         // project node -> offset node -> limit node
-        let actual = table("Bar")
-            .select()
+        let actual = chain("base")
+            .select("baz")
             .group_by("city")
             .having("COUNT(name) < 100")
             .project("city")
@@ -87,7 +87,7 @@ mod tests {
             .limit(3)
             .build();
         let expected = "
-            SELECT city FROM Bar
+            SELECT city FROM base.baz
             GROUP BY city
             HAVING COUNT(name) < 100
             OFFSET 1
@@ -96,8 +96,8 @@ mod tests {
         test(actual, expected);
 
         // select -> offset -> limit -> derived subquery
-        let actual = table("Bar")
-            .select()
+        let actual = chain("base")
+            .select("bar")
             .group_by("city")
             .having("COUNT(name) < 100")
             .offset(1)
@@ -107,7 +107,7 @@ mod tests {
             .build();
         let expected = "
             SELECT * FROM (
-                SELECT * FROM Bar
+                SELECT * FROM base.bar
                 GROUP BY city
                 HAVING COUNT(name) < 100
                 OFFSET 1

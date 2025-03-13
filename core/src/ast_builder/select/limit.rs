@@ -214,47 +214,51 @@ mod tests {
         test(actual, expected);
 
         // having node -> limit node -> build
-        let actual = chain("Foo")
-            .select()
+        let actual = chain("base")
+            .select("foo")
             .group_by("id")
             .having(col("id").gt(10))
             .limit(10)
             .build();
-        let expected = "SELECT * FROM Foo GROUP BY id HAVING id > 10 LIMIT 10";
+        let expected = "SELECT * FROM base.foo GROUP BY id HAVING id > 10 LIMIT 10";
         test(actual, expected);
 
         // join constraint node -> limit node -> build
-        let actual = table("Foo")
-            .select()
+        let actual = chain("mina")
+            .select("Foo")
             .join("Bar")
             .on("Foo.id = Bar.id")
             .limit(10)
             .build();
-        let expected = "SELECT * FROM Foo JOIN Bar ON Foo.id = Bar.id LIMIT 10";
+        let expected = "SELECT * FROM mina.Foo JOIN Bar ON Foo.id = Bar.id LIMIT 10";
         test(actual, expected);
 
         // filter node -> limit node -> build
-        let actual = table("World")
-            .select()
+        let actual = chain("mina")
+            .select("World")
             .filter(col("id").gt(2))
             .limit(100)
             .build();
-        let expected = "SELECT * FROM World WHERE id > 2 LIMIT 100";
+        let expected = "SELECT * FROM mina.World WHERE id > 2 LIMIT 100";
         test(actual, expected);
 
         // order by node -> limit node -> build
-        let actual = table("Hello").select().order_by("score").limit(3).build();
-        let expected = "SELECT * FROM Hello ORDER BY score LIMIT 3";
+        let actual = chain("mina")
+            .select("Hello")
+            .order_by("score")
+            .limit(3)
+            .build();
+        let expected = "SELECT * FROM mina.Hello ORDER BY score LIMIT 3";
         test(actual, expected);
 
         // project node -> limit node -> build
-        let actual = table("Item").select().project("*").limit(10).build();
-        let expected = "SELECT * FROM Item LIMIT 10";
+        let actual = chain("base").select("Item").project("*").limit(10).build();
+        let expected = "SELECT * FROM base.Item LIMIT 10";
         test(actual, expected);
 
         // hash join node -> limit node -> build
-        let actual = table("Player")
-            .select()
+        let actual = chain("base")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .limit(100)

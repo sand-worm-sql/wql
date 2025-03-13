@@ -59,7 +59,7 @@ impl<'a> HavingNode<'a> {
         OrderByNode::new(self, expr_list)
     }
 
-    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode {
+    pub fn alias_as(self, table_alias: &'a str) -> ChainFactorNode<'a> {
         QueryNode::HavingNode(self).alias_as(table_alias)
     }
 }
@@ -80,15 +80,15 @@ mod tests {
     #[test]
     fn having() {
         // group by node -> having node -> offset node
-        let actual = table("Bar")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .filter("id IS NULL")
             .group_by("id, (a + name)")
             .having("COUNT(id) > 10")
             .offset(10)
             .build();
         let expected = "
-            SELECT * FROM Bar
+            SELECT * FROM sui.transactions
             WHERE id IS NULL
             GROUP BY id, (a + name)
             HAVING COUNT(id) > 10
@@ -97,15 +97,15 @@ mod tests {
         test(actual, expected);
 
         // group by node -> having node -> limit node
-        let actual = table("Bar")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .filter("id IS NULL")
             .group_by("id, (a + name)")
             .having("COUNT(id) > 10")
             .limit(10)
             .build();
         let expected = "
-            SELECT * FROM Bar
+            SELECT * FROM sui.transactions
             WHERE id IS NULL
             GROUP BY id, (a + name)
             HAVING COUNT(id) > 10
@@ -114,8 +114,8 @@ mod tests {
         test(actual, expected);
 
         // group by node -> having node -> project node
-        let actual = table("Bar")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .filter("id IS NULL")
             .group_by("id, (a + name)")
             .having("COUNT(id) > 10")
@@ -123,7 +123,7 @@ mod tests {
             .build();
         let expected = "
             SELECT id, (a + name) AS b, COUNT(id) AS c
-            FROM Bar
+            FROM sui.transactions
             WHERE id IS NULL
             GROUP BY id, (a + name)
             HAVING COUNT(id) > 10
@@ -131,14 +131,14 @@ mod tests {
         test(actual, expected);
 
         // group by node -> having node -> build
-        let actual = table("Bar")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .filter("id IS NULL")
             .group_by("id, (a + name)")
             .having("COUNT(id) > 10")
             .build();
         let expected = "
-                SELECT * FROM Bar
+                SELECT * FROM  sui.transactions
                 WHERE id IS NULL
                 GROUP BY id, (a + name)
                 HAVING COUNT(id) > 10
@@ -146,14 +146,14 @@ mod tests {
         test(actual, expected);
 
         // select -> group by -> having -> derived subquery
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .group_by("a")
             .having("a > 1")
             .alias_as("Sub")
             .select()
             .build();
-        let expected = "SELECT * FROM (SELECT * FROM Foo GROUP BY a HAVING a > 1) Sub";
+        let expected = "SELECT * FROM (SELECT * FROM sui.transactions GROUP BY a HAVING a > 1) Sub";
         test(actual, expected);
     }
 }

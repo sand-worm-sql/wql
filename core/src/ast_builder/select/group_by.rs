@@ -126,64 +126,72 @@ mod tests {
     #[test]
     fn group_by() {
         // select node -> group by node -> build
-        let actual = table("Foo").select().group_by("a").build();
+        let actual = chain("base").select("transactions").group_by("a").build();
         let expected = "SELECT * FROM Foo GROUP BY a";
         test(actual, expected);
 
         // join node -> group by node -> build
-        let actual = table("Foo").select().join("Bar").group_by("b").build();
-        let expected = "SELECT * FROM Foo JOIN Bar GROUP BY b";
-        test(actual, expected);
-
-        // join node -> group by node -> build
-        let actual = table("Foo")
-            .select()
-            .join_as("Bar", "B")
+        let actual = chain("sui")
+            .select("transactions")
+            .join("trades")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM Foo JOIN Bar AS B GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions JOIN trades GROUP BY b";
         test(actual, expected);
 
         // join node -> group by node -> build
-        let actual = table("Foo").select().left_join("Bar").group_by("b").build();
-        let expected = "SELECT * FROM Foo LEFT JOIN Bar GROUP BY b";
-        test(actual, expected);
-
-        // join node -> group by node -> build
-        let actual = table("Foo")
-            .select()
-            .left_join_as("Bar", "B")
+        let actual = chain("sui")
+            .select("transactions")
+            .join_as("trades", "T")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM Foo LEFT JOIN Bar AS B GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions JOIN trades AS T GROUP BY b";
+        test(actual, expected);
+
+        // join node -> group by node -> build
+        let actual = chain("sui")
+            .select("transactions")
+            .left_join("trades")
+            .group_by("b")
+            .build();
+        let expected = "SELECT * FROM sui.transactions LEFT JOIN trades GROUP BY b";
+        test(actual, expected);
+
+        // join node -> group by node -> build
+        let actual = chain("sui")
+            .select("transactions")
+            .left_join_as("trades", "B")
+            .group_by("b")
+            .build();
+        let expected = "SELECT * FROM sui.transactions LEFT JOIN trades AS B GROUP BY b";
         test(actual, expected);
 
         // join constraint node -> group by node -> build
-        let actual = table("Foo")
-            .select()
-            .join("Bar")
-            .on("Foo.id = Bar.id")
+        let actual = chain("sui")
+            .select("transactions")
+            .join("trades")
+            .on("transactions.sender = trades.sender")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM Foo JOIN Bar ON Foo.id = Bar.id GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions JOIN trades ON transactions.sender = trades.sender GROUP BY b";
         test(actual, expected);
 
         // filter node -> group by node -> build
-        let actual = table("Bar")
-            .select()
+        let actual = chain("base")
+            .select("transactions")
             .filter(col("id").is_null())
             .group_by("id, (a + name)")
             .build();
         let expected = "
-                SELECT * FROM Bar
+                SELECT * FROM base.transactions
                 WHERE id IS NULL
                 GROUP BY id, (a + name)
             ";
         test(actual, expected);
 
         // hash join node -> group by node -> build
-        let actual = table("Player")
-            .select()
+        let actual = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .group_by("PlayerItem.category")
@@ -227,13 +235,13 @@ mod tests {
         assert_eq!(actual, expected);
 
         // select -> group by -> derived subquery
-        let actual = table("Foo")
-            .select()
+        let actual = chain("sui")
+            .select("transactions")
             .group_by("a")
             .alias_as("Sub")
             .select()
             .build();
-        let expected = "SELECT * FROM (SELECT * FROM Foo GROUP BY a) Sub";
+        let expected = "SELECT * FROM (SELECT * FROM sui.transactions GROUP BY a) Sub";
         test(actual, expected);
     }
 }
