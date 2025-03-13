@@ -155,48 +155,48 @@ mod test {
         let expected = "SELECT * FROM sui.transations JOIN checkpoints ON transation.digest = checkpoints.digest";
         test_query(actual, expected);
 
-        // let actual: QueryNode = ("Player")
-        //     .select()
-        //     .join("PlayerItem")
-        //     .hash_executor("PlayerItem.user_id", "Player.id")
-        //     .into();
-        // let expected = {
-        //     let join = Join {
-        //         relation: TableFactor::Table {
-        //             name: "PlayerItem".to_owned(),
-        //             alias: None,
-        //             index: None,
-        //         },
-        //         join_operator: JoinOperator::Inner(JoinConstraint::None),
-        //         join_executor: JoinExecutor::Hash {
-        //             key_expr: col("PlayerItem.user_id").try_into().unwrap(),
-        //             value_expr: col("Player.id").try_into().unwrap(),
-        //             where_clause: None,
-        //         },
-        //     };
-        //     let select = Select {
-        //         projection: SelectItemList::from("*").try_into().unwrap(),
-        //         from: TableWithJoins {
-        //             relation: TableFactor::Table {
-        //                 name: "Player".to_owned(),
-        //                 alias: None,
-        //                 index: None,
-        //             },
-        //             joins: vec![join],
-        //         },
-        //         selection: None,
-        //         group_by: Vec::new(),
-        //         having: None,
-        //     };
+        let actual: QueryNode = chain("sui")
+            .select("Player")
+            .join("PlayerItem")
+            .hash_executor("PlayerItem.user_id", "Player.id")
+            .into();
+        let expected = {
+            let join = Join {
+                relation: TableFactor::Table {
+                    name: "PlayerItem".to_owned(),
+                    alias: None,
+                    index: None,
+                },
+                join_operator: JoinOperator::Inner(JoinConstraint::None),
+                join_executor: JoinExecutor::Hash {
+                    key_expr: col("PlayerItem.user_id").try_into().unwrap(),
+                    value_expr: col("Player.id").try_into().unwrap(),
+                    where_clause: None,
+                },
+            };
+            let select = Select {
+                projection: SelectItemList::from("*").try_into().unwrap(),
+                from: TableWithJoins {
+                    relation: TableFactor::Table {
+                        name: "Player".to_owned(),
+                        alias: None,
+                        index: None,
+                    },
+                    joins: vec![join],
+                },
+                selection: None,
+                group_by: Vec::new(),
+                having: None,
+            };
 
-        //     Query {
-        //         body: SetExpr::Select(Box::new(select)),
-        //         order_by: Vec::new(),
-        //         limit: None,
-        //         offset: None,
-        //     }
-        // };
-        // assert_eq!(Query::try_from(actual).unwrap(), expected);
+            Query {
+                body: SetExpr::Select(Box::new(select)),
+                order_by: Vec::new(),
+                limit: None,
+                offset: None,
+            }
+        };
+        assert_eq!(Query::try_from(actual).unwrap(), expected);
 
         let actual = chain("sui")
             .select("transations")
