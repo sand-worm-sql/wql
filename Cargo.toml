@@ -22,6 +22,7 @@ repository = "https://github.com/sand-worm-sql/wql"
 documentation = "https://github.com/sand-worm-sql/wql"
 
 [workspace.dependencies]
-cli = { package = "sand-worm-cli", path = "./cli", version = "0.0.1" }
+wql-core = { path = "./core", version = "0.0.1" }
+wql-cli = { package = "sand-worm-cli", path = "./cli", version = "0.0.1" }
 wql_evm_adapter = { path = "./chains-support/evm-adapter", version = "0.0.1" }
 wql_sui_adapter = { path = "./chains-support/sui-adapter", version = "0.0.1" }

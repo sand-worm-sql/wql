@@ -5,7 +5,6 @@ pub use {chrono, sqlparser};
 
 // mod glue;
 // mod mock;
-mod chains_adapter;
 mod result;
 
 pub mod ast;
@@ -15,6 +14,7 @@ pub mod executor;
 pub mod parse_sql;
 pub mod plan;
 pub mod translate;
+pub mod chains_adapter;
 
 pub mod prelude {
     pub use crate::{

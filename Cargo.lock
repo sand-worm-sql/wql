@@ -3309,37 +3309,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sand-worm-core"
-version = "0.0.1"
-dependencies = [
- "alloy",
- "async-recursion",
- "async-trait",
- "bigdecimal",
- "cfg-if",
- "chrono",
- "futures",
- "futures-enum",
- "graphql-parser",
- "hex",
- "im-rc",
- "iter-enum",
- "itertools 0.12.1",
- "md-5",
- "ordered-float",
- "pretty_assertions",
- "rand",
- "regex",
- "rust_decimal",
- "serde",
- "serde_json",
- "sqlparser",
- "strum_macros 0.25.3",
- "thiserror 1.0.69",
- "uuid",
-]
-
-[[package]]
 name = "schannel"
 version = "0.1.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4580,25 +4549,64 @@ dependencies = [
 ]
 
 [[package]]
+name = "wql-core"
+version = "0.0.1"
+dependencies = [
+ "alloy",
+ "async-recursion",
+ "async-trait",
+ "bigdecimal",
+ "cfg-if",
+ "chrono",
+ "futures",
+ "futures-enum",
+ "graphql-parser",
+ "hex",
+ "im-rc",
+ "iter-enum",
+ "itertools 0.12.1",
+ "md-5",
+ "ordered-float",
+ "pretty_assertions",
+ "rand",
+ "regex",
+ "rust_decimal",
+ "serde",
+ "serde_json",
+ "sqlparser",
+ "strum_macros 0.25.3",
+ "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
 name = "wql-evm-adapter"
 version = "0.0.1"
 dependencies = [
+ "alloy",
  "async-trait",
  "futures",
  "reqwest",
  "serde",
  "serde_json",
+ "thiserror 1.0.69",
  "tokio",
+ "wql-core",
 ]
 
 [[package]]
 name = "wql-sui-adapter"
 version = "0.0.1"
 dependencies = [
+ "alloy",
  "async-trait",
  "futures",
+ "reqwest",
  "serde",
+ "serde_json",
+ "thiserror 1.0.69",
  "tokio",
+ "wql-core",
 ]
 
 [[package]]

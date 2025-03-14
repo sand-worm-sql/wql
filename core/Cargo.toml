@@ -1,5 +1,5 @@
 [package]
-name = "sand-worm-core"
+name = "wql-core"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
