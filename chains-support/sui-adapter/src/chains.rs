@@ -1,16 +1,7 @@
 use {
-    crate::{
-        chains_adapter::error::ChainAdapterError,
-        data::{Interval, Value},
-    },
-    alloy::{
-        providers::{Provider, ProviderBuilder},
-        transports::http::reqwest::Url,
-    },
-    chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike},
+    wql_core::chains_adapter::error::ChainAdapterError,
     serde::{Deserialize, Serialize},
-    std::{cmp::Ordering, fmt::Debug},
-    thiserror::Error as ThisError,
+    std,
 };
 
 type Result<T> = std::result::Result<T, ChainAdapterError>;
@@ -41,7 +32,7 @@ impl SuiChain {
 
     pub fn is_supported(chain: &str) -> bool {
         matches!(
-            chain.try_into() as Result<SuiChain, ChainAdapterError>,
+            chain.try_into() as Result<SuiChain>,
             Ok(_)
         )
     }
