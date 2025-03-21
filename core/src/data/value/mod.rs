@@ -597,8 +597,20 @@ impl Value {
         use Value::*;
 
         match self {
-            I8(_) | I16(_) | I32(_) | I64(_) | I128(_) | U8(_) | U16(_) | U32(_) | U64(_)
-            | U128(_) | Interval(_) | Null => Ok(Null),
+            I8(n) => Ok(I8(n.saturating_add(1))),
+            I16(n) => Ok(I16(n.saturating_add(1))),
+            I32(n) => Ok(I32(n.saturating_add(1))),
+            I64(n) => Ok(I64(n.saturating_add(1))),
+            I128(n) => Ok(I128(n.saturating_add(1))),
+
+            U8(n) => Ok(U8(n.saturating_add(1))),
+            U16(n) => Ok(U16(n.saturating_add(1))),
+            U32(n) => Ok(U32(n.saturating_add(1))),
+            U64(n) => Ok(U64(n.saturating_add(1))),
+            U128(n) => Ok(U128(n.saturating_add(1))),
+
+            Interval(_) | Null => Ok(Null),
+
             _ => Err(ValueError::UnaryPlusOnNonNumeric.into()),
         }
     }
@@ -2194,7 +2206,7 @@ mod tests {
 
     #[test]
     fn unary_plus() {
-        assert_eq!(U8(1).unary_plus(), Ok(U8(1)));
+        assert_eq!(U8(1).unary_plus(), Ok(U8(2)));
         assert!(Null.unary_plus().unwrap().is_null());
     }
 

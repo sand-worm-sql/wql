@@ -207,6 +207,7 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                 }),
                 _ => {
                     Ok(TableFactor::Table {
+                        chain_name: "temp".to_string(),
                         name: translate_object_name(name)?,
                         alias,
                         index: None, // query execution plan
