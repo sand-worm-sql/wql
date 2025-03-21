@@ -438,7 +438,7 @@ mod tests {
         );
 
         assert_eq!(
-            r#""id" IN (SELECT * FROM "FOO")"#,
+            r#""id" IN (SELECT * FROM "base.FOO")"#,
             Expr::InSubquery {
                 expr: Box::new(Expr::Identifier("id".to_owned())),
                 subquery: Box::new(Query {
@@ -446,6 +446,7 @@ mod tests {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
+                                chain_name: "base".to_owned(),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
@@ -466,7 +467,7 @@ mod tests {
         );
 
         assert_eq!(
-            r#""id" NOT IN (SELECT * FROM "FOO")"#,
+            r#""id" NOT IN (SELECT * FROM "base.FOO")"#,
             Expr::InSubquery {
                 expr: Box::new(Expr::Identifier("id".to_owned())),
                 subquery: Box::new(Query {
@@ -474,6 +475,7 @@ mod tests {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
+                                chain_name: "base".to_owned(),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
@@ -494,13 +496,14 @@ mod tests {
         );
 
         assert_eq!(
-            r#"EXISTS(SELECT * FROM "FOO")"#,
+            r#"EXISTS(SELECT * FROM "base.FOO")"#,
             Expr::Exists {
                 subquery: Box::new(Query {
                     body: SetExpr::Select(Box::new(Select {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
+                                chain_name: "base".to_owned(),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
@@ -521,13 +524,14 @@ mod tests {
         );
 
         assert_eq!(
-            r#"NOT EXISTS(SELECT * FROM "FOO")"#,
+            r#"NOT EXISTS(SELECT * FROM "base.FOO")"#,
             Expr::Exists {
                 subquery: Box::new(Query {
                     body: SetExpr::Select(Box::new(Select {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
+                                chain_name: "base".to_owned(),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
@@ -548,12 +552,13 @@ mod tests {
         );
 
         assert_eq!(
-            r#"(SELECT * FROM "FOO")"#,
+            r#"(SELECT * FROM "base.FOO")"#,
             Expr::Subquery(Box::new(Query {
                 body: SetExpr::Select(Box::new(Select {
                     projection: vec![SelectItem::Wildcard],
                     from: TableWithJoins {
                         relation: TableFactor::Table {
+                            chain_name: "base".to_owned(),
                             name: "FOO".to_owned(),
                             alias: None,
                             index: None,

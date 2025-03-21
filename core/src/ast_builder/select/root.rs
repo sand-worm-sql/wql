@@ -93,7 +93,8 @@ impl<'a> Prebuild<Select> for SelectNode<'a> {
 
         let relation = match self.chain_node.chain_query_type {
             ChainQueryType::Table => TableFactor::Table {
-                name: self.chain_node.chain_name,
+                chain_name: self.chain_node.chain_name,
+                name: self.chain_node.entity_name.unwrap(),
                 alias,
                 index,
             },

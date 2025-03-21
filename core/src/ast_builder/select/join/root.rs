@@ -73,6 +73,7 @@ impl<'a> JoinNode<'a> {
             join_operator_type,
             relation: match alias {
                 Some(alias) => TableFactor::Table {
+                    chain_name: "test".to_owned(),
                     name,
                     alias: Some(TableAlias {
                         name: alias,
@@ -81,6 +82,7 @@ impl<'a> JoinNode<'a> {
                     index: None,
                 },
                 None => TableFactor::Table {
+                    chain_name: "hhdhd".to_owned(),
                     name,
                     alias: None,
                     index: None,
@@ -589,6 +591,7 @@ mod tests {
         let gen_expected = |other_join| {
             let join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "sui".to_owned(),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
@@ -604,6 +607,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
+                        chain_name: "sui".to_owned(),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
@@ -632,6 +636,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "sui".to_owned(),
                     name: "OtherItem".to_owned(),
                     alias: None,
                     index: None,
@@ -653,6 +658,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "sui".to_owned(),
                     name: "OtherItem".to_owned(),
                     alias: Some(TableAlias {
                         name: "Ot".to_owned(),
@@ -677,6 +683,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "sui".to_owned(),
                     name: "OtherItem".to_owned(),
                     alias: None,
                     index: None,
@@ -698,6 +705,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "sui".to_owned(),
                     name: "OtherItem".to_owned(),
                     alias: Some(TableAlias {
                         name: "Ot".to_owned(),

@@ -239,6 +239,7 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "sui".to_owned(),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
@@ -256,6 +257,7 @@ mod tests {
                     .unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
+                        chain_name: "sui".to_owned(),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,

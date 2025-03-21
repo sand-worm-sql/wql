@@ -17,9 +17,7 @@ impl ShowChainEntitiesNode {
 impl Build for ShowChainEntitiesNode {
     fn build(self) -> Result<Statement> {
         let chain_name = self.chain_name;
-        Ok(Statement::ShowChainEntities {
-            chain_name,
-        })
+        Ok(Statement::ShowChainEntities { chain_name })
     }
 }
 

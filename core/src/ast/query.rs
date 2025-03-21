@@ -59,6 +59,7 @@ pub enum IndexItem {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TableFactor {
     Table {
+        chain_name: String,
         name: String,
         alias: Option<TableAlias>,
         /// Query planner result
@@ -611,12 +612,13 @@ mod tests {
             asc: Some(true),
         }];
         let actual =
-            r#"SELECT * FROM "FOO" AS "F" ORDER BY "name" ASC LIMIT 10 OFFSET 3"#.to_owned();
+            r#"SELECT * FROM "base.FOO" AS "F" ORDER BY "name" ASC LIMIT 10 OFFSET 3"#.to_owned();
         let expected = Query {
             body: SetExpr::Select(Box::new(Select {
                 projection: vec![SelectItem::Wildcard],
                 from: TableWithJoins {
                     relation: TableFactor::Table {
+                        chain_name: "base".to_owned(),
                         name: "FOO".to_owned(),
                         alias: Some(TableAlias {
                             name: "F".to_owned(),
@@ -648,12 +650,13 @@ mod tests {
             expr: Expr::Identifier("name".to_owned()),
             asc: Some(true),
         }];
-        let actual = "SELECT * FROM FOO AS F ORDER BY name ASC LIMIT 10 OFFSET 3".to_owned();
+        let actual = "SELECT * FROM base.FOO AS F ORDER BY name ASC LIMIT 10 OFFSET 3".to_owned();
         let expected = Query {
             body: SetExpr::Select(Box::new(Select {
                 projection: vec![SelectItem::Wildcard],
                 from: TableWithJoins {
                     relation: TableFactor::Table {
+                        chain_name: "base".to_owned(),
                         name: "FOO".to_owned(),
                         alias: Some(TableAlias {
                             name: "F".to_owned(),
@@ -681,11 +684,12 @@ mod tests {
 
     #[test]
     fn to_sql_set_expr() {
-        let actual = r#"SELECT * FROM "FOO" AS "F" INNER JOIN "PlayerItem""#.to_owned();
+        let actual = r#"SELECT * FROM "base.FOO" AS "F" INNER JOIN "PlayerItem""#.to_owned();
         let expected = SetExpr::Select(Box::new(Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
@@ -695,6 +699,7 @@ mod tests {
                 },
                 joins: vec![Join {
                     relation: TableFactor::Table {
+                        chain_name: "base".to_owned(),
                         name: "PlayerItem".to_owned(),
                         alias: None,
                         index: None,
@@ -729,11 +734,12 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_set_expr() {
-        let actual = "SELECT * FROM FOO AS F INNER JOIN PlayerItem".to_owned();
+        let actual = "SELECT * FROM base.FOO AS F INNER JOIN PlayerItem".to_owned();
         let expected = SetExpr::Select(Box::new(Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
@@ -743,6 +749,7 @@ mod tests {
                 },
                 joins: vec![Join {
                     relation: TableFactor::Table {
+                        chain_name: "base".to_owned(),
                         name: "PlayerItem".to_owned(),
                         alias: None,
                         index: None,
@@ -792,11 +799,12 @@ mod tests {
     #[test]
     fn to_sql_select() {
         let actual =
-            r#"SELECT * FROM "FOO" AS "F" GROUP BY "name" HAVING "name" = 'glue'"#.to_owned();
+            r#"SELECT * FROM "base.FOO" AS "F" GROUP BY "name" HAVING "name" = 'glue'"#.to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
@@ -817,11 +825,12 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"SELECT * FROM "FOO" WHERE "name" = 'glue'"#.to_owned();
+        let actual = r#"SELECT * FROM "base.FOO" WHERE "name" = 'glue'"#.to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "FOO".to_owned(),
                     alias: None,
                     index: None,
@@ -842,11 +851,12 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_select() {
-        let actual = "SELECT * FROM FOO AS F GROUP BY name HAVING name = 'glue'".to_owned();
+        let actual = "SELECT * FROM chain.FOO AS F GROUP BY name HAVING name = 'glue'".to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
+                    chain_name: "chain".to_owned(),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
@@ -867,11 +877,12 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "SELECT * FROM FOO WHERE name = 'glue'".to_owned();
+        let actual = "SELECT * FROM base.FOO WHERE name = 'glue'".to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "FOO".to_owned(),
                     alias: None,
                     index: None,
@@ -926,9 +937,10 @@ mod tests {
 
     #[test]
     fn to_sql_table_with_joins() {
-        let actual = r#""FOO" AS "F""#;
+        let actual = r#""chain.FOO" AS "F""#;
         let expected = TableWithJoins {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "FOO".to_owned(),
                 alias: Some(TableAlias {
                     name: "F".to_owned(),
@@ -944,9 +956,10 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_table_with_joins() {
-        let actual = "FOO AS F";
+        let actual = "base.FOO AS F";
         let expected = TableWithJoins {
             relation: TableFactor::Table {
+                chain_name: "base".to_owned(),
                 name: "FOO".to_owned(),
                 alias: Some(TableAlias {
                     name: "F".to_owned(),
@@ -962,8 +975,9 @@ mod tests {
 
     #[test]
     fn to_sql_table_factor() {
-        let actual = r#""FOO" AS "F""#;
+        let actual = r#""chain.FOO" AS "F""#;
         let expected = TableFactor::Table {
+            chain_name: "chain".to_owned(),
             name: "FOO".to_owned(),
             alias: Some(TableAlias {
                 name: "F".to_owned(),
@@ -974,13 +988,14 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"(SELECT * FROM "FOO") AS "F""#;
+        let actual = r#"(SELECT * FROM "chain.FOO") AS "F""#;
         let expected = TableFactor::Derived {
             subquery: Query {
                 body: SetExpr::Select(Box::new(Select {
                     projection: vec![SelectItem::Wildcard],
                     from: TableWithJoins {
                         relation: TableFactor::Table {
+                            chain_name: "chain".to_owned(),
                             name: "FOO".to_owned(),
                             alias: None,
                             index: None,
@@ -1028,8 +1043,9 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_table_factor() {
-        let actual = "FOO AS F";
+        let actual = "chain.FOO AS F";
         let expected = TableFactor::Table {
+            chain_name: "chain".to_owned(),
             name: "FOO".to_owned(),
             alias: Some(TableAlias {
                 name: "F".to_owned(),
@@ -1040,13 +1056,14 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "(SELECT * FROM FOO) AS F";
+        let actual = "(SELECT * FROM chain.FOO) AS F";
         let expected = TableFactor::Derived {
             subquery: Query {
                 body: SetExpr::Select(Box::new(Select {
                     projection: vec![SelectItem::Wildcard],
                     from: TableWithJoins {
                         relation: TableFactor::Table {
+                            chain_name: "chain".to_owned(),
                             name: "FOO".to_owned(),
                             alias: None,
                             index: None,
@@ -1116,9 +1133,10 @@ mod tests {
 
     #[test]
     fn to_sql_join() {
-        let actual = r#"INNER JOIN "PlayerItem""#;
+        let actual = r#"INNER JOIN "chain.PlayerItem""#;
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1129,9 +1147,10 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"INNER JOIN "PlayerItem" ON "PlayerItem"."user_id" = "Player"."id""#;
+        let actual = r#"INNER JOIN "chain.PlayerItem" ON "PlayerItem"."user_id" = "Player"."id""#;
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1144,9 +1163,10 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"LEFT OUTER JOIN "PlayerItem""#;
+        let actual = r#"LEFT OUTER JOIN "chain.PlayerItem""#;
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1157,9 +1177,11 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"LEFT OUTER JOIN "PlayerItem" ON "PlayerItem"."user_id" = "Player"."id""#;
+        let actual =
+            r#"LEFT OUTER JOIN "chain.PlayerItem" ON "PlayerItem"."user_id" = "Player"."id""#;
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1174,9 +1196,10 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"LEFT OUTER JOIN "PlayerItem" ON "PlayerItem"."age" > "Player"."age" AND "PlayerItem"."user_id" = "Player"."id" AND "PlayerItem"."amount" > 10 AND "PlayerItem"."amount" * 3 <= 2"#;
+        let actual = r#"LEFT OUTER JOIN "chain.PlayerItem" ON "PlayerItem"."age" > "Player"."age" AND "PlayerItem"."user_id" = "Player"."id" AND "PlayerItem"."amount" > 10 AND "PlayerItem"."amount" * 3 <= 2"#;
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1198,9 +1221,10 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_join() {
-        let actual = "INNER JOIN PlayerItem";
+        let actual = "INNER JOIN chain.PlayerItem";
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1211,9 +1235,10 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "INNER JOIN PlayerItem ON PlayerItem.user_id = Player.id AND PlayerItem.group_id = Player.group_id";
+        let actual = "INNER JOIN chain.PlayerItem ON PlayerItem.user_id = Player.id AND PlayerItem.group_id = Player.group_id";
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1230,9 +1255,10 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "LEFT OUTER JOIN PlayerItem";
+        let actual = "LEFT OUTER JOIN chain.PlayerItem";
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1243,9 +1269,10 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "LEFT OUTER JOIN PlayerItem ON PlayerItem.user_id = Player.id";
+        let actual = "LEFT OUTER JOIN chain.PlayerItem ON PlayerItem.user_id = Player.id";
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
@@ -1260,9 +1287,10 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "LEFT OUTER JOIN PlayerItem ON PlayerItem.age > Player.age AND PlayerItem.user_id = Player.id AND PlayerItem.amount > 10 AND PlayerItem.amount * 3 <= 2";
+        let actual = "LEFT OUTER JOIN chain.PlayerItem ON PlayerItem.age > Player.age AND PlayerItem.user_id = Player.id AND PlayerItem.amount > 10 AND PlayerItem.amount * 3 <= 2";
         let expected = Join {
             relation: TableFactor::Table {
+                chain_name: "chain".to_owned(),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,

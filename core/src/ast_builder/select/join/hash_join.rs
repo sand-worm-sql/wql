@@ -164,7 +164,8 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    name: "PlayerItem".to_owned(),
+                    chain_name: "sui".to_owned(),
+                    name: "transations".to_owned(),
                     alias: None,
                     index: None,
                 },
@@ -179,7 +180,8 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        name: "Player".to_owned(),
+                        chain_name: "sui".to_owned(),
+                        name: "Transactions".to_owned(),
                         alias: None,
                         index: None,
                     },
@@ -209,6 +211,7 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
@@ -228,6 +231,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
+                        chain_name: "base".to_owned(),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
@@ -260,6 +264,7 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
+                    chain_name: "base".to_owned(),
                     name: "Bar".to_owned(),
                     alias: None,
                     index: None,
@@ -276,6 +281,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
+                        chain_name: "base".to_owned(),
                         name: "Foo".to_owned(),
                         alias: None,
                         index: None,

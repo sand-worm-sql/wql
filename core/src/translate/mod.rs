@@ -153,6 +153,7 @@ pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
         SqlStatement::CreateFunction { .. } => {
             Err(TranslateError::UnsupportedEmptyFunctionBody.into())
         }
+
         _ => Err(TranslateError::UnsupportedStatement(sql_statement.to_string()).into()),
     }
 }

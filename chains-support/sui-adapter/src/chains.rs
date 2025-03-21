@@ -1,7 +1,7 @@
 use {
-    wql_core::chains_adapter::error::ChainAdapterError,
     serde::{Deserialize, Serialize},
     std,
+    wql_core::chains_adapter::error::ChainAdapterError,
 };
 
 type Result<T> = std::result::Result<T, ChainAdapterError>;
@@ -31,10 +31,7 @@ impl SuiChain {
     }
 
     pub fn is_supported(chain: &str) -> bool {
-        matches!(
-            chain.try_into() as Result<SuiChain>,
-            Ok(_)
-        )
+        matches!(chain.try_into() as Result<SuiChain>, Ok(_))
     }
 }
 
