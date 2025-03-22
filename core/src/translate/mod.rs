@@ -210,6 +210,21 @@ fn translate_object_name(sql_object_name: &SqlObjectName) -> Result<String> {
         .ok_or_else(|| TranslateError::UnreachableEmptyObject.into())
 }
 
+fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(String, String)> {
+    let sql_object_name = &sql_object_name.0;
+    if sql_object_name.len() > 2 {
+        let compound_object_name = translate_idents(sql_object_name).join(".");
+        println!("compound_object_name: {}", compound_object_name);
+        return Err(TranslateError::CompoundObjectNotSupported(compound_object_name).into());
+    }
+
+    match (sql_object_name.first(), sql_object_name.get(1)) {
+        (Some(schema), Some(table)) => Ok((schema.value.to_owned(), table.value.to_owned())),
+        (Some(table), None) => Ok(("default_schema".to_string(), table.value.to_owned())), // Handle single table case
+        _ => Err(TranslateError::UnreachableEmptyObject.into()),
+    }
+}
+
 pub fn translate_idents(idents: &[SqlIdent]) -> Vec<String> {
     idents.iter().map(|v| v.value.to_owned()).collect()
 }
