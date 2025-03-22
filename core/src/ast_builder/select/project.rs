@@ -151,7 +151,7 @@ mod tests {
     fn project() {
         // select node -> project node -> build
         let actual = chain("sui").select("transactions").project("id").build();
-        let expected = "SELECT checkpoint_sequence_number FROM sui.transactions";
+        let expected = "SELECT  id FROM sui.transactions";
         test(actual, expected);
 
         // select node -> project node -> build
@@ -200,22 +200,21 @@ mod tests {
         // group by node -> project node -> build
         let actual = chain("base")
             .select("transactions")
-            .group_by("from")
-            .project("from, COUNT(hash) as unique_id")
+            .group_by("address_from")
+            .project("address_from, COUNT(hash) as unique_id")
             .build();
         let expected = "
-            SELECT
-              from, COUNT(hash) as unique_id
+            SELECT address_from, COUNT(hash) as unique_id
             FROM base.transactions
-            GROUP BY from
+            GROUP BY address_from; 
         ";
         test(actual, expected);
 
         // // having node -> project node -> build
         let actual = chain("base")
             .select("accounts")
-            .filter(r#"type = "cute""#)
-            .group_by("age")
+            .filter(r#"address = "0x00000000219ab540356cbb839cbe05303d7705fa""#)
+            .group_by("balance")
             .having("SUM(length) < 1000")
             .project(col("age"))
             .project("SUM(length)")

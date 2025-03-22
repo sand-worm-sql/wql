@@ -199,8 +199,9 @@ fn translate_table_with_join(table: &TableWithJoins) -> Result<String> {
 
 fn translate_object_name(sql_object_name: &SqlObjectName) -> Result<String> {
     let sql_object_name = &sql_object_name.0;
-    if sql_object_name.len() > 1 {
+    if sql_object_name.len() > 2 {
         let compound_object_name = translate_idents(sql_object_name).join(".");
+        println!("compound_object_name: {}", compound_object_name);
         return Err(TranslateError::CompoundObjectNotSupported(compound_object_name).into());
     }
 
@@ -212,7 +213,8 @@ fn translate_object_name(sql_object_name: &SqlObjectName) -> Result<String> {
 
 fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(String, String)> {
     let sql_object_name = &sql_object_name.0;
-    if sql_object_name.len() > 2 {
+    println!("sql_object_name: {:#?}", sql_object_name);
+    if sql_object_name.len() > 3 {
         let compound_object_name = translate_idents(sql_object_name).join(".");
         println!("compound_object_name: {}", compound_object_name);
         return Err(TranslateError::CompoundObjectNotSupported(compound_object_name).into());
@@ -220,7 +222,6 @@ fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(String,
 
     match (sql_object_name.first(), sql_object_name.get(1)) {
         (Some(schema), Some(table)) => Ok((schema.value.to_owned(), table.value.to_owned())),
-        (Some(table), None) => Ok(("default_schema".to_string(), table.value.to_owned())), // Handle single table case
         _ => Err(TranslateError::UnreachableEmptyObject.into()),
     }
 }

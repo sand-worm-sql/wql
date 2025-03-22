@@ -234,14 +234,14 @@ mod tests {
         let expected = PlanExpr::MultiExprs(expected.iter().collect());
         test!(actual, expected);
 
-        let actual = Expr::Subquery(Box::new(query("SELECT id FROM Foo")));
-        let expected = query("SELECT id FROM Foo");
+        let actual = Expr::Subquery(Box::new(query("SELECT id FROM base.Foo")));
+        let expected = query("SELECT id FROM base.Foo");
         let expected = PlanExpr::Query(&expected);
         test!(actual, expected);
 
-        let actual = expr("1 IN (SELECT id FROM Foo)");
+        let actual = expr("1 IN (SELECT id FROM base.Foo)");
         let target = expr("1");
-        let subquery = query("SELECT id FROM Foo");
+        let subquery = query("SELECT id FROM base.Foo");
         let expected = PlanExpr::QueryAndExpr {
             expr: &target,
             query: &subquery,

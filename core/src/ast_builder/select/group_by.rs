@@ -127,7 +127,7 @@ mod tests {
     fn group_by() {
         // select node -> group by node -> build
         let actual = chain("base").select("transactions").group_by("a").build();
-        let expected = "SELECT * FROM Foo GROUP BY a";
+        let expected = "SELECT * FROM base.transactions GROUP BY a";
         test(actual, expected);
 
         // join node -> group by node -> build
