@@ -183,9 +183,9 @@ mod tests {
         let actual = chain("sui")
             .select("checkpoints")
             .left_join("transations")
-            .on("chec.id = Bar.id")
+            .on("checkpoints.id = transations.id")
             .build();
-        let expected = "SELECT * FROM Foo LEFT OUTER JOIN Bar ON Foo.id = Bar.id";
+        let expected = "SELECT * FROM  sui.checkpoints LEFT OUTER JOIN transations ON checkpoints.id = transations.id";
         test(actual, expected);
 
         // join node -> join constraint node -> build

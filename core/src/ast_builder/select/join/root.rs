@@ -302,7 +302,7 @@ mod tests {
         let expected = "
             SELECT player.id, item.id
             FROM mina.player
-            LEFT JOIN item
+            LEFT JOIN  item
             ON player.id = item.id
         ";
         test(actual, expected);

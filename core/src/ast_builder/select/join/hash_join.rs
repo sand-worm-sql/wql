@@ -171,7 +171,7 @@ mod tests {
     #[test]
     fn hash_join() {
         let actual = chain("sui")
-            .select("transations")
+            .select("transaction")
             .join("checkpoints")
             .hash_executor("transations.digest", col("checkpoints.transaction_digest"))
             .build();
@@ -179,14 +179,14 @@ mod tests {
             let join = Join {
                 relation: TableFactor::Table {
                     chain_name: "sui".to_owned(),
-                    name: "transations".to_owned(),
+                    name: "checkpoints".to_owned(),
                     alias: None,
                     index: None,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
-                    key_expr: col("PlayerItem.user_id").try_into().unwrap(),
-                    value_expr: col("Player.id").try_into().unwrap(),
+                    key_expr: col("transations.digest").try_into().unwrap(),
+                    value_expr: col("checkpoints.transaction_digest").try_into().unwrap(),
                     where_clause: None,
                 },
             };
@@ -195,7 +195,7 @@ mod tests {
                 from: TableWithJoins {
                     relation: TableFactor::Table {
                         chain_name: "sui".to_owned(),
-                        name: "Transactions".to_owned(),
+                        name: "transactions".to_owned(),
                         alias: None,
                         index: None,
                     },
