@@ -52,26 +52,40 @@ impl<'a> JoinConstraintNode<'a> {
         }
     }
 
-    pub fn join(self, table_name: &str) -> JoinNode<'a> {
-        JoinNode::new(self, table_name.to_owned(), None, JoinOperatorType::Inner)
-    }
-
-    pub fn join_as(self, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
+            chain_name.to_owned(),
+            table_name.to_owned(),
+            None,
+            JoinOperatorType::Inner,
+        )
+    }
+
+    pub fn join_as(self, chain_name: &str, table_name: &str, alias: &str) -> JoinNode<'a> {
+        JoinNode::new(
+            self,
+            chain_name.to_owned(),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
         )
     }
 
-    pub fn left_join(self, table_name: &str) -> JoinNode<'a> {
-        JoinNode::new(self, table_name.to_owned(), None, JoinOperatorType::Left)
-    }
-
-    pub fn left_join_as(self, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn left_join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
+            chain_name.to_owned(),
+            table_name.to_owned(),
+            None,
+            JoinOperatorType::Left,
+        )
+    }
+
+    pub fn left_join_as(self, chain_name: &str, table_name: &str, alias: &str) -> JoinNode<'a> {
+        JoinNode::new(
+            self,
+            chain_name.to_owned(),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,
@@ -115,7 +129,6 @@ impl<'a> Prebuild<Select> for JoinConstraintNode<'a> {
             operator_type,
             executor: join_executor,
         } = self.prev_node.prebuild_for_constraint()?;
-
         select.from.joins.push(Join {
             relation,
             join_operator: match operator_type {

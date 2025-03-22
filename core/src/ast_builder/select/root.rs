@@ -49,12 +49,21 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn join(self, table_name: &str) -> JoinNode<'a> {
-        JoinNode::new(self, table_name.to_owned(), None, JoinOperatorType::Inner)
+        let chain_name = self.chain_node.chain_name.clone();
+        JoinNode::new(
+            self,
+            chain_name,
+            table_name.to_owned(),
+            None,
+            JoinOperatorType::Inner,
+        )
     }
 
     pub fn join_as(self, table_name: &str, alias: &str) -> JoinNode<'a> {
+        let chain_name = self.chain_node.chain_name.clone();
         JoinNode::new(
             self,
+            chain_name,
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
@@ -62,20 +71,29 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn left_join(self, table_name: &str) -> JoinNode<'a> {
-        JoinNode::new(self, table_name.to_owned(), None, JoinOperatorType::Left)
+        let chain_name = self.chain_node.chain_name.clone();
+        JoinNode::new(
+            self,
+            chain_name,
+            table_name.to_owned(),
+            None,
+            JoinOperatorType::Left,
+        )
     }
 
     pub fn left_join_as(self, table_name: &str, alias: &str) -> JoinNode<'a> {
+        let chain_name = self.chain_node.chain_name.clone();
         JoinNode::new(
             self,
+            chain_name,
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,
         )
     }
 
-    pub fn alias_as(self, chain_alias: &'a str) -> ChainFactorNode<'a> {
-        QueryNode::SelectNode(self).alias_as(chain_alias)
+    pub fn alias_as(self, alias: &'a str) -> ChainFactorNode<'a> {
+        QueryNode::SelectNode(self).alias_as(alias)
     }
 }
 
