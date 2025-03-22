@@ -1,7 +1,7 @@
 use {
     super::{
-        function::translate_function_arg_exprs, translate_expr, translate_idents, translate_chain_and_table,
-        translate_object_name, translate_order_by_expr, TranslateError,
+        function::translate_function_arg_exprs, translate_chain_and_table, translate_expr,
+        translate_idents, translate_object_name, translate_order_by_expr, TranslateError,
     },
     crate::{
         ast::{
@@ -20,7 +20,7 @@ use {
 };
 
 pub fn translate_query(sql_query: &SqlQuery) -> Result<Query> {
-   // println!("translate_query: {:#?}", sql_query);
+    // println!("translate_query: {:#?}", sql_query);
     let SqlQuery {
         body,
         order_by,
@@ -207,7 +207,7 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                     alias: alias_or_name(alias, object_name),
                 }),
                 _ => {
-                     let (chain_name,table_name)=  translate_chain_and_table(name)?;
+                    let (chain_name, table_name) = translate_chain_and_table(name)?;
                     Ok(TableFactor::Table {
                         chain_name: chain_name,
                         name: table_name,
