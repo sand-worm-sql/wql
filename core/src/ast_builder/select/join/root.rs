@@ -59,7 +59,6 @@ pub struct JoinNode<'a> {
     prev_node: PrevNode<'a>,
     relation: TableFactor,
     join_operator_type: JoinOperatorType,
-    chain_name: String,
 }
 
 impl<'a> JoinNode<'a> {
@@ -73,7 +72,6 @@ impl<'a> JoinNode<'a> {
         Self {
             prev_node: prev_node.into(),
             join_operator_type,
-            chain_name: chain_name.clone(),
             relation: match alias {
                 Some(alias) => TableFactor::Table {
                     chain_name: chain_name.clone(),
@@ -83,12 +81,14 @@ impl<'a> JoinNode<'a> {
                         columns: vec![],
                     }),
                     index: None,
+                    existing_table: false ,
                 },
                 None => TableFactor::Table {
-                    chain_name: chain_name.clone(),
+                    chain_name: None,
                     name,
                     alias: None,
                     index: None,
+                    existing_table: true,
                 },
             },
         }
