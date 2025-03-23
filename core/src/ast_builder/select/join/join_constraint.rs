@@ -164,7 +164,7 @@ mod tests {
         // join node ->  join constarint node -> build
         let actual = chain("sui")
             .select("checkpoints")
-            .join("transations")
+            .join(None,"transations")
             .on("checkpoints.digest = transations.digest")
             .build();
         let expected = "SELECT * FROM sui.checkpoints INNER JOIN  transations ON checkpoints.digest = transations.digest";
@@ -173,7 +173,7 @@ mod tests {
         // join node ->  join constraint node -> build
         let actual = chain("sui")
             .select("checkpoints")
-            .join_as("transations", "tnx")
+            .join_as(None,"transations", "tnx")
             .on("checkpoints.digest = transations.digest")
             .build();
         let expected = "SELECT * FROM sui.checkpoints INNER JOIN transations AS tnx ON checkpoints.digest = tnx.digest";
@@ -191,7 +191,7 @@ mod tests {
         // join node -> join constraint node -> build
         let actual = chain("sui")
             .select("checkpoints")
-            .left_join_as("transations", "t")
+            .left_join_as(None,"transations", "t")
             .on("checkpoints.digest = transations.digest")
             .build();
         let expected = "SELECT * FROM sui.checkpoints LEFT OUTER JOIN transations AS t ON checkpoints.digest = t.digest";
@@ -200,7 +200,7 @@ mod tests {
         // hash join node -> join constraint node -> build
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(None,"PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .on("PlayerItem.flag IS NOT NULL")
             .build();
@@ -249,7 +249,7 @@ mod tests {
         // join -> on -> derived subquery
         let actual = chain("sui")
             .select("checkpoints")
-            .join("transations")
+            .join(None,"transations")
             .on("checkpoints.digest = transations.digest")
             .alias_as("Transationx")
             .select()

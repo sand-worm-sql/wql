@@ -122,7 +122,7 @@ mod test {
 
         // from JoinNode
         let actual =
-            col("timestamp_ms").in_list(chain("sui").select("checkpoints").join("transations"));
+            col("timestamp_ms").in_list(chain("sui").select("checkpoints").join(None,"transations"));
         let expected = "timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations)";
         test_expr(actual, expected);
 
@@ -130,7 +130,7 @@ mod test {
         let actual = col("timestamp_ms").in_list(
             chain("sui")
                 .select("checkpoints")
-                .join("transations")
+                .join(None,"transations")
                 .on("checkpoints.sender = transation.sender"),
         );
         let expected = " timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations ON checkpoints.sender = transation.sender)";
@@ -140,7 +140,7 @@ mod test {
         let actual = col("id").in_list(
             chain("sui")
                 .select("checkpoints")
-                .join("transations")
+                .join(None,"transations")
                 .hash_executor("checkpoints.sender", "transation.sender"),
         );
         let expected = {

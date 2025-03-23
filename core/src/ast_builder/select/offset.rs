@@ -174,23 +174,23 @@ mod tests {
         test(actual, expected);
 
         // join node -> offset node -> build
-        let actual = chain("base").select("Foo").join("Bar").offset(10).build();
+        let actual = chain("base").select("Foo").join(None,"Bar").offset(10).build();
         let expected = "SELECT * FROM base.Foo JOIN Bar OFFSET 10";
         test(actual, expected);
 
         // join node -> offset node -> build
         let actual = chain("mina")
             .select("Foo")
-            .join_as("Bar", "B")
+            .join_as(Some("base"), "Bar", "B")
             .offset(10)
             .build();
-        let expected = "SELECT * FROM mina.Foo JOIN Bar AS B OFFSET 10";
+        let expected = "SELECT * FROM mina.Foo JOIN base.Bar AS B OFFSET 10";
         test(actual, expected);
 
         // join node -> offset node -> build
         let actual = chain("mina")
             .select("Foo")
-            .left_join("Bar")
+            .left_join(None,"Bar")
             .on("Foo.id = Bar.id")
             .offset(10)
             .build();
@@ -200,17 +200,17 @@ mod tests {
         // join node -> offset node -> build
         let actual = chain("base")
             .select("Foo")
-            .left_join_as("Bar", "B")
+            .left_join_as(Some("base"), "Bar", "B")
             .on("Foo.id = B.id")
             .offset(10)
             .build();
-        let expected = "SELECT * FROM base.Foo LEFT JOIN Bar AS B ON Foo.id = B.id OFFSET 10";
+        let expected = "SELECT * FROM base.Foo LEFT JOIN base.Bar AS B ON Foo.id = B.id OFFSET 10";
         test(actual, expected);
 
         // join constraint node -> offset node -> build
         let actual = chain("mina")
             .select("Foo")
-            .join("Bar")
+            .join(Some("mina"),"Bar")
             .on("Foo.id = Bar.id")
             .offset(10)
             .build();
@@ -238,7 +238,7 @@ mod tests {
         // hash join node -> offset node -> build
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(Some("sui"),"PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .offset(100)
             .build();

@@ -201,7 +201,7 @@ mod tests {
         // hash join node -> filter node -> build
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(Some("sui"),"PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .filter("PlayerItem.amount > 10")
             .build();

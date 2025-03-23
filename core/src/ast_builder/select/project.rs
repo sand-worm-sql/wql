@@ -231,7 +231,7 @@ mod tests {
         // // hash join node -> project node -> build
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(Some("sui"),"PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .project("Player.name, PlayerItem.name")
             .build();

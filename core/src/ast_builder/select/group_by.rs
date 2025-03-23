@@ -142,10 +142,10 @@ mod tests {
         // join node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join_as("trades", "T")
+            .join_as(Some("sui"),"trades", "T")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM sui.transactions JOIN trades AS T GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions JOIN sui.trades AS T GROUP BY b";
         test(actual, expected);
 
         // join node -> group by node -> build

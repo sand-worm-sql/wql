@@ -229,11 +229,11 @@ mod tests {
         // join node -> order by node -> build
         let actual = chain("sui")
             .select("Foo")
-            .join("Bar")
+            .join(Some("sui"), "Bar")
             .order_by("Foo.id desc")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             JOIN Bar
             ORDER BY Foo.id desc
         ";
@@ -242,13 +242,13 @@ mod tests {
         // join constraint node -> order by node -> build
         let actual = chain("sui")
             .select("Foo")
-            .join("Bar")
+            .join(Some("sui"), "Bar")
             .on("Foo.id = Bar.id")
             .order_by("Foo.id desc")
             .build();
         let expected = "
-            SELECT * FROM Foo
-            JOIN Bar ON Foo.id = Bar.id
+            SELECT * FROM sui.Foo
+            JOIN sui.Bar ON Foo.id = Bar.id
             ORDER BY Foo.id desc
         ";
         test(actual, expected);
@@ -256,7 +256,7 @@ mod tests {
         // hash join node -> order by node -> build
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .order_by("Player.score DESC")
             .build();
@@ -311,7 +311,7 @@ mod tests {
             .build();
         let expected = "
             SELECT * FROM (
-                SELECT * FROM Foo
+                SELECT * FROM sui.Foo
                 ORDER BY name DESC
             ) Sub
         ";

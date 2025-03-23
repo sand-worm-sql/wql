@@ -143,13 +143,13 @@ mod test {
         let expected = "SELECT * FROM sui.checkpoints";
         test_query(actual, expected);
 
-        let actual = chain("sui").select("blocks").join("chackpoints").into();
+        let actual = chain("sui").select("blocks").join(None,"chackpoints").into();
         let expected = "SELECT * FROM sui.blocks JOIN chackpoints";
         test_query(actual, expected);
 
         let actual = chain("sui")
             .select("transations")
-            .join("checkpoints")
+            .join(None,"checkpoints")
             .on("transations.digest = checkpoints.digest")
             .into();
         let expected = "SELECT * FROM sui.transations JOIN checkpoints ON transation.digest = checkpoints.digest";
@@ -157,7 +157,7 @@ mod test {
 
         let actual: QueryNode = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(None,"PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .into();
         let expected = {

@@ -65,7 +65,7 @@ pub struct JoinNode<'a> {
 impl<'a> JoinNode<'a> {
     pub fn new<N: Into<PrevNode<'a>>>(
         prev_node: N,
-        chain_name: String,
+        chain_name: Option<String>,
         name: String,
         alias: Option<String>,
         join_operator_type: JoinOperatorType,

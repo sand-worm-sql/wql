@@ -171,34 +171,34 @@ mod tests {
         // join node -> limit node -> build
         let actual = chain("base")
             .select("transations")
-            .join("blocks")
+            .join(Some("base"), "blocks")
             .limit(10)
             .build();
-        let expected = "SELECT * FROM base.transations JOIN blocks LIMIT 10";
+        let expected = "SELECT * FROM base.transations JOIN base.blocks LIMIT 10";
         test(actual, expected);
 
         // join node -> limit node -> build
         let actual = chain("base")
             .select("transations")
-            .join_as("blocks", "B")
+            .join_as(Some("base"), "blocks", "B")
             .limit(10)
             .build();
-        let expected = "SELECT * FROM base.transations JOIN blocks AS B LIMIT 10";
+        let expected = "SELECT * FROM base.transations JOIN base.blocks AS B LIMIT 10";
         test(actual, expected);
 
         // join node -> limit node -> build
         let actual = chain("base")
             .select("transations")
-            .left_join("blocks")
+            .left_join(Some("base"), "blocks")
             .limit(10)
             .build();
-        let expected = "SELECT * FROM base.transations LEFT JOIN blocks LIMIT 10";
+        let expected = "SELECT * FROM base.transations LEFT JOIN base.blocks LIMIT 10";
         test(actual, expected);
 
         // join node -> limit node -> build
         let actual = chain("base")
             .select("transations")
-            .left_join_as("blocks", "B")
+            .left_join_as(Some("base"), "blocks", "B")
             .limit(10)
             .build();
         let expected = "SELECT * FROM base.transations LEFT JOIN blocks AS B LIMIT 10";
@@ -226,11 +226,11 @@ mod tests {
         // join constraint node -> limit node -> build
         let actual = chain("mina")
             .select("Foo")
-            .join("Bar")
+            .join(Some("mina"),"Bar")
             .on("Foo.id = Bar.id")
             .limit(10)
             .build();
-        let expected = "SELECT * FROM mina.Foo JOIN Bar ON Foo.id = Bar.id LIMIT 10";
+        let expected = "SELECT * FROM mina.Foo JOIN mina.Bar ON Foo.id = Bar.id LIMIT 10";
         test(actual, expected);
 
         // filter node -> limit node -> build
@@ -259,7 +259,7 @@ mod tests {
         // hash join node -> limit node -> build
         let actual = chain("base")
             .select("Player")
-            .join("PlayerItem")
+            .join(Some("base"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .limit(100)
             .build();
