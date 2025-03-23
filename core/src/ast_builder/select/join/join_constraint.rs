@@ -182,7 +182,7 @@ mod tests {
         // join node -> join constraint node -> build
         let actual = chain("sui")
             .select("checkpoints")
-            .left_join("transations")
+            .left_join(None, "transations")
             .on("checkpoints.id = transations.id")
             .build();
         let expected = "SELECT * FROM  sui.checkpoints LEFT OUTER JOIN transations ON checkpoints.id = transations.id";
@@ -207,10 +207,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::On(
                     col("PlayerItem.flag").is_not_null().try_into().unwrap(),
@@ -225,10 +226,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

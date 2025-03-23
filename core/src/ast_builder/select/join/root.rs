@@ -81,7 +81,7 @@ impl<'a> JoinNode<'a> {
                         columns: vec![],
                     }),
                     index: None,
-                    existing_table: false ,
+                    existing_table: false,
                 },
                 None => TableFactor::Table {
                     chain_name: None,
@@ -295,7 +295,7 @@ mod tests {
         // select node -> left join node -> join constraint node
         let actual = chain("mina")
             .select("player")
-            .left_join("item")
+            .left_join(None, "item")
             .on("player.id = item.id")
             .project(vec!["player.id", "item.id"])
             .build();
@@ -362,81 +362,81 @@ mod tests {
             LEFT JOIN Player ON p1.id = Item.player_id";
         test(actual, expected);
 
-        //     let actual = chain("base")
-        //         .select("T tem")
-        //         .left_join("Player")
-        //         .on("Player.id = Item.player_id")
-        //         .left_join_as("Player", "p1")
-        //         .on("p1.id = Item.player_id")
-        //         .left_join_as("Player", "p2")
-        //         .on("p2.id = Item.player_id")
-        //         .left_join_as("Player", "p3")
-        //         .on("p3.id = Item.player_id")
-        //         .join_as("Player", "p4")
-        //         .on("p4.id = Item.player_id AND Item.id > 101")
-        //         .filter("Player.id = 1")
-        //         .build();
-        //     let expected = "
-        //         SELECT * FROM base.Item
-        //         LEFT JOIN Player ON Player.id = Item.player_id
-        //         LEFT JOIN Player p1 ON p1.id = Item.player_id
-        //         LEFT JOIN Player p2 ON p2.id = Item.player_id
-        //         LEFT JOIN Player p3 ON p3.id = Item.player_id
-        //         INNER JOIN Player p4 ON p4.id = Item.player_id AND Item.id > 101
-        //         WHERE Player.id = 1;
-        //     ";
-        //     test(actual, expected);
-        // }
+        let actual = chain("base")
+            .select("T tem")
+            .left_join("Player")
+            .on("Player.id = Item.player_id")
+            .left_join_as("Player", "p1")
+            .on("p1.id = Item.player_id")
+            .left_join_as("Player", "p2")
+            .on("p2.id = Item.player_id")
+            .left_join_as("Player", "p3")
+            .on("p3.id = Item.player_id")
+            .join_as("Player", "p4")
+            .on("p4.id = Item.player_id AND Item.id > 101")
+            .filter("Player.id = 1")
+            .build();
+        let expected = "
+                SELECT * FROM base.Item
+                LEFT JOIN Player ON Player.id = Item.player_id
+                LEFT JOIN Player p1 ON p1.id = Item.player_id
+                LEFT JOIN Player p2 ON p2.id = Item.player_id
+                LEFT JOIN Player p3 ON p3.id = Item.player_id
+                INNER JOIN Player p4 ON p4.id = Item.player_id AND Item.id > 101
+                WHERE Player.id = 1;
+            ";
+        test(actual, expected);
+    }
 
-        // #[test]
-        // fn join_join() {
-        //     // join - join
-        //     let actual = chain("sui").select("Foo").join("Bar").join("Baz").build();
-        //     let expected = "
-        //         SELECT * FROM sui.Foo
-        //         INNER JOIN Bar
-        //         INNER JOIN Baz
-        //         ";
-        //     test(actual, expected);
+    #[test]
+    fn join_join() {
+        // join - join
+        let actual = chain("sui").select("Foo").join("Bar").join("Baz").build();
+        let expected = "
+                SELECT * FROM sui.Foo
+                INNER JOIN Bar
+                INNER JOIN Baz
+                ";
+        test(actual, expected);
 
-        //     // join - join as
-        //     let actual = chain("sui")
-        //         .select("Foo")
-        //         .join("Bar")
-        //         .join_as("sui", "Baz", "B")
-        //         .build();
-        //     let expected = "
-        //         SELECT * FROM sui.Foo
-        //         INNER JOIN sui.Bar
-        //         INNER JOIN sui.Baz  B
-        //         ";
-        //     test(actual, expected);
+        // join - join as
+        let actual = chain("sui")
+            .select("Foo")
+            .join("Bar")
+            .join_as("sui", "Baz", "B")
+            .build();
+        let expected = "
+                SELECT * FROM sui.Foo
+                INNER JOIN sui.Bar
+                INNER JOIN sui.Baz  B
+                ";
+        test(actual, expected);
 
-        //     // join - left join
-        //     let actual = chain("sui")
-        //         .select("Foo")
-        //         .join("Bar")
-        //         .left_join("Baz")
-        //         .build();
-        //     let expected = "
-        //         SELECT * FROM sui.Foo
-        //         INNER JOIN Bar
-        //         LEFT JOIN Baz
-        //         ";
-        //     test(actual, expected);
+        // join - left join
+        let actual = chain("sui")
+            .select("Foo")
+            .join("Bar")
+            .left_join("Baz")
+            .build();
+        let expected = "
+                SELECT * FROM sui.Foo
+                INNER JOIN Bar
+                LEFT JOIN Baz
+                ";
+        test(actual, expected);
 
-        //     // join - left join as
-        //     let actual = chain("sui")
-        //         .select("Foo")
-        //         .join("Bar")
-        //         .left_join_as("Baz", "B")
-        //         .build();
-        //     let expected = "
-        //         SELECT * FROM sui.Foo
-        //         INNER JOIN Bar
-        //         LEFT JOIN Baz B
-        //         ";
-        //     test(actual, expected);
+        // join - left join as
+        let actual = chain("sui")
+            .select("Foo")
+            .join("Bar")
+            .left_join_as("Baz", "B")
+            .build();
+        let expected = "
+                SELECT * FROM sui.Foo
+                INNER JOIN Bar
+                LEFT JOIN Baz B
+                ";
+        test(actual, expected);
 
         // join as - join
         let actual = chain("sui")
