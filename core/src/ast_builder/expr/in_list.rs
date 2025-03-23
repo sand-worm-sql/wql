@@ -121,8 +121,8 @@ mod test {
         test_expr(actual, expected);
 
         // from JoinNode
-        let actual =
-            col("timestamp_ms").in_list(chain("sui").select("checkpoints").join(None,"transations"));
+        let actual = col("timestamp_ms")
+            .in_list(chain("sui").select("checkpoints").join(None, "transations"));
         let expected = "timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations)";
         test_expr(actual, expected);
 
@@ -130,7 +130,7 @@ mod test {
         let actual = col("timestamp_ms").in_list(
             chain("sui")
                 .select("checkpoints")
-                .join(None,"transations")
+                .join(None, "transations")
                 .on("checkpoints.sender = transation.sender"),
         );
         let expected = " timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations ON checkpoints.sender = transation.sender)";
@@ -140,16 +140,17 @@ mod test {
         let actual = col("id").in_list(
             chain("sui")
                 .select("checkpoints")
-                .join(None,"transations")
+                .join(None, "transations")
                 .hash_executor("checkpoints.sender", "transation.sender"),
         );
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -162,10 +163,11 @@ mod test {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

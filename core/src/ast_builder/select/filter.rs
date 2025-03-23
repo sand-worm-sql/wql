@@ -155,16 +155,16 @@ mod tests {
         // join node -> filter node -> build
         let actual = chain("base")
             .select("accounts")
-            .join("transations")
+            .join(Some("base"), "transations")
             .filter("id IS NULL")
             .build();
-        let expected = "SELECT * FROM base.accounts JOIN transations WHERE id IS NULL";
+        let expected = "SELECT * FROM base.accounts JOIN base.transations WHERE id IS NULL";
         test(actual, expected);
 
         // join node -> filter node -> build
         let actual = chain("base")
             .select("transations")
-            .join_as("blocks", "b")
+            .join_as(None, "blocks", "b")
             .filter("hash IS NULL")
             .build();
         let expected = "SELECT * FROM base.transations JOIN blocks AS b WHERE hash IS NULL";
@@ -173,7 +173,7 @@ mod tests {
         // join node -> filter node -> build
         let actual = chain("base")
             .select("transations")
-            .left_join("blocks")
+            .left_join(None, "blocks")
             .filter("hash IS NULL")
             .build();
         let expected = "SELECT * FROM base.transations LEFT JOIN blocks WHERE hash IS NULL";
@@ -182,7 +182,7 @@ mod tests {
         // join node -> filter node -> build
         let actual = chain("base")
             .select("transations")
-            .left_join_as("blocks", "b")
+            .left_join_as(None, "blocks", "b")
             .filter("hash IS NULL")
             .build();
         let expected = "SELECT * FROM base.transations LEFT JOIN blocks AS b WHERE hash IS NULL";
@@ -191,27 +191,29 @@ mod tests {
         // join constraint node -> filter node -> build
         let actual = chain("base")
             .select("dex")
-            .join("pool")
+            .join(Some("base"), "pool")
             .on("pool.name = dex.name")
             .filter("fee IS NULL")
             .build();
-        let expected = "SELECT * FROM base.dex JOIN pool ON pool.name = dex.name WHERE fee IS NULL";
+        let expected =
+            "SELECT * FROM base.dex JOIN base.pool ON pool.name = dex.name WHERE fee IS NULL";
         test(actual, expected);
 
         // hash join node -> filter node -> build
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"),"PlayerItem")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .filter("PlayerItem.amount > 10")
             .build();
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -224,10 +226,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

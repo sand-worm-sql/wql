@@ -59,9 +59,10 @@ pub enum IndexItem {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TableFactor {
     Table {
-        chain_name: String,
+        chain_name: Option<String>,
         name: String,
         alias: Option<TableAlias>,
+        existing_table: bool,
         /// Query planner result
         index: Option<IndexItem>,
     },
@@ -618,13 +619,14 @@ mod tests {
                 projection: vec![SelectItem::Wildcard],
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "base".to_owned(),
+                        chain_name: Some("base".to_owned()),
                         name: "FOO".to_owned(),
                         alias: Some(TableAlias {
                             name: "F".to_owned(),
                             columns: Vec::new(),
                         }),
                         index: None,
+                        existing_table: false,
                     },
                     joins: Vec::new(),
                 },
@@ -656,13 +658,14 @@ mod tests {
                 projection: vec![SelectItem::Wildcard],
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "base".to_owned(),
+                        chain_name: Some("base".to_owned()),
                         name: "FOO".to_owned(),
                         alias: Some(TableAlias {
                             name: "F".to_owned(),
                             columns: Vec::new(),
                         }),
                         index: None,
+                        existing_table: false,
                     },
                     joins: Vec::new(),
                 },
@@ -689,20 +692,22 @@ mod tests {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
-                    chain_name: "base".to_owned(),
+                    chain_name: Some("base".to_owned()),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
                         columns: Vec::new(),
                     }),
                     index: None,
+                    existing_table: false,
                 },
                 joins: vec![Join {
                     relation: TableFactor::Table {
-                        chain_name: "base".to_owned(),
+                        chain_name: Some("base".to_owned()),
                         name: "PlayerItem".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     join_operator: JoinOperator::Inner(JoinConstraint::None),
                     join_executor: JoinExecutor::NestedLoop,
@@ -739,20 +744,22 @@ mod tests {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
-                    chain_name: "base".to_owned(),
+                    chain_name: Some("base".to_owned()),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
                         columns: Vec::new(),
                     }),
                     index: None,
+                    existing_table: false,
                 },
                 joins: vec![Join {
                     relation: TableFactor::Table {
-                        chain_name: "base".to_owned(),
+                        chain_name: Some("base".to_owned()),
                         name: "PlayerItem".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     join_operator: JoinOperator::Inner(JoinConstraint::None),
                     join_executor: JoinExecutor::NestedLoop,
@@ -804,13 +811,14 @@ mod tests {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
-                    chain_name: "base".to_owned(),
+                    chain_name: Some("base".to_owned()),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
                         columns: Vec::new(),
                     }),
                     index: None,
+                    existing_table: false,
                 },
                 joins: Vec::new(),
             },
@@ -830,10 +838,11 @@ mod tests {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
-                    chain_name: "base".to_owned(),
+                    chain_name: Some("base".to_owned()),
                     name: "FOO".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 joins: Vec::new(),
             },
@@ -856,13 +865,14 @@ mod tests {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
-                    chain_name: "chain".to_owned(),
+                    chain_name: Some("chain".to_owned()),
                     name: "FOO".to_owned(),
                     alias: Some(TableAlias {
                         name: "F".to_owned(),
                         columns: Vec::new(),
                     }),
                     index: None,
+                    existing_table: false,
                 },
                 joins: Vec::new(),
             },
@@ -882,10 +892,11 @@ mod tests {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
                 relation: TableFactor::Table {
-                    chain_name: "base".to_owned(),
+                    chain_name: Some("base".to_owned()),
                     name: "FOO".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 joins: Vec::new(),
             },
@@ -940,13 +951,14 @@ mod tests {
         let actual = r#""chain.FOO" AS "F""#;
         let expected = TableWithJoins {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "FOO".to_owned(),
                 alias: Some(TableAlias {
                     name: "F".to_owned(),
                     columns: Vec::new(),
                 }),
                 index: None,
+                existing_table: false,
             },
             joins: Vec::new(),
         }
@@ -959,13 +971,14 @@ mod tests {
         let actual = "base.FOO AS F";
         let expected = TableWithJoins {
             relation: TableFactor::Table {
-                chain_name: "base".to_owned(),
+                chain_name: Some("base".to_owned()),
                 name: "FOO".to_owned(),
                 alias: Some(TableAlias {
                     name: "F".to_owned(),
                     columns: Vec::new(),
                 }),
                 index: None,
+                existing_table: false,
             },
             joins: Vec::new(),
         }
@@ -977,13 +990,14 @@ mod tests {
     fn to_sql_table_factor() {
         let actual = r#""chain.FOO" AS "F""#;
         let expected = TableFactor::Table {
-            chain_name: "chain".to_owned(),
+            chain_name: Some("chain".to_owned()),
             name: "FOO".to_owned(),
             alias: Some(TableAlias {
                 name: "F".to_owned(),
                 columns: Vec::new(),
             }),
             index: None,
+            existing_table: false,
         }
         .to_sql();
         assert_eq!(actual, expected);
@@ -995,10 +1009,11 @@ mod tests {
                     projection: vec![SelectItem::Wildcard],
                     from: TableWithJoins {
                         relation: TableFactor::Table {
-                            chain_name: "chain".to_owned(),
+                            chain_name: Some("chain".to_owned()),
                             name: "FOO".to_owned(),
                             alias: None,
                             index: None,
+                            existing_table: false,
                         },
                         joins: Vec::new(),
                     },
@@ -1045,13 +1060,14 @@ mod tests {
     fn to_sql_unquoted_table_factor() {
         let actual = "chain.FOO AS F";
         let expected = TableFactor::Table {
-            chain_name: "chain".to_owned(),
+            chain_name: Some("chain".to_owned()),
             name: "FOO".to_owned(),
             alias: Some(TableAlias {
                 name: "F".to_owned(),
                 columns: Vec::new(),
             }),
             index: None,
+            existing_table: false,
         }
         .to_sql_unquoted();
         assert_eq!(actual, expected);
@@ -1063,10 +1079,11 @@ mod tests {
                     projection: vec![SelectItem::Wildcard],
                     from: TableWithJoins {
                         relation: TableFactor::Table {
-                            chain_name: "chain".to_owned(),
+                            chain_name: Some("chain".to_owned()),
                             name: "FOO".to_owned(),
                             alias: None,
                             index: None,
+                            existing_table: false,
                         },
                         joins: Vec::new(),
                     },
@@ -1136,10 +1153,11 @@ mod tests {
         let actual = r#"INNER JOIN "chain.PlayerItem""#;
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::Inner(JoinConstraint::None),
             join_executor: JoinExecutor::NestedLoop,
@@ -1150,10 +1168,11 @@ mod tests {
         let actual = r#"INNER JOIN "chain.PlayerItem" ON "PlayerItem"."user_id" = "Player"."id""#;
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::Inner(JoinConstraint::On(expr(
                 r#""PlayerItem"."user_id" = "Player"."id""#,
@@ -1166,10 +1185,11 @@ mod tests {
         let actual = r#"LEFT OUTER JOIN "chain.PlayerItem""#;
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
             join_executor: JoinExecutor::NestedLoop,
@@ -1181,10 +1201,11 @@ mod tests {
             r#"LEFT OUTER JOIN "chain.PlayerItem" ON "PlayerItem"."user_id" = "Player"."id""#;
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
             join_executor: JoinExecutor::Hash {
@@ -1199,10 +1220,11 @@ mod tests {
         let actual = r#"LEFT OUTER JOIN "chain.PlayerItem" ON "PlayerItem"."age" > "Player"."age" AND "PlayerItem"."user_id" = "Player"."id" AND "PlayerItem"."amount" > 10 AND "PlayerItem"."amount" * 3 <= 2"#;
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::LeftOuter(JoinConstraint::On(expr(
                 r#""PlayerItem"."age" > "Player"."age""#,
@@ -1224,10 +1246,11 @@ mod tests {
         let actual = "INNER JOIN chain.PlayerItem";
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::Inner(JoinConstraint::None),
             join_executor: JoinExecutor::NestedLoop,
@@ -1238,10 +1261,11 @@ mod tests {
         let actual = "INNER JOIN chain.PlayerItem ON PlayerItem.user_id = Player.id AND PlayerItem.group_id = Player.group_id";
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::Inner(JoinConstraint::On(expr(
                 "PlayerItem.user_id = Player.id",
@@ -1258,10 +1282,11 @@ mod tests {
         let actual = "LEFT OUTER JOIN chain.PlayerItem";
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
             join_executor: JoinExecutor::NestedLoop,
@@ -1272,10 +1297,11 @@ mod tests {
         let actual = "LEFT OUTER JOIN chain.PlayerItem ON PlayerItem.user_id = Player.id";
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
             join_executor: JoinExecutor::Hash {
@@ -1290,10 +1316,11 @@ mod tests {
         let actual = "LEFT OUTER JOIN chain.PlayerItem ON PlayerItem.age > Player.age AND PlayerItem.user_id = Player.id AND PlayerItem.amount > 10 AND PlayerItem.amount * 3 <= 2";
         let expected = Join {
             relation: TableFactor::Table {
-                chain_name: "chain".to_owned(),
+                chain_name: Some("chain".to_owned()),
                 name: "PlayerItem".to_owned(),
                 alias: None,
                 index: None,
+                existing_table: false,
             },
             join_operator: JoinOperator::LeftOuter(JoinConstraint::On(expr(
                 "PlayerItem.age > Player.age",

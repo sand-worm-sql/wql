@@ -174,7 +174,11 @@ mod tests {
         test(actual, expected);
 
         // join node -> offset node -> build
-        let actual = chain("base").select("Foo").join(None,"Bar").offset(10).build();
+        let actual = chain("base")
+            .select("Foo")
+            .join(None, "Bar")
+            .offset(10)
+            .build();
         let expected = "SELECT * FROM base.Foo JOIN Bar OFFSET 10";
         test(actual, expected);
 
@@ -190,7 +194,7 @@ mod tests {
         // join node -> offset node -> build
         let actual = chain("mina")
             .select("Foo")
-            .left_join(None,"Bar")
+            .left_join(None, "Bar")
             .on("Foo.id = Bar.id")
             .offset(10)
             .build();
@@ -210,7 +214,7 @@ mod tests {
         // join constraint node -> offset node -> build
         let actual = chain("mina")
             .select("Foo")
-            .join(Some("mina"),"Bar")
+            .join(Some("mina"), "Bar")
             .on("Foo.id = Bar.id")
             .offset(10)
             .build();
@@ -238,17 +242,18 @@ mod tests {
         // hash join node -> offset node -> build
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"),"PlayerItem")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .offset(100)
             .build();
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -261,10 +266,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

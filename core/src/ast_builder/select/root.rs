@@ -51,14 +51,14 @@ impl<'a> SelectNode<'a> {
     pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.?to_owned(),
+            chain_name.to_owned(),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
         )
     }
 
-    pub fn join_as(self, chain_name: Option<&str>,  table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
             chain_name.to_owned(),
@@ -78,7 +78,12 @@ impl<'a> SelectNode<'a> {
         )
     }
 
-    pub fn left_join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn left_join_as(
+        self,
+        chain_name: Option<&str>,
+        table_name: &str,
+        alias: &str,
+    ) -> JoinNode<'a> {
         JoinNode::new(
             self,
             chain_name.to_owned(),
@@ -107,10 +112,11 @@ impl<'a> Prebuild<Select> for SelectNode<'a> {
 
         let relation = match self.chain_node.chain_query_type {
             ChainQueryType::Table => TableFactor::Table {
-                chain_name: self.chain_node.chain_name,
+                chain_name: Some(self.chain_node.chain_name),
                 name: self.chain_node.entity_name.unwrap(),
                 alias,
                 index,
+                existing_table: false,
             },
             ChainQueryType::Dictionary(dict) => TableFactor::Dictionary {
                 dict,

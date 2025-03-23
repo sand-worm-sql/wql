@@ -226,7 +226,7 @@ mod tests {
         // join constraint node -> limit node -> build
         let actual = chain("mina")
             .select("Foo")
-            .join(Some("mina"),"Bar")
+            .join(Some("mina"), "Bar")
             .on("Foo.id = Bar.id")
             .limit(10)
             .build();
@@ -266,10 +266,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "base".to_owned(),
+                    chain_name: Some("base".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -282,10 +283,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "base".to_owned(),
+                        chain_name: Some("base".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

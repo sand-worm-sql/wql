@@ -143,13 +143,16 @@ mod test {
         let expected = "SELECT * FROM sui.checkpoints";
         test_query(actual, expected);
 
-        let actual = chain("sui").select("blocks").join(None,"chackpoints").into();
+        let actual = chain("sui")
+            .select("blocks")
+            .join(None, "chackpoints")
+            .into();
         let expected = "SELECT * FROM sui.blocks JOIN chackpoints";
         test_query(actual, expected);
 
         let actual = chain("sui")
             .select("transations")
-            .join(None,"checkpoints")
+            .join(None, "checkpoints")
             .on("transations.digest = checkpoints.digest")
             .into();
         let expected = "SELECT * FROM sui.transations JOIN checkpoints ON transation.digest = checkpoints.digest";
@@ -157,16 +160,17 @@ mod test {
 
         let actual: QueryNode = chain("sui")
             .select("Player")
-            .join(None,"PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .into();
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -179,10 +183,11 @@ mod test {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

@@ -446,10 +446,11 @@ mod tests {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
-                                chain_name: "base".to_owned(),
+                                chain_name: Some("base".to_owned()),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
+                                existing_table: false
                             },
                             joins: Vec::new(),
                         },
@@ -475,10 +476,11 @@ mod tests {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
-                                chain_name: "base".to_owned(),
+                                chain_name: Some("base".to_owned()),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
+                                existing_table: false
                             },
                             joins: Vec::new(),
                         },
@@ -503,10 +505,11 @@ mod tests {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
-                                chain_name: "base".to_owned(),
+                                chain_name: Some("base".to_owned()),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
+                                existing_table: false
                             },
                             joins: Vec::new(),
                         },
@@ -531,10 +534,11 @@ mod tests {
                         projection: vec![SelectItem::Wildcard],
                         from: TableWithJoins {
                             relation: TableFactor::Table {
-                                chain_name: "base".to_owned(),
+                                chain_name: Some("base".to_owned()),
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
+                                existing_table: false
                             },
                             joins: Vec::new(),
                         },
@@ -558,10 +562,11 @@ mod tests {
                     projection: vec![SelectItem::Wildcard],
                     from: TableWithJoins {
                         relation: TableFactor::Table {
-                            chain_name: "base".to_owned(),
+                            chain_name: Some("base".to_owned()),
                             name: "FOO".to_owned(),
                             alias: None,
                             index: None,
+                            existing_table: false
                         },
                         joins: Vec::new(),
                     },

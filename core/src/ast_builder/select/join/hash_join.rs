@@ -172,7 +172,7 @@ mod tests {
     fn hash_join() {
         let actual = chain("sui")
             .select("transaction")
-            .join(None,"checkpoints")
+            .join(None, "checkpoints")
             .hash_executor("transations.digest", col("checkpoints.transaction_digest"))
             .build();
         let expected = {
@@ -217,7 +217,7 @@ mod tests {
 
         let actual = chain("base")
             .select("Player")
-            .join(None,"PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .hash_filter("PlayerItem.amount > 10")
             .hash_filter("PlayerItem.amount * 3 <= 2")
@@ -269,7 +269,7 @@ mod tests {
         // join -> hash -> derived subquery
         let actual = chain("base")
             .select("Foo")
-            .join(None,"Bar")
+            .join(None, "Bar")
             .hash_executor("Foo.id", "Bar.id")
             .alias_as("Sub")
             .select()

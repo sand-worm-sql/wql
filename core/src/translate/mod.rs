@@ -211,7 +211,7 @@ fn translate_object_name(sql_object_name: &SqlObjectName) -> Result<String> {
         .ok_or_else(|| TranslateError::UnreachableEmptyObject.into())
 }
 
-fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(String, String)> {
+fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(Option<String>, String)> {
     let sql_object_name = &sql_object_name.0;
     if sql_object_name.len() > 3 {
         let compound_object_name = translate_idents(sql_object_name).join(".");
@@ -220,11 +220,8 @@ fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(String,
     }
 
     match (sql_object_name.first(), sql_object_name.get(1)) {
-        (Some(schema), Some(table)) => Ok((schema.value.to_owned(), table.value.to_owned())),
-        (Some(table), None) => {
-            println!("sql_object_name: {:#?}", sql_object_name);
-            Ok(("".to_owned(), table.value.to_owned()))
-        }
+        (Some(chain), Some(table)) => Ok((Some(chain.value.to_owned()), table.value.to_owned())),
+        (Some(table), None) => Ok((None, table.value.to_owned())),
         _ => Err(TranslateError::UnreachableEmptyObject.into()),
     }
 }

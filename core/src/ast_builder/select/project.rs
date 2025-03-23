@@ -231,17 +231,18 @@ mod tests {
         // // hash join node -> project node -> build
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"),"PlayerItem")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .project("Player.name, PlayerItem.name")
             .build();
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -256,10 +257,11 @@ mod tests {
                     .unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

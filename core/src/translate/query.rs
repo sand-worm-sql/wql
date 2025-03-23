@@ -208,11 +208,13 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                 }),
                 _ => {
                     let (chain_name, table_name) = translate_chain_and_table(name)?;
+                    let existing_table = chain_name.is_none();
                     Ok(TableFactor::Table {
-                        chain_name: chain_name,
+                        chain_name: chain_name.to_owned(),
                         name: table_name,
                         alias,
-                        index: None, // query execution plan
+                        index: None,
+                        existing_table, // query execution plan
                     })
                 }
             }

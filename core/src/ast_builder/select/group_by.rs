@@ -133,16 +133,16 @@ mod tests {
         // join node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join("trades")
+            .join(Some("sui"), "trades")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM sui.transactions JOIN trades GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions JOIN sui.trades GROUP BY b";
         test(actual, expected);
 
         // join node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join_as(Some("sui"),"trades", "T")
+            .join_as(Some("sui"), "trades", "T")
             .group_by("b")
             .build();
         let expected = "SELECT * FROM sui.transactions JOIN sui.trades AS T GROUP BY b";
@@ -151,25 +151,25 @@ mod tests {
         // join node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .left_join("trades")
+            .left_join(Some("sui"), "trades")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM sui.transactions LEFT JOIN trades GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions LEFT JOIN sui.trades GROUP BY b";
         test(actual, expected);
 
         // join node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .left_join_as("trades", "B")
+            .left_join_as(Some("sui"), "trades", "B")
             .group_by("b")
             .build();
-        let expected = "SELECT * FROM sui.transactions LEFT JOIN trades AS B GROUP BY b";
+        let expected = "SELECT * FROM sui.transactions LEFT JOIN sui.trades AS B GROUP BY b";
         test(actual, expected);
 
         // join constraint node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join("trades")
+            .join(None, "trades")
             .on("transactions.sender = trades.sender")
             .group_by("b")
             .build();
@@ -192,17 +192,18 @@ mod tests {
         // hash join node -> group by node -> build
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .group_by("PlayerItem.category")
             .build();
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: "sui".to_owned(),
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -215,10 +216,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: "sui".to_owned(),
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },
