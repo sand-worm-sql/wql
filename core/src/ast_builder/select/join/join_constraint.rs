@@ -52,40 +52,45 @@ impl<'a> JoinConstraintNode<'a> {
         }
     }
 
-    pub fn join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
+    pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
         )
     }
 
-    pub fn join_as(self, chain_name: &str, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
         )
     }
 
-    pub fn left_join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
+    pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Left,
         )
     }
 
-    pub fn left_join_as(self, chain_name: &str, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn left_join_as(
+        self,
+        chain_name: Option<&str>,
+        table_name: &str,
+        alias: &str,
+    ) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,

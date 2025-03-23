@@ -51,7 +51,7 @@ impl<'a> SelectNode<'a> {
     pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
@@ -61,7 +61,7 @@ impl<'a> SelectNode<'a> {
     pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
@@ -71,7 +71,7 @@ impl<'a> SelectNode<'a> {
     pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Left,
@@ -86,7 +86,7 @@ impl<'a> SelectNode<'a> {
     ) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,
