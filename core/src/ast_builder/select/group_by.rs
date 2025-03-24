@@ -142,7 +142,7 @@ mod tests {
         // join node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join_as(Some("sui"), "trades", "T")
+            .join_as(Some("suiii"), "trades", "T")
             .group_by("b")
             .build();
         let expected = "SELECT * FROM sui.transactions JOIN sui.trades AS T GROUP BY b";
@@ -169,7 +169,7 @@ mod tests {
         // join constraint node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join(None, "trades")
+            .join(None, "trads")
             .on("transactions.sender = trades.sender")
             .group_by("b")
             .build();

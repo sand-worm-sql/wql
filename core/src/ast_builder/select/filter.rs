@@ -139,7 +139,7 @@ mod tests {
                 right: Box::new(Expr::Identifier("col2".to_owned())),
             })
             .build();
-        let expected = "SELECT * FROM sui.transations WHERE col1 > col2";
+        let expected = "SELECT * FROM base.transations WHERE col1 > col2";
         test(actual, expected);
 
         // filter node -> filter node -> build
@@ -202,7 +202,7 @@ mod tests {
         // hash join node -> filter node -> build
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"), "PlayerItem")
+            .join(Some("base"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .filter("PlayerItem.amount > 10")
             .build();
