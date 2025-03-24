@@ -20,7 +20,7 @@ pub enum DataType {
     Uint64,
     Uint128,
     Uint256,
-    Bytes,
+    Bytea,
     Text,
     Date,
     Timestamp,

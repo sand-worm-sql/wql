@@ -365,7 +365,15 @@ impl TableFactor {
         };
 
         match (self, quoted) {
-            (TableFactor::Table { name,chain_name, alias, .. }, true) =>  {
+            (
+                TableFactor::Table {
+                    name,
+                    chain_name,
+                    alias,
+                    ..
+                },
+                true,
+            ) => {
                 let table_prefix = match chain_name {
                     Some(chain) => format!(r#""{}.{}""#, chain, name),
                     None => format!(r#""{}""#, name),
@@ -373,9 +381,17 @@ impl TableFactor {
                 match alias {
                     Some(alias) => format!("{} {}", table_prefix, alias.to_sql_with(quoted)),
                     None => table_prefix,
-                 }
-            },
-            (TableFactor::Table { name, chain_name, alias, .. }, false) =>  {
+                }
+            }
+            (
+                TableFactor::Table {
+                    name,
+                    chain_name,
+                    alias,
+                    ..
+                },
+                false,
+            ) => {
                 let table_prefix = match chain_name {
                     Some(chain) => format!(r#"{}.{}"#, chain, name),
                     None => format!(r#""{}""#, name),
@@ -383,8 +399,8 @@ impl TableFactor {
                 match alias {
                     Some(alias) => format!("{} {}", table_prefix, alias.to_sql_with(quoted)),
                     None => table_prefix,
-                 }
-            },
+                }
+            }
             // (TableFactor::Table { name, alias, .. }, true) => match alias {
             //     Some(alias) => format!(r#""{}" {}"#, name, alias.to_sql_with(quoted)),
             //     None => format!(r#""{name}""#),
@@ -707,7 +723,7 @@ mod tests {
 
     #[test]
     fn to_sql_set_expr() {
-        let actual = r#"SELECT * FROM "base.FOO" AS "F" INNER JOIN "PlayerItem""#.to_owned();
+        let actual = r#"SELECT * FROM "base.FOO" AS "F" INNER JOIN "base.PlayerItem""#.to_owned();
         let expected = SetExpr::Select(Box::new(Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
@@ -759,7 +775,7 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_set_expr() {
-        let actual = "SELECT * FROM base.FOO AS F INNER JOIN PlayerItem".to_owned();
+        let actual = "SELECT * FROM base.FOO AS F INNER JOIN base.PlayerItem".to_owned();
         let expected = SetExpr::Select(Box::new(Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
