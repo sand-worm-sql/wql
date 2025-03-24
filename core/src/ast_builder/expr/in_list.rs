@@ -131,9 +131,9 @@ mod test {
             chain("sui")
                 .select("checkpoints")
                 .join(None, "transations")
-                .on("checkpoints.sender = transation.sender"),
+                .on("checkpoints.sender = transations.sender"),
         );
-        let expected = " timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations ON checkpoints.sender = transation.sender)";
+        let expected = " timestamp_ms IN (SELECT * FROM sui.checkpoints JOIN transations ON checkpoints.sender = transations.sender)";
         test_expr(actual, expected);
 
         // from HashJoinNode
@@ -141,21 +141,21 @@ mod test {
             chain("sui")
                 .select("checkpoints")
                 .join(None, "transations")
-                .hash_executor("checkpoints.sender", "transation.sender"),
+                .hash_executor("checkpoints.sender", "transations.sender"),
         );
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
                     chain_name: None,
-                    name: "PlayerItem".to_owned(),
+                    name: "transations".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
-                    key_expr: col("PlayerItem.user_id").try_into().unwrap(),
-                    value_expr: col("Player.id").try_into().unwrap(),
+                    key_expr: col("checkpoints.sender").try_into().unwrap(),
+                    value_expr: col("transations.sender").try_into().unwrap(),
                     where_clause: None,
                 },
             };
@@ -163,8 +163,8 @@ mod test {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
-                        name: "Player".to_owned(),
+                        chain_name: Some("sui".to_owned()),
+                        name: "checkpoints".to_owned(),
                         alias: None,
                         index: None,
                         existing_table: false,
@@ -199,7 +199,7 @@ mod test {
                 .group_by("id, (a + name)"),
         );
         let expected =
-            "id NOT IN (SELECT * FROM baese.erc20 WHERE id IS NULL GROUP BY id, (a + name))";
+            "id NOT IN (SELECT * FROM base.erc20 WHERE volume_24h IS NULL GROUP BY id, (a + name))";
         test_expr(actual, expected);
 
         // from HavingNode
@@ -212,7 +212,7 @@ mod test {
         );
         let expected = "
             id IN (
-                SELECT * FROM Bar
+                SELECT * FROM sui.transations
                 WHERE id IS NULL
                 GROUP BY id, (a + name)
                 HAVING COUNT(id) > 10
@@ -237,18 +237,18 @@ mod test {
         test_expr(actual, expected);
 
         // from OffsetNode
-        let actual = col("id").not_in_list(chain("sui").select("transations").offset(10));
+        let actual = col("tnx").not_in_list(chain("sui").select("transations").offset(10));
         let expected = "tnx NOT IN (SELECT * FROM sui.transations OFFSET 10)";
         test_expr(actual, expected);
 
         // from OffsetLimitNode
-        let actual = col("id").in_list(chain("sui").select("transations").offset(1).limit(3));
+        let actual = col("tnx").in_list(chain("sui").select("transations").offset(1).limit(3));
         let expected = "tnx IN (SELECT * FROM sui.transations OFFSET 1 LIMIT 3)";
         test_expr(actual, expected);
 
         // from ProjectNode
         let actual = col("tnx").in_list(chain("sui").select("transations").project("tnx"));
-        let expected = "tnx IN (SELECT name FROM sui.transations)";
+        let expected = "tnx IN (SELECT tnx FROM sui.transations)";
         test_expr(actual, expected);
 
         // from OrderByNode
