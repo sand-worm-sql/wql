@@ -266,11 +266,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: true,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },
