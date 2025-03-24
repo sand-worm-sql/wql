@@ -20,7 +20,6 @@ use {
 };
 
 pub fn translate_query(sql_query: &SqlQuery) -> Result<Query> {
-    // println!("translate_query: {:#?}", sql_query);
     let SqlQuery {
         body,
         order_by,

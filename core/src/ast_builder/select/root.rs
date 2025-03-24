@@ -49,7 +49,6 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
-        println!("chain_name: {:?}, table_name: {}", chain_name, table_name);
         JoinNode::new(
             self,
             chain_name.map(|name| name.to_owned()),
@@ -60,7 +59,6 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
-        println!("\n chain_name: {:?}, table_name: {}", chain_name, table_name);
         JoinNode::new(
             self,
             chain_name.map(|name| name.to_owned()),
@@ -71,7 +69,6 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
-        println!("\n chain_name: {:?}, table_name: {}", chain_name, table_name);
         JoinNode::new(
             self,
             chain_name.map(|name| name.to_owned()),
@@ -87,7 +84,6 @@ impl<'a> SelectNode<'a> {
         table_name: &str,
         alias: &str,
     ) -> JoinNode<'a> {
-        println!("\n chain_name: {:?}, table_name: {}", chain_name, table_name);
         JoinNode::new(
             self,
             chain_name.map(|name| name.to_owned()),

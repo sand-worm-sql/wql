@@ -200,8 +200,7 @@ fn translate_table_with_join(table: &TableWithJoins) -> Result<String> {
 fn translate_object_name(sql_object_name: &SqlObjectName) -> Result<String> {
     let sql_object_name = &sql_object_name.0;
     if sql_object_name.len() > 2 {
-        let compound_object_name = translate_idents(sql_object_name).join(".");
-        println!("compound_object_name: {}", compound_object_name);
+        let compound_object_name = translate_idents(sql_object_name).join("."); 
         return Err(TranslateError::CompoundObjectNotSupported(compound_object_name).into());
     }
 
@@ -215,7 +214,6 @@ fn translate_chain_and_table(sql_object_name: &SqlObjectName) -> Result<(Option<
     let sql_object_name = &sql_object_name.0;
     if sql_object_name.len() > 3 {
         let compound_object_name = translate_idents(sql_object_name).join(".");
-        println!("compound_object_name: {}", compound_object_name);
         return Err(TranslateError::CompoundObjectNotSupported(compound_object_name).into());
     }
 
