@@ -365,14 +365,34 @@ impl TableFactor {
         };
 
         match (self, quoted) {
-            (TableFactor::Table { name, alias, .. }, true) => match alias {
-                Some(alias) => format!(r#""{}" {}"#, name, alias.to_sql_with(quoted)),
-                None => format!(r#""{name}""#),
+            (TableFactor::Table { name,chain_name, alias, .. }, true) =>  {
+                let table_prefix = match chain_name {
+                    Some(chain) => format!(r#""{}.{}""#, chain, name),
+                    None => format!(r#""{}""#, name),
+                };
+                match alias {
+                    Some(alias) => format!("{} {}", table_prefix, alias.to_sql_with(quoted)),
+                    None => table_prefix,
+                 }
             },
-            (TableFactor::Table { name, alias, .. }, false) => match alias {
-                Some(alias) => format!("{} {}", name, alias.to_sql_with(quoted)),
-                None => name.to_owned(),
+            (TableFactor::Table { name, chain_name, alias, .. }, false) =>  {
+                let table_prefix = match chain_name {
+                    Some(chain) => format!(r#"{}.{}"#, chain, name),
+                    None => format!(r#""{}""#, name),
+                };
+                match alias {
+                    Some(alias) => format!("{} {}", table_prefix, alias.to_sql_with(quoted)),
+                    None => table_prefix,
+                 }
             },
+            // (TableFactor::Table { name, alias, .. }, true) => match alias {
+            //     Some(alias) => format!(r#""{}" {}"#, name, alias.to_sql_with(quoted)),
+            //     None => format!(r#""{name}""#),
+            // },
+            // (TableFactor::Table { name, alias, .. }, false) => match alias {
+            //     Some(alias) => format!("{} {}", name, alias.to_sql_with(quoted)),
+            //     None => name.to_owned(),
+            // },
             (TableFactor::Derived { subquery, alias }, _) => {
                 format!(
                     "({}) {}",

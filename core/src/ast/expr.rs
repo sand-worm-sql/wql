@@ -538,7 +538,7 @@ mod tests {
                                 name: "FOO".to_owned(),
                                 alias: None,
                                 index: None,
-                                existing_table: false
+                                existing_table:false
                             },
                             joins: Vec::new(),
                         },
