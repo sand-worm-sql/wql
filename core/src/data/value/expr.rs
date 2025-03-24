@@ -51,7 +51,7 @@ impl TryFrom<Value> for Expr {
                 BigDecimal::from_u128(v).ok_or(ValueToExprConversionFailure)?,
             )),
             Value::Str(v) => Expr::Literal(AstLiteral::QuotedString(v)),
-            Value::Bytes(v) => Expr::Literal(AstLiteral::HexString(hex::encode(v))),
+            Value::Bytea(v) => Expr::Literal(AstLiteral::HexString(hex::encode(v))),
             Value::Date(v) => Expr::TypedString {
                 data_type: DataType::Date,
                 value: v.to_string(),
@@ -196,7 +196,7 @@ mod tests {
             Ok(Expr::Literal(AstLiteral::QuotedString("data".to_owned())))
         );
         assert_eq!(
-            Value::Bytes(hex::decode("1234").unwrap()).try_into(),
+            Value::Bytea(hex::decode("1234").unwrap()).try_into(),
             Ok(Expr::Literal(AstLiteral::HexString("1234".to_owned())))
         );
         assert_eq!(

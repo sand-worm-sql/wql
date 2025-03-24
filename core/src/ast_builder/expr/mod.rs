@@ -368,15 +368,15 @@ pub fn uuid<'a, T: Into<Cow<'a, str>>>(uuid: T) -> ExprNode<'a> {
     }
 }
 
-/// Returns an AST ExprNode containing the provided Bytes.
+/// Returns an AST ExprNode containing the provided Bytea.
 ///
 /// # Arguments
-/// * `bytes` - A byte array to be converted to a Bytes AST node.
+/// * `bytea` - A byte array to be converted to a Bytea AST node.
 ///
-pub fn bytes<'a, T: AsRef<[u8]>>(bytes: T) -> ExprNode<'a> {
+pub fn bytea<'a, T: AsRef<[u8]>>(bytea: T) -> ExprNode<'a> {
     ExprNode::TypedString {
-        data_type: DataType::Bytes,
-        value: hex::encode(bytes).into(),
+        data_type: DataType::Bytea,
+        value: hex::encode(bytea).into(),
     }
 }
 
@@ -395,7 +395,7 @@ mod tests {
         crate::{
             ast::Expr,
             ast_builder::{
-                bytes, chain, col, date, expr, null, num, subquery, test_expr, text, time,
+                bytea, chain, col, date, expr, null, num, subquery, test_expr, text, time,
                 timestamp, uuid, QueryNode,
             },
         },
@@ -479,13 +479,13 @@ mod tests {
         let expected = "UUID '936DA01F9ABD4d9d80C702AF85C822A8'";
         test_expr(actual, expected);
 
-        let actual = bytes(b"hello world");
-        let expected = "BYTES '68656c6c6f20776f726c64'";
+        let actual = bytea(b"hello world");
+        let expected = "BYTEA '68656c6c6f20776f726c64'";
         test_expr(actual, expected);
 
         let actual = subquery(
             chain("sui")
-                .select("trasactions")
+                .select("transactions")
                 .filter("sender IS NOT NULL"),
         );
         let expected = "(SELECT * FROM sui.transactions WHERE sender IS NOT NULL)";

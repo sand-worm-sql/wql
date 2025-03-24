@@ -200,7 +200,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name:None,
+                        chain_name: None,
                         name: "transactions".to_owned(),
                         alias: None,
                         index: None,

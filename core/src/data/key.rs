@@ -11,7 +11,7 @@ use {
 
 #[derive(ThisError, Debug, PartialEq, Eq, Serialize)]
 pub enum KeyError {
-    #[error("FLOAT data type cannot be converted to Big-Endian bytes for comparison")]
+    #[error("FLOAT data type cannot be converted to Big-Endian bytea for comparison")]
     FloatToCmpBigEndianNotSupported,
 
     #[error("MAP data type cannot be used as Key")]
@@ -38,7 +38,7 @@ pub enum Key {
     U128(u128),
     Bool(bool),
     Str(String),
-    Bytes(Vec<u8>),
+    Bytea(Vec<u8>),
     Date(NaiveDate),
     Timestamp(NaiveDateTime),
     Time(NaiveTime),
@@ -62,7 +62,7 @@ impl Ord for Key {
             (Key::U128(l), Key::U128(r)) => l.cmp(r),
             (Key::Bool(l), Key::Bool(r)) => l.cmp(r),
             (Key::Str(l), Key::Str(r)) => l.cmp(r),
-            (Key::Bytes(l), Key::Bytes(r)) => l.cmp(r),
+            (Key::Bytea(l), Key::Bytea(r)) => l.cmp(r),
             (Key::Date(l), Key::Date(r)) => l.cmp(r),
             (Key::Timestamp(l), Key::Timestamp(r)) => l.cmp(r),
             (Key::Time(l), Key::Time(r)) => l.cmp(r),
@@ -108,7 +108,7 @@ impl TryFrom<Value> for Key {
             U64(v) => Ok(Key::U64(v)),
             U128(v) => Ok(Key::U128(v)),
             Str(v) => Ok(Key::Str(v)),
-            Bytes(v) => Ok(Key::Bytes(v)),
+            Bytea(v) => Ok(Key::Bytea(v)),
             Date(v) => Ok(Key::Date(v)),
             Timestamp(v) => Ok(Key::Timestamp(v)),
             Time(v) => Ok(Key::Time(v)),
@@ -144,7 +144,7 @@ impl From<Key> for Value {
             Key::U64(v) => Value::U64(v),
             Key::U128(v) => Value::U128(v),
             Key::Str(v) => Value::Str(v),
-            Key::Bytes(v) => Value::Bytes(v),
+            Key::Bytea(v) => Value::Bytea(v),
             Key::Date(v) => Value::Date(v),
             Key::Timestamp(v) => Value::Timestamp(v),
             Key::Time(v) => Value::Time(v),
@@ -160,7 +160,7 @@ const NONE: u8 = 1;
 
 impl Key {
     /// Key to Big-Endian for comparison purpose
-    pub fn to_cmp_be_bytes(&self) -> Result<Vec<u8>> {
+    pub fn to_cmp_be_bytea(&self) -> Result<Vec<u8>> {
         Ok(match self {
             Key::Bool(v) => {
                 if *v {
@@ -244,7 +244,7 @@ impl Key {
                 .chain(v.as_bytes().iter())
                 .copied()
                 .collect::<Vec<_>>(),
-            Key::Bytes(v) => v.to_vec(),
+            Key::Bytea(v) => v.to_vec(),
             Key::Date(date) => [VALUE]
                 .iter()
                 .chain(date.num_days_from_ce().to_be_bytes().iter())
@@ -310,7 +310,7 @@ impl Key {
             Key::U128(_) => 10,
             Key::Bool(_) => 14,
             Key::Str(_) => 15,
-            Key::Bytes(_) => 16,
+            Key::Bytea(_) => 16,
             Key::Date(_) => 17,
             Key::Timestamp(_) => 18,
             Key::Time(_) => 19,
@@ -368,7 +368,7 @@ mod tests {
         );
         assert_eq!(
             convert("X'1234'"),
-            Ok(Key::Bytes(hex::decode("1234").unwrap())),
+            Ok(Key::Bytea(hex::decode("1234").unwrap())),
         );
         assert!(matches!(convert("DATE '2022-03-03'"), Ok(Key::Date(_))));
         assert!(matches!(convert("TIME '12:30:00'"), Ok(Key::Time(_))));
@@ -434,10 +434,10 @@ mod tests {
         assert!(Key::Bool(true) > Key::Str("zzz".to_owned()));
 
         assert!(Key::Str("def".to_owned()) > Key::Str("abcd".to_owned()));
-        assert!(Key::Str("hi".to_owned()) > Key::Bytes(vec![101]));
+        assert!(Key::Str("hi".to_owned()) > Key::Bytea(vec![101]));
 
-        assert!(Key::Bytes(vec![100]) > Key::Bytes(vec![3]));
-        assert!(Key::Bytes(vec![0]) > Key::Date(date(2023, 1, 1)));
+        assert!(Key::Bytea(vec![100]) > Key::Bytea(vec![3]));
+        assert!(Key::Bytea(vec![0]) > Key::Date(date(2023, 1, 1)));
 
         assert!(Key::Date(date(2023, 3, 1)) > Key::Date(date(1999, 6, 11)));
         assert!(Key::Date(date(2022, 6, 1)) > Key::Timestamp(timestamp(1669000003)));
@@ -484,22 +484,22 @@ mod tests {
             size_l.cmp(&size_r)
         }
 
-        let null = None.to_cmp_be_bytes();
+        let null = None.to_cmp_be_bytea();
 
-        let n1 = Bool(true).to_cmp_be_bytes();
-        let n2 = Bool(false).to_cmp_be_bytes();
+        let n1 = Bool(true).to_cmp_be_bytea();
+        let n2 = Bool(false).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n2, &n2), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Greater);
         assert_eq!(cmp(&n2, &n1), Ordering::Less);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
 
-        let n1 = I8(-100).to_cmp_be_bytes();
-        let n2 = I8(-10).to_cmp_be_bytes();
-        let n3 = I8(0).to_cmp_be_bytes();
-        let n4 = I8(3).to_cmp_be_bytes();
-        let n5 = I8(20).to_cmp_be_bytes();
-        let n6 = I8(100).to_cmp_be_bytes();
+        let n1 = I8(-100).to_cmp_be_bytea();
+        let n2 = I8(-10).to_cmp_be_bytea();
+        let n3 = I8(0).to_cmp_be_bytea();
+        let n4 = I8(3).to_cmp_be_bytea();
+        let n5 = I8(20).to_cmp_be_bytea();
+        let n6 = I8(100).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
@@ -509,12 +509,12 @@ mod tests {
         assert_eq!(cmp(&n6, &n4), Ordering::Greater);
         assert_eq!(cmp(&n4, &null), Ordering::Less);
 
-        let n1 = I16(-100).to_cmp_be_bytes();
-        let n2 = I16(-10).to_cmp_be_bytes();
-        let n3 = I16(0).to_cmp_be_bytes();
-        let n4 = I16(3).to_cmp_be_bytes();
-        let n5 = I16(20).to_cmp_be_bytes();
-        let n6 = I16(100).to_cmp_be_bytes();
+        let n1 = I16(-100).to_cmp_be_bytea();
+        let n2 = I16(-10).to_cmp_be_bytea();
+        let n3 = I16(0).to_cmp_be_bytea();
+        let n4 = I16(3).to_cmp_be_bytea();
+        let n5 = I16(20).to_cmp_be_bytea();
+        let n6 = I16(100).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
@@ -524,12 +524,12 @@ mod tests {
         assert_eq!(cmp(&n6, &n4), Ordering::Greater);
         assert_eq!(cmp(&n4, &null), Ordering::Less);
 
-        let n1 = I32(-100).to_cmp_be_bytes();
-        let n2 = I32(-10).to_cmp_be_bytes();
-        let n3 = I32(0).to_cmp_be_bytes();
-        let n4 = I32(3).to_cmp_be_bytes();
-        let n5 = I32(20).to_cmp_be_bytes();
-        let n6 = I32(100).to_cmp_be_bytes();
+        let n1 = I32(-100).to_cmp_be_bytea();
+        let n2 = I32(-10).to_cmp_be_bytea();
+        let n3 = I32(0).to_cmp_be_bytea();
+        let n4 = I32(3).to_cmp_be_bytea();
+        let n5 = I32(20).to_cmp_be_bytea();
+        let n6 = I32(100).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
@@ -539,12 +539,12 @@ mod tests {
         assert_eq!(cmp(&n6, &n4), Ordering::Greater);
         assert_eq!(cmp(&n4, &null), Ordering::Less);
 
-        let n1 = I64(-123).to_cmp_be_bytes();
-        let n2 = I64(-11).to_cmp_be_bytes();
-        let n3 = I64(0).to_cmp_be_bytes();
-        let n4 = I64(3).to_cmp_be_bytes();
-        let n5 = I64(20).to_cmp_be_bytes();
-        let n6 = I64(100).to_cmp_be_bytes();
+        let n1 = I64(-123).to_cmp_be_bytea();
+        let n2 = I64(-11).to_cmp_be_bytea();
+        let n3 = I64(0).to_cmp_be_bytea();
+        let n4 = I64(3).to_cmp_be_bytea();
+        let n5 = I64(20).to_cmp_be_bytea();
+        let n6 = I64(100).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
@@ -554,12 +554,12 @@ mod tests {
         assert_eq!(cmp(&n6, &n4), Ordering::Greater);
         assert_eq!(cmp(&n4, &null), Ordering::Less);
 
-        let n1 = I128(-123).to_cmp_be_bytes();
-        let n2 = I128(-11).to_cmp_be_bytes();
-        let n3 = I128(0).to_cmp_be_bytes();
-        let n4 = I128(3).to_cmp_be_bytes();
-        let n5 = I128(20).to_cmp_be_bytes();
-        let n6 = I128(100).to_cmp_be_bytes();
+        let n1 = I128(-123).to_cmp_be_bytea();
+        let n2 = I128(-11).to_cmp_be_bytea();
+        let n3 = I128(0).to_cmp_be_bytea();
+        let n4 = I128(3).to_cmp_be_bytea();
+        let n5 = I128(20).to_cmp_be_bytea();
+        let n6 = I128(100).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
@@ -569,56 +569,56 @@ mod tests {
         assert_eq!(cmp(&n6, &n4), Ordering::Greater);
         assert_eq!(cmp(&n4, &null), Ordering::Less);
 
-        let n1 = U8(0).to_cmp_be_bytes();
-        let n2 = U8(3).to_cmp_be_bytes();
-        let n3 = U8(20).to_cmp_be_bytes();
-        let n4 = U8(20).to_cmp_be_bytes();
+        let n1 = U8(0).to_cmp_be_bytea();
+        let n2 = U8(3).to_cmp_be_bytea();
+        let n3 = U8(20).to_cmp_be_bytea();
+        let n4 = U8(20).to_cmp_be_bytea();
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &n4), Ordering::Less);
         assert_eq!(cmp(&n3, &n4), Ordering::Equal);
 
-        let n1 = U16(0).to_cmp_be_bytes();
-        let n2 = U16(3).to_cmp_be_bytes();
-        let n3 = U16(20).to_cmp_be_bytes();
-        let n4 = U16(20).to_cmp_be_bytes();
+        let n1 = U16(0).to_cmp_be_bytea();
+        let n2 = U16(3).to_cmp_be_bytea();
+        let n3 = U16(20).to_cmp_be_bytea();
+        let n4 = U16(20).to_cmp_be_bytea();
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &n4), Ordering::Less);
         assert_eq!(cmp(&n3, &n4), Ordering::Equal);
 
-        let n1 = U32(0).to_cmp_be_bytes();
-        let n2 = U32(3).to_cmp_be_bytes();
-        let n3 = U32(20).to_cmp_be_bytes();
-        let n4 = U32(20).to_cmp_be_bytes();
+        let n1 = U32(0).to_cmp_be_bytea();
+        let n2 = U32(3).to_cmp_be_bytea();
+        let n3 = U32(20).to_cmp_be_bytea();
+        let n4 = U32(20).to_cmp_be_bytea();
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &n4), Ordering::Less);
         assert_eq!(cmp(&n3, &n4), Ordering::Equal);
 
-        let n1 = U64(0).to_cmp_be_bytes();
-        let n2 = U64(3).to_cmp_be_bytes();
-        let n3 = U64(20).to_cmp_be_bytes();
-        let n4 = U64(20).to_cmp_be_bytes();
+        let n1 = U64(0).to_cmp_be_bytea();
+        let n2 = U64(3).to_cmp_be_bytea();
+        let n3 = U64(20).to_cmp_be_bytea();
+        let n4 = U64(20).to_cmp_be_bytea();
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &n4), Ordering::Less);
         assert_eq!(cmp(&n3, &n4), Ordering::Equal);
 
-        let n1 = U128(0).to_cmp_be_bytes();
-        let n2 = U128(3).to_cmp_be_bytes();
-        let n3 = U128(20).to_cmp_be_bytes();
-        let n4 = U128(20).to_cmp_be_bytes();
+        let n1 = U128(0).to_cmp_be_bytea();
+        let n2 = U128(3).to_cmp_be_bytea();
+        let n3 = U128(20).to_cmp_be_bytea();
+        let n4 = U128(20).to_cmp_be_bytea();
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
         assert_eq!(cmp(&n3, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &n4), Ordering::Less);
         assert_eq!(cmp(&n3, &n4), Ordering::Equal);
 
-        let n1 = Str("a".to_owned()).to_cmp_be_bytes();
-        let n2 = Str("ab".to_owned()).to_cmp_be_bytes();
-        let n3 = Str("aaa".to_owned()).to_cmp_be_bytes();
-        let n4 = Str("aaz".to_owned()).to_cmp_be_bytes();
-        let n5 = Str("c".to_owned()).to_cmp_be_bytes();
+        let n1 = Str("a".to_owned()).to_cmp_be_bytea();
+        let n2 = Str("ab".to_owned()).to_cmp_be_bytea();
+        let n3 = Str("aaa".to_owned()).to_cmp_be_bytea();
+        let n4 = Str("aaz".to_owned()).to_cmp_be_bytea();
+        let n5 = Str("c".to_owned()).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n2, &n2), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
@@ -628,11 +628,11 @@ mod tests {
         assert_eq!(cmp(&n5, &n4), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
 
-        let n1 = Bytes(n1.unwrap()).to_cmp_be_bytes();
-        let n2 = Bytes(n2.unwrap()).to_cmp_be_bytes();
-        let n3 = Bytes(n3.unwrap()).to_cmp_be_bytes();
-        let n4 = Bytes(n4.unwrap()).to_cmp_be_bytes();
-        let n5 = Bytes(n5.unwrap()).to_cmp_be_bytes();
+        let n1 = Bytea(n1.unwrap()).to_cmp_be_bytea();
+        let n2 = Bytea(n2.unwrap()).to_cmp_be_bytea();
+        let n3 = Bytea(n3.unwrap()).to_cmp_be_bytea();
+        let n4 = Bytea(n4.unwrap()).to_cmp_be_bytea();
+        let n5 = Bytea(n5.unwrap()).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n2, &n2), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
@@ -642,15 +642,15 @@ mod tests {
         assert_eq!(cmp(&n5, &n4), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
 
-        let n1 = Date(NaiveDate::from_ymd_opt(2021, 1, 1).unwrap()).to_cmp_be_bytes();
-        let n2 = Date(NaiveDate::from_ymd_opt(1989, 3, 20).unwrap()).to_cmp_be_bytes();
+        let n1 = Date(NaiveDate::from_ymd_opt(2021, 1, 1).unwrap()).to_cmp_be_bytea();
+        let n2 = Date(NaiveDate::from_ymd_opt(1989, 3, 20).unwrap()).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n2, &n2), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
 
-        let n1 = Time(NaiveTime::from_hms_milli_opt(20, 1, 9, 100).unwrap()).to_cmp_be_bytes();
-        let n2 = Time(NaiveTime::from_hms_milli_opt(3, 10, 30, 0).unwrap()).to_cmp_be_bytes();
+        let n1 = Time(NaiveTime::from_hms_milli_opt(20, 1, 9, 100).unwrap()).to_cmp_be_bytea();
+        let n2 = Time(NaiveTime::from_hms_milli_opt(3, 10, 30, 0).unwrap()).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n2, &n2), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Greater);
@@ -662,23 +662,23 @@ mod tests {
                 .and_hms_milli_opt(1, 2, 3, 0)
                 .unwrap(),
         )
-        .to_cmp_be_bytes();
+        .to_cmp_be_bytea();
         let n2 = Timestamp(
             NaiveDate::from_ymd_opt(1989, 3, 20)
                 .unwrap()
                 .and_hms_milli_opt(10, 0, 0, 999)
                 .unwrap(),
         )
-        .to_cmp_be_bytes();
+        .to_cmp_be_bytea();
 
         assert_eq!(cmp(&n2, &n2), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
 
-        let n1 = Interval(I::Month(30)).to_cmp_be_bytes();
-        let n2 = Interval(I::Month(2)).to_cmp_be_bytes();
-        let n3 = Interval(I::Microsecond(1000)).to_cmp_be_bytes();
-        let n4 = Interval(I::Microsecond(30)).to_cmp_be_bytes();
+        let n1 = Interval(I::Month(30)).to_cmp_be_bytea();
+        let n2 = Interval(I::Month(2)).to_cmp_be_bytea();
+        let n3 = Interval(I::Microsecond(1000)).to_cmp_be_bytea();
+        let n4 = Interval(I::Microsecond(30)).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n1), Ordering::Equal);
         assert_eq!(cmp(&n2, &n1), Ordering::Less);
@@ -686,8 +686,8 @@ mod tests {
         assert_eq!(cmp(&n3, &n4), Ordering::Greater);
         assert_eq!(cmp(&n1, &null), Ordering::Less);
 
-        let n1 = Uuid(100).to_cmp_be_bytes();
-        let n2 = Uuid(101).to_cmp_be_bytes();
+        let n1 = Uuid(100).to_cmp_be_bytea();
+        let n2 = Uuid(101).to_cmp_be_bytea();
 
         assert_eq!(cmp(&n1, &n1), Ordering::Equal);
         assert_eq!(cmp(&n1, &n2), Ordering::Less);
@@ -714,7 +714,7 @@ mod tests {
             Value::from(Key::Str("abc".to_owned())),
             Value::Str("abc".to_owned())
         );
-        assert_eq!(Value::from(Key::Bytes(vec![])), Value::Bytes(vec![]));
+        assert_eq!(Value::from(Key::Bytea(vec![])), Value::Bytea(vec![]));
 
         assert_eq!(
             Value::from(Key::Date(NaiveDate::from_ymd_opt(2023, 1, 23).unwrap())),

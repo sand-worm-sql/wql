@@ -34,7 +34,7 @@ pub use {
     chain_name::chain,
     data_type::DataTypeNode,
     expr::{
-        bitwise_not, bytes, case, col, date, exists, expr, factorial, minus, nested, not,
+        bitwise_not, bytea, case, col, date, exists, expr, factorial, minus, nested, not,
         not_exists, null, num, numeric::NumericNode, plus, subquery, text, time, timestamp, uuid,
         ExprNode,
     },

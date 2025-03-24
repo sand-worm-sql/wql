@@ -182,7 +182,7 @@ mod tests {
             .select("transations")
             .join_as(Some("base"), "blocks", "B")
             .limit(10)
-            .build();         
+            .build();
         let expected = "SELECT * FROM base.transations JOIN base.blocks AS B LIMIT 10";
         test(actual, expected);
 

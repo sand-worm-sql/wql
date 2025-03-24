@@ -24,6 +24,8 @@ pub fn translate_data_type(sql_data_type: &SqlDataType) -> Result<DataType> {
         SqlDataType::UnsignedInt(None) | SqlDataType::UnsignedInteger(None) => Ok(DataType::Uint64),
         SqlDataType::UnsignedInt8(None) => Ok(DataType::Uint8),
 
+        SqlDataType::Bytea => Ok(DataType::Bytea),
+
         SqlDataType::Text => Ok(DataType::Text),
         SqlDataType::Date => Ok(DataType::Date),
         SqlDataType::Timestamp(None, SqlTimezoneInfo::None) => Ok(DataType::Timestamp),
@@ -69,7 +71,7 @@ mod tests {
         test!("INTEGER UNSIGNED" => SqlDataType::UnsignedInteger(None) => Ok(DataType::Uint64));
 
         test!("INT8 UNSIGNED" => SqlDataType::UnsignedInt8(None) => Ok(DataType::Uint8));
-
+        test!("BYTEA" => SqlDataType::Bytea => Ok(DataType::Bytea));
         test!("TEXT" => SqlDataType::Text => Ok(DataType::Text));
 
         test!("DATE" => SqlDataType::Date => Ok(DataType::Date));

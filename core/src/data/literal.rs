@@ -60,7 +60,7 @@ pub enum Literal<'a> {
     Boolean(bool),
     Number(Cow<'a, BigDecimal>),
     Text(Cow<'a, str>),
-    Bytes(Vec<u8>),
+    Bytea(Vec<u8>),
     Null,
 }
 
@@ -73,7 +73,7 @@ impl<'a> TryFrom<&'a AstLiteral> for Literal<'a> {
             AstLiteral::Number(v) => Number(Cow::Borrowed(v)),
             AstLiteral::QuotedString(v) => Text(Cow::Borrowed(v)),
             AstLiteral::HexString(v) => {
-                Bytes(hex::decode(v).map_err(|_| LiteralError::FailedToDecodeHexString(v.clone()))?)
+                Bytea(hex::decode(v).map_err(|_| LiteralError::FailedToDecodeHexString(v.clone()))?)
             }
             AstLiteral::Null => Null,
         };
@@ -103,7 +103,7 @@ impl<'a> Literal<'a> {
             (Boolean(l), Boolean(r)) => Some(l.cmp(r)),
             (Number(l), Number(r)) => Some(l.cmp(r)),
             (Text(l), Text(r)) => Some(l.cmp(r)),
-            (Bytes(l), Bytes(r)) => Some(l.cmp(r)),
+            (Bytea(l), Bytea(r)) => Some(l.cmp(r)),
             _ => None,
         }
     }
@@ -133,7 +133,7 @@ impl<'a> Literal<'a> {
             }),
             Number(v) => Some(v.to_string()),
             Text(v) => Some(v.into_owned()),
-            Bytes(_) | Null => None,
+            Bytea(_) | Null => None,
         };
 
         match (convert(self), convert(other)) {
@@ -300,7 +300,7 @@ mod tests {
         );
         test(
             AstLiteral::HexString("1A2B".to_owned()),
-            Ok(Bytes(hex::decode("1A2B").unwrap())),
+            Ok(Bytea(hex::decode("1A2B").unwrap())),
         );
         test(
             AstLiteral::HexString("!*@Q".to_owned()),
@@ -523,9 +523,9 @@ mod tests {
                 Number(Cow::Owned(BigDecimal::from_str($num).unwrap()))
             };
         }
-        macro_rules! bytes {
+        macro_rules! bytea {
             ($val: expr) => {
-                Bytes(hex::decode($val).unwrap())
+                Bytea(hex::decode($val).unwrap())
             };
         }
 
@@ -545,9 +545,9 @@ mod tests {
         assert!(!text!("Foo").evaluate_eq(&text!("Bar")));
         assert!(!text!("Foo").evaluate_eq(&Null));
         //Bytea
-        assert!(bytes!("12A456").evaluate_eq(&bytes!("12A456")));
-        assert!(!bytes!("1230").evaluate_eq(&num!("1230")));
-        assert!(!bytes!("12").evaluate_eq(&Null));
+        assert!(bytea!("12A456").evaluate_eq(&bytea!("12A456")));
+        assert!(!bytea!("1230").evaluate_eq(&num!("1230")));
+        assert!(!bytea!("12").evaluate_eq(&Null));
         // Null
         assert!(!Null.evaluate_eq(&Null));
     }
@@ -567,7 +567,7 @@ mod tests {
         }
         macro_rules! bytea {
             ($val: expr) => {
-                Bytes(hex::decode($val).unwrap())
+                Bytea(hex::decode($val).unwrap())
             };
         }
 

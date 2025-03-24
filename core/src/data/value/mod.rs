@@ -41,7 +41,7 @@ pub enum Value {
     U64(u64),
     U128(u128),
     Str(String),
-    Bytes(Vec<u8>),
+    Bytea(Vec<u8>),
     Date(NaiveDate),
     Timestamp(NaiveDateTime),
     Time(NaiveTime),
@@ -92,7 +92,7 @@ impl Value {
             (Value::U128(l), _) => l.partial_cmp(other),
             (Value::Bool(l), Value::Bool(r)) => Some(l.cmp(r)),
             (Value::Str(l), Value::Str(r)) => Some(l.cmp(r)),
-            (Value::Bytes(l), Value::Bytes(r)) => Some(l.cmp(r)),
+            (Value::Bytea(l), Value::Bytea(r)) => Some(l.cmp(r)),
             (Value::Date(l), Value::Date(r)) => Some(l.cmp(r)),
             (Value::Date(l), Value::Timestamp(r)) => {
                 l.and_hms_opt(0, 0, 0).map(|date_time| date_time.cmp(r))
@@ -138,7 +138,7 @@ impl Value {
             Value::U128(_) => Some(DataType::Uint128),
             Value::Bool(_) => Some(DataType::Boolean),
             Value::Str(_) => Some(DataType::Text),
-            Value::Bytes(_) => Some(DataType::Bytes),
+            Value::Bytea(_) => Some(DataType::Bytea),
             Value::Date(_) => Some(DataType::Date),
             Value::Timestamp(_) => Some(DataType::Timestamp),
             Value::Time(_) => Some(DataType::Time),
@@ -186,7 +186,7 @@ impl Value {
             | (DataType::Uint128, Value::U128(_))
             | (DataType::Boolean, Value::Bool(_))
             | (DataType::Text, Value::Str(_))
-            | (DataType::Bytes, Value::Bytes(_))
+            | (DataType::Bytea, Value::Bytea(_))
             | (DataType::Date, Value::Date(_))
             | (DataType::Timestamp, Value::Timestamp(_))
             | (DataType::Time, Value::Time(_))
@@ -212,9 +212,9 @@ impl Value {
             (DataType::Interval, Value::Str(value)) => Interval::parse(value).map(Value::Interval),
             (DataType::Uuid, Value::Str(value)) => uuid::parse_uuid(value).map(Value::Uuid),
             (DataType::Uuid, value) => Ok(value.try_into().map(Value::Uuid)?),
-            (DataType::Bytes, Value::Str(value)) => hex::decode(value)
+            (DataType::Bytea, Value::Str(value)) => hex::decode(value)
                 .map_err(|_| ValueError::CastFromHexToByteaFailed(value.clone()).into())
-                .map(Value::Bytes),
+                .map(Value::Bytea),
             (DataType::List, Value::Str(value)) => Self::parse_json_list(value),
             (DataType::Map, Value::Str(value)) => Self::parse_json_map(value),
 
@@ -731,8 +731,8 @@ impl Value {
     }
 
     /// Value to Big-Endian for comparison purpose
-    pub fn to_cmp_be_bytes(&self) -> Result<Vec<u8>> {
-        self.try_into().and_then(|key: Key| key.to_cmp_be_bytes())
+    pub fn to_cmp_be_bytea(&self) -> Result<Vec<u8>> {
+        self.try_into().and_then(|key: Key| key.to_cmp_be_bytea())
     }
 
     /// # Description
@@ -822,7 +822,7 @@ mod tests {
             super::Interval,
             chrono::{NaiveDateTime, NaiveTime},
         };
-        let bytes = |v: &str| Bytes(hex::decode(v).unwrap());
+        let bytea = |v: &str| Bytea(hex::decode(v).unwrap());
 
         assert_eq!(Null, Null);
         assert!(!Null.evaluate_eq(&Null));
@@ -838,7 +838,7 @@ mod tests {
         assert!(U64(1).evaluate_eq(&U64(1)));
         assert!(U128(1).evaluate_eq(&U128(1)));
         assert!(Str("Worm".to_owned()).evaluate_eq(&Str("Worm".to_owned())));
-        assert!(bytes("1004").evaluate_eq(&bytes("1004")));
+        assert!(bytea("1004").evaluate_eq(&bytea("1004")));
         assert!(Interval(Interval::Month(1)).evaluate_eq(&Interval(Interval::Month(1))));
         assert!(Time(NaiveTime::from_hms_opt(12, 30, 11).unwrap())
             .evaluate_eq(&Time(NaiveTime::from_hms_opt(12, 30, 11).unwrap())));
@@ -916,14 +916,14 @@ mod tests {
 
         assert_eq!(Null.evaluate_cmp(&Null), None);
 
-        let bytes = |v: &str| Bytes(hex::decode(v).unwrap());
-        assert_eq!(bytes("12").evaluate_cmp(&bytes("20")), Some(Ordering::Less));
+        let bytea = |v: &str| Bytea(hex::decode(v).unwrap());
+        assert_eq!(bytea("12").evaluate_cmp(&bytea("20")), Some(Ordering::Less));
         assert_eq!(
-            bytes("9123").evaluate_cmp(&bytes("9122")),
+            bytea("9123").evaluate_cmp(&bytea("9122")),
             Some(Ordering::Greater)
         );
         assert_eq!(
-            bytes("10").evaluate_cmp(&bytes("10")),
+            bytea("10").evaluate_cmp(&bytea("10")),
             Some(Ordering::Equal)
         );
     }
@@ -1915,12 +1915,12 @@ mod tests {
             };
         }
 
-        let bytes = Value::Bytes(hex::decode("0abc").unwrap());
+        let bytea = Value::Bytea(hex::decode("0abc").unwrap());
 
         // Same as
         cast!(Bool(true)            => Boolean      , Bool(true));
         cast!(Str("a".to_owned())   => Text         , Str("a".to_owned()));
-        cast!(bytes                => Bytes        , bytes);
+        cast!(bytea                => Bytea        , bytea);
         cast!(I8(1)                 => Int8         , I8(1));
         cast!(I16(1)                 => Int16         , I16(1));
         cast!(I32(1)                => Int32        , I32(1));
@@ -2052,9 +2052,9 @@ mod tests {
         cast!(Null                                                      => Timestamp, Null);
 
         // Bytea
-        cast!(Value::Str("0abc".to_owned()) => Bytes, Value::Bytes(hex::decode("0abc").unwrap()));
+        cast!(Value::Str("0abc".to_owned()) => Bytea, Value::Bytea(hex::decode("0abc").unwrap()));
         assert_eq!(
-            Value::Str("!@#$5".to_owned()).cast(&Bytes),
+            Value::Str("!@#$5".to_owned()).cast(&Bytea),
             Err(ValueError::CastFromHexToByteaFailed("!@#$5".to_owned()).into()),
         );
 
@@ -2129,7 +2129,7 @@ mod tests {
         let uuid = Uuid(parse_uuid("936DA01F9ABD4d9d80C702AF85C822A8").unwrap());
         let map = Value::parse_json_map(r#"{ "a": 10 }"#).unwrap();
         let list = Value::parse_json_list(r#"[ true ]"#).unwrap();
-        let bytes = Bytes(hex::decode("9001").unwrap());
+        let bytea = Bytea(hex::decode("9001").unwrap());
 
         assert!(Bool(true).validate_type(&D::Boolean).is_ok());
         assert!(Bool(true).validate_type(&D::Int).is_err());
@@ -2154,8 +2154,8 @@ mod tests {
         assert!(U128(1).validate_type(&D::Text).is_err());
         assert!(Str("a".to_owned()).validate_type(&D::Text).is_ok());
         assert!(Str("a".to_owned()).validate_type(&D::Int).is_err());
-        assert!(bytes.validate_type(&D::Bytes).is_ok());
-        assert!(bytes.validate_type(&D::Uuid).is_err());
+        assert!(bytea.validate_type(&D::Bytea).is_ok());
+        assert!(bytea.validate_type(&D::Uuid).is_err());
         assert!(date.validate_type(&D::Date).is_ok());
         assert!(date.validate_type(&D::Text).is_err());
         assert!(timestamp.validate_type(&D::Timestamp).is_ok());
@@ -2348,7 +2348,7 @@ mod tests {
         let uuid = Uuid(parse_uuid("936DA01F9ABD4d9d80C702AF85C822A8").unwrap());
         let map = Value::parse_json_map(r#"{ "a": 10 }"#).unwrap();
         let list = Value::parse_json_list(r#"[ true ]"#).unwrap();
-        let bytes = Bytes(hex::decode("9001").unwrap());
+        let bytea = Bytea(hex::decode("9001").unwrap());
 
         assert_eq!(I8(1).get_type(), Some(D::Int8));
         assert_eq!(I16(1).get_type(), Some(D::Int16));
@@ -2362,7 +2362,7 @@ mod tests {
         assert_eq!(U128(1).get_type(), Some(D::Uint128));
         assert_eq!(Bool(true).get_type(), Some(D::Boolean));
         assert_eq!(Str('1'.into()).get_type(), Some(D::Text));
-        assert_eq!(bytes.get_type(), Some(D::Bytes));
+        assert_eq!(bytea.get_type(), Some(D::Bytea));
         assert_eq!(date.get_type(), Some(D::Date));
         assert_eq!(timestamp.get_type(), Some(D::Timestamp));
         assert_eq!(time.get_type(), Some(D::Time));

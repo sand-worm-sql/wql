@@ -30,7 +30,7 @@ impl TryFrom<&Literal<'_>> for Value {
                 .ok_or_else(|| ValueError::FailedToParseNumber.into()),
             Literal::Boolean(v) => Ok(Value::Bool(*v)),
             Literal::Text(v) => Ok(Value::Str(v.as_ref().to_owned())),
-            Literal::Bytes(v) => Ok(Value::Bytes(v.to_vec())),
+            Literal::Bytea(v) => Ok(Value::Bytea(v.to_vec())),
             Literal::Null => Ok(Value::Null),
         }
     }
@@ -62,7 +62,7 @@ impl Value {
             (Value::U64(l), Literal::Number(r)) => r.to_u64().map(|r| *l == r).unwrap_or(false),
             (Value::U128(l), Literal::Number(r)) => r.to_u128().map(|r| *l == r).unwrap_or(false),
             (Value::Str(l), Literal::Text(r)) => l == r.as_ref(),
-            (Value::Bytes(l), Literal::Bytes(r)) => l == r,
+            (Value::Bytea(l), Literal::Bytea(r)) => l == r,
             (Value::Date(l), Literal::Text(r)) => match r.parse::<NaiveDate>() {
                 Ok(r) => l == &r,
                 Err(_) => false,
@@ -146,9 +146,9 @@ impl Value {
                 .map(Value::U128)
                 .ok_or_else(|| ValueError::FailedToParseNumber.into()),
             (DataType::Text, Literal::Text(v)) => Ok(Value::Str(v.to_string())),
-            (DataType::Bytes, Literal::Bytes(v)) => Ok(Value::Bytes(v.to_vec())),
-            (DataType::Bytes, Literal::Text(v)) => hex::decode(v.as_ref())
-                .map(Value::Bytes)
+            (DataType::Bytea, Literal::Bytea(v)) => Ok(Value::Bytea(v.to_vec())),
+            (DataType::Bytea, Literal::Text(v)) => hex::decode(v.as_ref())
+                .map(Value::Bytea)
                 .map_err(|_| ValueError::FailedToParseHexString(v.to_string()).into()),
             (DataType::Date, Literal::Text(v)) => v
                 .parse::<NaiveDate>()
@@ -161,7 +161,7 @@ impl Value {
                 .map(Value::Time)
                 .ok_or_else(|| ValueError::FailedToParseTime(v.to_string()).into()),
             (DataType::Uuid, Literal::Text(v)) => parse_uuid(v).map(Value::Uuid),
-            (DataType::Uuid, Literal::Bytes(v)) => parse_uuid(&hex::encode(v)).map(Value::Uuid),
+            (DataType::Uuid, Literal::Bytea(v)) => parse_uuid(&hex::encode(v)).map(Value::Uuid),
             (DataType::Map, Literal::Text(v)) => Value::parse_json_map(v),
             (DataType::List, Literal::Text(v)) => Value::parse_json_list(v),
             (_, Literal::Null) => Ok(Value::Null),
@@ -413,7 +413,7 @@ mod tests {
         let uuid_text = "936DA01F9ABD4d9d80C702AF85C822A8";
         let uuid = parse_uuid(uuid_text).unwrap();
 
-        let to_bytes = || hex::decode("123456").unwrap();
+        let to_bytea = || hex::decode("123456").unwrap();
 
         assert!(Value::Bool(true).evaluate_eq_with_literal(&Literal::Boolean(true)));
         assert!(Value::I8(8).evaluate_eq_with_literal(num!("8")));
@@ -428,7 +428,7 @@ mod tests {
         assert!(Value::U64(64).evaluate_eq_with_literal(num!("64")));
         assert!(Value::U128(64).evaluate_eq_with_literal(num!("64")));
         assert!(Value::Str("Hello".to_owned()).evaluate_eq_with_literal(text!("Hello")));
-        assert!(Value::Bytes(to_bytes()).evaluate_eq_with_literal(&Literal::Bytes(to_bytes())));
+        assert!(Value::Bytea(to_bytea()).evaluate_eq_with_literal(&Literal::Bytea(to_bytea())));
         assert!(Value::Date(date(2021, 11, 20)).evaluate_eq_with_literal(text!("2021-11-20")));
         assert!(!Value::Date(date(2021, 11, 20)).evaluate_eq_with_literal(text!("202=abcdef")));
         assert!(Value::Timestamp(date_time(2021, 11, 20, 10, 0, 0, 0))
@@ -564,7 +564,7 @@ mod tests {
             };
         }
 
-        let to_bytes = |v| hex::decode(v).unwrap();
+        let to_bytea = |v| hex::decode(v).unwrap();
 
         test!(DataType::Boolean, Literal::Boolean(true), Value::Bool(true));
         test!(DataType::Int, num!("123456789"), Value::I64(123456789));
@@ -584,17 +584,17 @@ mod tests {
             Value::Str("Good!".to_owned())
         );
         test!(
-            DataType::Bytes,
-            Literal::Bytes(to_bytes("1234")),
-            Value::Bytes(to_bytes("1234"))
+            DataType::Bytea,
+            Literal::Bytea(to_bytea("1234")),
+            Value::Bytea(to_bytea("1234"))
         );
         test!(
-            DataType::Bytes,
+            DataType::Bytea,
             text!("1234"),
-            Value::Bytes(to_bytes("1234"))
+            Value::Bytea(to_bytea("1234"))
         );
         assert_eq!(
-            Value::try_from_literal(&DataType::Bytes, &text!("123")),
+            Value::try_from_literal(&DataType::Bytea, &text!("123")),
             Err(ValueError::FailedToParseHexString("123".to_owned()).into())
         );
         test!(
@@ -619,7 +619,7 @@ mod tests {
         );
         test!(
             DataType::Uuid,
-            Literal::Bytes(to_bytes("936DA01F9ABD4d9d80C702AF85C822A8")),
+            Literal::Bytea(to_bytea("936DA01F9ABD4d9d80C702AF85C822A8")),
             Value::Uuid(195965723427462096757863453463987888808)
         );
 
@@ -675,7 +675,7 @@ mod tests {
             };
         }
 
-        let to_bytes = |v| hex::decode(v).unwrap();
+        let to_bytea = |v| hex::decode(v).unwrap();
 
         macro_rules! test {
             ($from: expr, $expected: expr) => {
@@ -686,12 +686,12 @@ mod tests {
         test!(text!("hello"), Value::Str("hello".to_owned()));
         test!(&text!("hallo"), Value::Str("hallo".to_owned()));
         test!(
-            Literal::Bytes(to_bytes("1234")),
-            Value::Bytes(to_bytes("1234"))
+            Literal::Bytea(to_bytea("1234")),
+            Value::Bytea(to_bytea("1234"))
         );
         test!(
-            &Literal::Bytes(to_bytes("1234")),
-            Value::Bytes(to_bytes("1234"))
+            &Literal::Bytea(to_bytea("1234")),
+            Value::Bytea(to_bytea("1234"))
         );
         test!(num!("1234567890"), Value::I64(1234567890));
         test!(&Literal::Boolean(false), Value::Bool(false));

@@ -617,7 +617,7 @@ mod tests {
         let gen_expected = |other_join| {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name:None,
+                    chain_name: None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
@@ -634,7 +634,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name:None,
+                        chain_name: None,
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
@@ -664,7 +664,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name:None,
+                    chain_name: None,
                     name: "OtherItem".to_owned(),
                     alias: None,
                     index: None,
@@ -687,7 +687,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name:None,
+                    chain_name: None,
                     name: "OtherItem".to_owned(),
                     alias: Some(TableAlias {
                         name: "Ot".to_owned(),
@@ -713,11 +713,11 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name:None,
+                    chain_name: None,
                     name: "OtherItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table:true,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
                 join_executor: JoinExecutor::NestedLoop,
@@ -736,7 +736,7 @@ mod tests {
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name:None,
+                    chain_name: None,
                     name: "OtherItem".to_owned(),
                     alias: Some(TableAlias {
                         name: "Ot".to_owned(),

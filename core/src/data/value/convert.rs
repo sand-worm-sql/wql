@@ -38,7 +38,7 @@ impl From<&Value> for String {
     fn from(v: &Value) -> Self {
         match v {
             Value::Str(value) => value.to_owned(),
-            Value::Bytes(value) => hex::encode(value),
+            Value::Bytea(value) => hex::encode(value),
             Value::Bool(value) => (if *value { "TRUE" } else { "FALSE" }).to_owned(),
             Value::I8(value) => value.to_string(),
             Value::I16(value) => value.to_string(),
@@ -124,7 +124,7 @@ impl TryFrom<&Value> for bool {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -172,7 +172,7 @@ impl TryFrom<&Value> for i8 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -220,7 +220,7 @@ impl TryFrom<&Value> for i16 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -267,7 +267,7 @@ impl TryFrom<&Value> for i32 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -315,7 +315,7 @@ impl TryFrom<&Value> for i64 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -363,7 +363,7 @@ impl TryFrom<&Value> for i128 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -411,7 +411,7 @@ impl TryFrom<&Value> for u8 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -458,7 +458,7 @@ impl TryFrom<&Value> for u16 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -506,7 +506,7 @@ impl TryFrom<&Value> for u32 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -554,7 +554,7 @@ impl TryFrom<&Value> for u64 {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -601,7 +601,7 @@ impl TryFrom<&Value> for u128 {
             | Value::Interval(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => {
                 return Err(ConvertError {
                     value: v.clone(),
@@ -651,7 +651,7 @@ impl TryFrom<&Value> for usize {
             | Value::Uuid(_)
             | Value::Map(_)
             | Value::List(_)
-            | Value::Bytes(_)
+            | Value::Bytea(_)
             | Value::Null => return Err(err()),
         })
     }
@@ -758,7 +758,7 @@ mod tests {
         }
 
         test!(Value::Str("text".to_owned()), "text");
-        test!(Value::Bytes(hex::decode("1234").unwrap()), "1234");
+        test!(Value::Bytea(hex::decode("1234").unwrap()), "1234");
         test!(Value::Bool(true), "TRUE");
         test!(Value::I8(122), "122");
         test!(Value::I16(122), "122");
@@ -849,7 +849,7 @@ mod tests {
         err!(Value::U64(3));
         err!(Value::U128(3));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -905,7 +905,7 @@ mod tests {
         err!(Value::U64(128));
         err!(Value::U128(128));
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -962,7 +962,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1018,7 +1018,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1072,7 +1072,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1122,7 +1122,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1180,7 +1180,7 @@ mod tests {
         err!(Value::U128(256));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::List(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
@@ -1236,7 +1236,7 @@ mod tests {
         err!(Value::U128(65536));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1289,7 +1289,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1340,7 +1340,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));
@@ -1388,7 +1388,7 @@ mod tests {
         test!(Value::Str("122".to_owned()), Ok(122));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
 
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
@@ -1445,7 +1445,7 @@ mod tests {
         err!(Value::U128(u128::MAX));
 
         err!(Value::Str("text".to_owned()));
-        err!(Value::Bytes(Vec::new()));
+        err!(Value::Bytea(Vec::new()));
         err!(Value::Date(date(2021, 11, 20)));
         err!(Value::Timestamp(timestamp(2021, 11, 20, 10, 0, 0, 0)));
         err!(Value::Time(time(10, 0, 0, 0)));

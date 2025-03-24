@@ -249,11 +249,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name:None,
+                    chain_name: None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table:true,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -266,7 +266,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name:None,
+                        chain_name: None,
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
