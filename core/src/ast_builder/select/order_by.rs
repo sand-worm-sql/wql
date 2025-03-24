@@ -179,7 +179,7 @@ mod tests {
             .order_by(vec!["id desc"])
             .build();
         let expected = "
-                SELECT * FROM Bar 
+                SELECT * FROM sui.Bar 
                 GROUP BY name 
                 ORDER BY id desc
             ";
@@ -223,7 +223,7 @@ mod tests {
             .project("id")
             .order_by("id asc")
             .build();
-        let expected = "SELECT id FROM Foo ORDER BY id asc";
+        let expected = "SELECT id FROM sui.Foo ORDER BY id asc";
         test(actual, expected);
 
         // join node -> order by node -> build
@@ -234,7 +234,7 @@ mod tests {
             .build();
         let expected = "
             SELECT * FROM sui.Foo
-            JOIN Bar
+            JOIN sui.Bar
             ORDER BY Foo.id desc
         ";
         test(actual, expected);
@@ -263,11 +263,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -280,11 +280,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: Some("sui".to_owned()),
+                        chain_name:None,
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: false,
+                        existing_table: true,
                     },
                     joins: vec![join],
                 },

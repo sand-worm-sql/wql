@@ -179,7 +179,7 @@ mod tests {
         let actual = chain("sui")
             .select("checkpoints")
             .join_as(None, "transations", "tnx")
-            .on("checkpoints.digest = transations.digest")
+            .on("checkpoints.digest = tnx.digest")
             .build();
         let expected = "SELECT * FROM sui.checkpoints INNER JOIN transations AS tnx ON checkpoints.digest = tnx.digest";
         test(actual, expected);
@@ -197,7 +197,7 @@ mod tests {
         let actual = chain("sui")
             .select("checkpoints")
             .left_join_as(None, "transations", "t")
-            .on("checkpoints.digest = transations.digest")
+            .on("checkpoints.digest = t.digest")
             .build();
         let expected = "SELECT * FROM sui.checkpoints LEFT OUTER JOIN transations AS t ON checkpoints.digest = t.digest";
         test(actual, expected);
@@ -212,7 +212,7 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
@@ -231,7 +231,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: Some("sui".to_owned()),
+                        chain_name:None,
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,

@@ -155,7 +155,7 @@ mod test {
             .join(None, "checkpoints")
             .on("transations.digest = checkpoints.digest")
             .into();
-        let expected = "SELECT * FROM sui.transations JOIN checkpoints ON transation.digest = checkpoints.digest";
+        let expected = "SELECT * FROM sui.transations JOIN checkpoints ON transations.digest = checkpoints.digest";
         test_query(actual, expected);
 
         let actual: QueryNode = chain("sui")
@@ -166,11 +166,11 @@ mod test {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name: None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -183,11 +183,11 @@ mod test {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: Some("sui".to_owned()),
+                        chain_name: None,
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: false,
+                        existing_table: true,
                     },
                     joins: vec![join],
                 },

@@ -81,7 +81,7 @@ impl<'a> JoinNode<'a> {
                         columns: vec![],
                     }),
                     index: None,
-                    existing_table: false,
+                    existing_table: chain_name.is_none(),
                 },
                 None => TableFactor::Table {
                     chain_name: None,
@@ -98,10 +98,10 @@ impl<'a> JoinNode<'a> {
         JoinConstraintNode::new(self, expr)
     }
 
-    pub fn join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
+    pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            Some(chain_name.to_owned()),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
@@ -111,7 +111,7 @@ impl<'a> JoinNode<'a> {
     pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            Some(chain_name.to_owned()),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
@@ -121,7 +121,7 @@ impl<'a> JoinNode<'a> {
     pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            Some(chain_name.to_owned()),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Left,
@@ -136,7 +136,7 @@ impl<'a> JoinNode<'a> {
     ) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            Some(chain_name.to_owned()),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,
@@ -224,7 +224,7 @@ mod tests {
             .select("transactions")
             .join_as(None, "blocks", "b")
             .on("b.digest = transactions.digest")
-            .filter("p.id = 1")
+            .filter("b.transaction = 1")
             .build();
         let expected = "
         SELECT * FROM sui.transactions INNER JOIN blocks AS b ON b.digest = transactions.digest WHERE b.transaction = 1;
@@ -240,7 +240,7 @@ mod tests {
             .project(vec!["p.id", "p.name", "Item.id"])
             .build();
         let expected = "
-        SELECT p.id, p.name, Item.id FROM Item INNER JOIN Player AS p ON p.id = Item.player_id WHERE p.id = 1;
+        SELECT p.id, p.name, Item.id FROM sui.transactions INNER JOIN Player AS p ON p.id = Item.player_id WHERE p.id = 1;
         ";
         test(actual, expected);
 
@@ -317,23 +317,23 @@ mod tests {
             .select("Item")
             .left_join(None, "Player")
             .on("Player.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p1")
+            .left_join_as(None, "Player", "p1")
             .on("p1.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p2")
+            .left_join_as(None, "Player", "p2")
             .on("p2.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p3")
+            .left_join_as(None, "Player", "p3")
             .on("p3.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p4")
+            .left_join_as(None, "Player", "p4")
             .on("p4.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p5")
+            .left_join_as(None, "Player", "p5")
             .on("p5.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p6")
+            .left_join_as(None, "Player", "p6")
             .on("p6.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p7")
+            .left_join_as(None, "Player", "p7")
             .on("p7.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p8")
+            .left_join_as(None, "Player", "p8")
             .on("p8.id = Item.player_id")
-            .left_join_as(Some("sui"), "Player", "p9")
+            .left_join_as(None, "Player", "p9")
             .on("p9.id = Item.player_id")
             .filter("Player.id = 1")
             .build();
@@ -355,7 +355,7 @@ mod tests {
 
         // select node -> left join node -> join constraint node -> left join node
         let actual = chain("base")
-            .select("item")
+            .select("Item")
             .left_join(None, "Player")
             .on("Player.id = Item.player_id")
             .left_join(None, "Player")
@@ -368,7 +368,7 @@ mod tests {
         test(actual, expected);
 
         let actual = chain("base")
-            .select("T tem")
+            .select("Item")
             .left_join(None, "Player")
             .on("Player.id = Item.player_id")
             .left_join_as(None, "Player", "p1")
@@ -396,7 +396,11 @@ mod tests {
     #[test]
     fn join_join() {
         // join - join
-        let actual = chain("sui").select("Foo").join("Bar").join("Baz").build();
+        let actual = chain("sui")
+            .select("Foo")
+            .join(None, "Bar")
+            .join(None, "Baz")
+            .build();
         let expected = "
                 SELECT * FROM sui.Foo
                 INNER JOIN Bar
@@ -446,8 +450,8 @@ mod tests {
         // join as - join
         let actual = chain("sui")
             .select("Foo")
-            .join_as("Bar", "B")
-            .join("sui", "Baz")
+            .join_as(None, "Bar", "B")
+            .join(Some("sui"), "Baz")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -472,8 +476,8 @@ mod tests {
         // join as - left join
         let actual = chain("base")
             .select("transactions")
-            .join_as("Bar", "B")
-            .left_join("sui", "Baz")
+            .join_as(None, "Bar", "B")
+            .left_join(Some("sui"), "Baz")
             .build();
         let expected = "
             SELECT * FROM base.transactions
@@ -485,8 +489,8 @@ mod tests {
         // join as - left join as
         let actual = chain("sui")
             .select("Foo")
-            .join_as("Bar", "B")
-            .left_join_as("sui", "Baz", "C")
+            .join_as(None, "Bar", "B")
+            .left_join_as(Some("sui"), "Baz", "C")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -498,8 +502,8 @@ mod tests {
         // left join - join
         let actual = chain("sui")
             .select("Foo")
-            .left_join("Bar")
-            .join("sui", "Baz")
+            .left_join(None, "Bar")
+            .join(Some("sui"), "Baz")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -511,8 +515,8 @@ mod tests {
         // left join - join as
         let actual = chain("sui")
             .select("Foo")
-            .left_join("Bar")
-            .join_as("sui", "Baz", "B")
+            .left_join(None, "Bar")
+            .join_as(Some("sui"), "Baz", "B")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -524,8 +528,8 @@ mod tests {
         // left join - left join
         let actual = chain("sui")
             .select("Foo")
-            .left_join("Bar")
-            .left_join("sui", "Baz")
+            .left_join(None, "Bar")
+            .left_join(Some("sui"), "Baz")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -537,8 +541,8 @@ mod tests {
         // left join - left join as
         let actual = chain("sui")
             .select("Foo")
-            .left_join("Bar")
-            .left_join_as("sui", "Baz", "B")
+            .left_join(None, "Bar")
+            .left_join_as(Some("sui"), "Baz", "B")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -550,8 +554,8 @@ mod tests {
         // left join as - join
         let actual = chain("sui")
             .select("Foo")
-            .left_join_as("Bar", "B")
-            .join("sui", "Baz")
+            .left_join_as(None, "Bar", "B")
+            .join(Some("sui"), "Baz")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -563,8 +567,8 @@ mod tests {
         // left join as - join as
         let actual = chain("sui")
             .select("Foo")
-            .left_join_as("Bar", "B")
-            .join_as("sui", "Baz", "C")
+            .left_join_as(None, "Bar", "B")
+            .join_as(Some("sui"), "Baz", "C")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -576,8 +580,8 @@ mod tests {
         // left join as - left join
         let actual = chain("sui")
             .select("Foo")
-            .left_join_as("Bar", "B")
-            .left_join("sui", "Baz")
+            .left_join_as(None, "Bar", "B")
+            .left_join(Some("sui"), "Baz")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -589,8 +593,8 @@ mod tests {
         // left join as - left join as
         let actual = chain("sui")
             .select("Foo")
-            .left_join_as("Bar", "B")
-            .left_join_as("sui", "Baz", "C")
+            .left_join_as(None, "Bar", "B")
+            .left_join_as(Some("sui"), "Baz", "C")
             .build();
         let expected = "
             SELECT * FROM sui.Foo
@@ -613,11 +617,11 @@ mod tests {
         let gen_expected = |other_join| {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -630,11 +634,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: Some("sui".to_owned()),
+                        chain_name:None,
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: false,
+                        existing_table: true,
                     },
                     joins: vec![join, other_join],
                 },
@@ -653,18 +657,18 @@ mod tests {
 
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
-            .join("sui", "OtherItem")
+            .join(Some("sui"), "OtherItem")
             .build();
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "OtherItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::NestedLoop,
@@ -676,21 +680,21 @@ mod tests {
 
         let actual = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
-            .join_as("sui", "OtherItem", "Ot")
+            .join_as(None, "OtherItem", "Ot")
             .build();
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "OtherItem".to_owned(),
                     alias: Some(TableAlias {
                         name: "Ot".to_owned(),
                         columns: Vec::new(),
                     }),
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::NestedLoop,
@@ -704,16 +708,16 @@ mod tests {
             .select("Player")
             .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
-            .left_join("sui", "OtherItem")
+            .left_join(None, "OtherItem")
             .build();
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "OtherItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table:true,
                 },
                 join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
                 join_executor: JoinExecutor::NestedLoop,
@@ -727,19 +731,19 @@ mod tests {
             .select("Player")
             .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
-            .left_join_as("sui", "OtherItem", "Ot")
+            .left_join_as(None, "OtherItem", "Ot")
             .build();
         let expected = {
             let other_join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name:None,
                     name: "OtherItem".to_owned(),
                     alias: Some(TableAlias {
                         name: "Ot".to_owned(),
                         columns: Vec::new(),
                     }),
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::LeftOuter(JoinConstraint::None),
                 join_executor: JoinExecutor::NestedLoop,

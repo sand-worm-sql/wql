@@ -48,40 +48,45 @@ impl<'a> HashJoinNode<'a> {
         JoinConstraintNode::new(self, expr)
     }
 
-    pub fn join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
+    pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
         )
     }
 
-    pub fn join_as(self, chain_name: &str, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
         )
     }
 
-    pub fn left_join(self, chain_name: &str, table_name: &str) -> JoinNode<'a> {
+    pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             None,
             JoinOperatorType::Left,
         )
     }
 
-    pub fn left_join_as(self, chain_name: &str, table_name: &str, alias: &str) -> JoinNode<'a> {
+    pub fn left_join_as(
+        self,
+        chain_name: Option<&str>,
+        table_name: &str,
+        alias: &str,
+    ) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.to_owned(),
+            chain_name.map(|name| name.to_owned()),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,
@@ -171,14 +176,14 @@ mod tests {
     #[test]
     fn hash_join() {
         let actual = chain("sui")
-            .select("transaction")
+            .select("transactions")
             .join(None, "checkpoints")
             .hash_executor("transations.digest", col("checkpoints.transaction_digest"))
             .build();
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("sui".to_owned()),
+                    chain_name: None,
                     name: "checkpoints".to_owned(),
                     alias: None,
                     index: None,
@@ -195,7 +200,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: Some("sui".to_owned()),
+                        chain_name:None,
                         name: "transactions".to_owned(),
                         alias: None,
                         index: None,
