@@ -44,7 +44,7 @@ mod test {
         test(actual, expected);
 
         let actual = exists(chain("sui").select("checkpoints").filter(col("tnx").gt(2)));
-        let expected = "EXISTS (SELECT * FROM sui.checkpoints WHERE tnx > 4)";
+        let expected = "EXISTS (SELECT * FROM sui.checkpoints WHERE tnx > 2)";
         test_expr(actual, expected);
 
         let actual = not_exists(chain("sui").select("transations").filter(col("tnx").gt(2)));
@@ -52,7 +52,7 @@ mod test {
         test_expr(actual, expected);
 
         let actual = exists("SELECT * FROM sui.transations");
-        let expected = "EXISTS (SELECT * FROM FOO)";
+        let expected = "EXISTS (SELECT * FROM sui.transations)";
         test_expr(actual, expected);
 
         let actual = not_exists("SELECT * FROM sui.transations");
