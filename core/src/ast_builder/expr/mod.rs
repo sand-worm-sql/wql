@@ -404,7 +404,7 @@ mod tests {
     #[test]
     fn into_expr_node() {
         let actual: ExprNode = "sender IS NOT NULL".into();
-        let expected = "a IS NOT NULL";
+        let expected = "sender IS NOT NULL";
         test_expr(actual, expected);
 
         let actual: ExprNode = String::from("1 + 10)").into();
