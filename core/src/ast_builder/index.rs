@@ -64,20 +64,20 @@ mod tests {
         let actual = chain("sui")
             .create_index("transations", "tnxIndex", "tnx asc")
             .build();
-        let expected = "CREATE INDEX tnxIndex ON sui.transations (tnx Asc)";
+        let expected = "CREATE INDEX tnxIndex ON transations (tnx Asc)";
         test(actual, expected);
 
         let actual = chain("sui")
             .create_index("transations", "tnxIndex", "tnx desc")
             .build();
-        let expected = "CREATE INDEX tnxIndex ON sui.transations (tnx Desc)";
+        let expected = "CREATE INDEX tnxIndex ON transations (tnx Desc)";
         test(actual, expected);
     }
 
     #[test]
     fn drop_index() {
         let actual = chain("sui").drop_index("transations", "tnxIndex").build();
-        let expected = "DROP INDEX sui.transations.tnxIndex";
+        let expected = "DROP INDEX transations.tnxIndex";
         test(actual, expected);
     }
 }
