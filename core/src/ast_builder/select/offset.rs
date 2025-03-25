@@ -242,7 +242,7 @@ mod tests {
         // hash join node -> offset node -> build
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"), "PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .offset(100)
             .build();

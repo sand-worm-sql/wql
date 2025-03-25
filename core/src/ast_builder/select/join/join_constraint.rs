@@ -216,7 +216,7 @@ mod tests {
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::On(
                     col("PlayerItem.flag").is_not_null().try_into().unwrap(),
@@ -231,7 +231,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,

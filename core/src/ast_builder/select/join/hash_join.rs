@@ -187,7 +187,7 @@ mod tests {
                     name: "checkpoints".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -200,7 +200,7 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "transactions".to_owned(),
                         alias: None,
                         index: None,
@@ -232,11 +232,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: Some("base".to_owned()),
+                    chain_name: None,
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: false,
+                    existing_table: true,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -278,7 +278,7 @@ mod tests {
         // join -> hash -> derived subquery
         let actual = chain("base")
             .select("Foo")
-            .join(None, "Bar")
+            .join(Some("base"), "Bar")
             .hash_executor("Foo.id", "Bar.id")
             .alias_as("Sub")
             .select()
