@@ -208,6 +208,7 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                 _ => {
                     let (chain_name, table_name) = translate_chain_and_table(name)?;
                     let existing_table = chain_name.is_none();
+                    println!("chain_name: {:?}, table_name: {:?}, existing_table: {}", chain_name, table_name, existing_table);
                     Ok(TableFactor::Table {
                         chain_name: chain_name.to_owned(),
                         name: table_name,
@@ -250,7 +251,7 @@ fn translate_join(sql_join: &SqlJoin) -> Result<Join> {
         join_operator: sql_join_operator,
         ..
     } = sql_join;
-
+    println!("join: {:?}", relation);
     let translate_constraint = |sql_join_constraint: &SqlJoinConstraint| match sql_join_constraint {
         SqlJoinConstraint::On(expr) => translate_expr(expr).map(JoinConstraint::On),
         SqlJoinConstraint::None => Ok(JoinConstraint::None),

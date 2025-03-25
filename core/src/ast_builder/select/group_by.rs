@@ -169,7 +169,7 @@ mod tests {
         // join constraint node -> group by node -> build
         let actual = chain("sui")
             .select("transactions")
-            .join(None, "trads")
+            .join(None, "trades")
             .on("transactions.sender = trades.sender")
             .group_by("b")
             .build();
