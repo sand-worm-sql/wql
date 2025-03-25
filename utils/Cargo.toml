@@ -1,6 +1,5 @@
 [package]
-name = "gluesql-utils"
-authors = ["Taehoon Moon <taehoon.moon@outlook.com>"]
+name = "wql-utils"
 version.workspace = true
 edition.workspace = true
 description.workspace = true
