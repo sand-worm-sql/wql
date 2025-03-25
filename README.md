@@ -28,7 +28,7 @@ WQL (Worm Query Language) is designed to provide **SQL-like querying capabilitie
 Example query to fetch structured data:  
 
 ```sql
-SELECT * FROM sui.accounts WHERE balance > 100;
+SELECT * FROM sui.accounts WHERE address = "0x4d6960d097167b4e9f0512d0a04d9d2a8742b428ab6b638a40940e1b827eeb35";
 ```  
 
 ---
