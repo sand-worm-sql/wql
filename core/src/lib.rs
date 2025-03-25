@@ -13,7 +13,7 @@ pub mod chains_adapter;
 pub mod data;
 pub mod executor;
 pub mod parse_sql;
-//pub mod plan;
+pub mod plan;
 pub mod translate;
 
 pub mod prelude {
@@ -24,7 +24,7 @@ pub mod prelude {
         //executor::{execute, Payload, PayloadVariable},
         //glue::Glue,
         parse_sql::parse,
-        //  plan::plan,
+        plan::plan,
         result::{Error, Result},
         translate::translate,
     };
