@@ -17,7 +17,7 @@ pub use crate::{
         SelectError,
         // EvaluateError, ExecuteError, FetchError,  SortError, ValidateError,
     },
-    plan::PlanError,
+    //plan::PlanError,
     translate::TranslateError,
 };
 
@@ -69,8 +69,8 @@ pub enum Error {
     Interval(#[from] IntervalError),
     #[error("string-ext: {0}")]
     StringExt(#[from] StringExtError),
-    #[error("plan: {0}")]
-    Plan(#[from] PlanError),
+    //  #[error("plan: {0}")]
+    //Plan(#[from] PlanError),
     // #[error("schema-parse: {0}")]
     // Schema(#[from] SchemaParseError),
 }

@@ -208,7 +208,10 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                 _ => {
                     let (chain_name, table_name) = translate_chain_and_table(name)?;
                     let existing_table = chain_name.is_none();
-                    println!("chain_name: {:?}, table_name: {:?}, existing_table: {}", chain_name, table_name, existing_table);
+                    println!(
+                        "chain_name: {:?}, table_name: {:?}, existing_table: {}",
+                        chain_name, table_name, existing_table
+                    );
                     Ok(TableFactor::Table {
                         chain_name: chain_name.to_owned(),
                         name: table_name,

@@ -24,7 +24,7 @@ pub mod prelude {
         //executor::{execute, Payload, PayloadVariable},
         //glue::Glue,
         parse_sql::parse,
-      //  plan::plan,
+        //  plan::plan,
         result::{Error, Result},
         translate::translate,
     };
