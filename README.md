@@ -13,7 +13,7 @@ WQL (Worm Query Language) is designed to provide **SQL-like querying capabilitie
 - **SQL-like syntax** → Query data with familiar SQL commands.  
 - **Blockchain compatibility** → Supports querying on-chain data.  
 - **Lightweight & Efficient** → Designed for speed and low overhead.  
-- **Flexible Storage** → Works with different data storage backends.  
+- **Flexible Data Support** → Support Data from multiple  sources like RPC, Graph-gl, HTTP  
 
 ---
 
