@@ -280,7 +280,7 @@ dependencies = [
  "derive_more 2.0.1",
  "foldhash",
  "hashbrown 0.15.2",
- "indexmap",
+ "indexmap 2.8.0",
  "itoa",
  "k256",
  "keccak-asm",
@@ -456,7 +456,7 @@ dependencies = [
  "alloy-sol-macro-input",
  "const-hex",
  "heck 0.5.0",
- "indexmap",
+ "indexmap 2.8.0",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
@@ -1771,7 +1771,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "http",
- "indexmap",
+ "indexmap 2.8.0",
  "slab",
  "tokio",
  "tokio-util",
@@ -2162,6 +2162,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.100",
+]
+
+[[package]]
+name = "indexmap"
+version = "1.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
+dependencies = [
+ "autocfg",
+ "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -3925,7 +3935,7 @@ version = "0.22.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17b4795ff5edd201c7cd6dca065ae59972ce77d1b80fa0a84d94950ece7d1474"
 dependencies = [
- "indexmap",
+ "indexmap 2.8.0",
  "toml_datetime",
  "winnow",
 ]
@@ -4607,6 +4617,15 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "wql-core",
+]
+
+[[package]]
+name = "wql-utils"
+version = "0.0.1"
+dependencies = [
+ "futures",
+ "indexmap 1.9.3",
+ "pin-project",
 ]
 
 [[package]]

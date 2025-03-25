@@ -5,12 +5,14 @@ members = [
   "core",
   "chains-support/evm-adapter",
   "chains-support/sui-adapter",
+  "utils",
 ]
 
 default-members = [
   "cli",
   "chains-support/evm-adapter",
   "chains-support/sui-adapter",
+  "utils"
 ]
 
 [workspace.package]
@@ -26,3 +28,4 @@ wql-core = { path = "./core", version = "0.0.1" }
 wql-cli = { package = "sand-worm-cli", path = "./cli", version = "0.0.1" }
 wql_evm_adapter = { path = "./chains-support/evm-adapter", version = "0.0.1" }
 wql_sui_adapter = { path = "./chains-support/sui-adapter", version = "0.0.1" }
+utils = { package = "wql-utils", path = "./utils", version = "0.0.1" }
