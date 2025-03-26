@@ -17,7 +17,7 @@ pub use self::{
 
 use {
     crate::{
-        ast::{Assignment, ForeignKey, ReferentialAction, Statement, Variable},
+        ast::{Assignment, ReferentialAction, Statement, Variable},
         result::Result,
     },
     sqlparser::ast::{
@@ -238,53 +238,6 @@ pub fn translate_referential_action(
     match action {
         NoAction | Restrict => Ok(ReferentialAction::NoAction),
         _ => Err(TranslateError::UnsupportedConstraint(action.to_string()).into()),
-    }
-}
-
-pub fn translate_foreign_key(table_constraint: &SqlTableConstraint) -> Result<ForeignKey> {
-    match table_constraint {
-        SqlTableConstraint::ForeignKey {
-            name,
-            columns,
-            foreign_table,
-            referred_columns,
-            on_delete,
-            on_update,
-            ..
-        } => {
-            let referencing_column_name = columns.first().map(|i| i.value.clone()).ok_or(
-                TranslateError::UnreachableForeignKeyColumns(
-                    columns.iter().map(|i| i.to_string()).collect::<String>(),
-                ),
-            )?;
-
-            let referenced_column_name = referred_columns
-                .first()
-                .ok_or(TranslateError::UnreachableForeignKeyColumns(
-                    columns.iter().map(|i| i.to_string()).collect::<String>(),
-                ))?
-                .value
-                .clone();
-
-            let referenced_table_name = translate_object_name(foreign_table)?;
-
-            let name = match name {
-                Some(name) => name.value.clone(),
-                None => {
-                    format!("FK_{referencing_column_name}-{referenced_table_name}_{referenced_column_name}")
-                }
-            };
-
-            Ok(ForeignKey {
-                name,
-                referencing_column_name,
-                referenced_table_name,
-                referenced_column_name,
-                on_delete: translate_referential_action(on_delete)?,
-                on_update: translate_referential_action(on_update)?,
-            })
-        }
-        _ => Err(TranslateError::UnsupportedConstraint(table_constraint.to_string()).into()),
     }
 }
 

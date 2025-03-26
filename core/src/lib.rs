@@ -12,6 +12,7 @@ pub mod ast_builder;
 pub mod chains_adapter;
 pub mod data;
 pub mod executor;
+pub mod store;
 pub mod parse_sql;
 pub mod plan;
 pub mod translate;
