@@ -207,4 +207,73 @@ mod tests {
         assert!(EvmChain::is_supported("zksync"));
         assert!(!EvmChain::is_supported("unknown"));
     }
+
+    #[test]
+    fn test_try_from_str() {
+        // Valid conversions
+        assert_eq!(EvmChain::try_from("eth").unwrap(), EvmChain::Ethereum);
+        assert_eq!(EvmChain::try_from("polygon").unwrap(), EvmChain::Polygon);
+        assert_eq!(EvmChain::try_from("zksync").unwrap(), EvmChain::Zksync);
+
+        // Invalid conversion
+        let invalid_chain = EvmChain::try_from("unknown");
+        assert!(invalid_chain.is_err());
+        if let Err(ChainAdapterError::InvalidChain(ref err)) = invalid_chain {
+            assert_eq!(err, "unknown");
+        }
+    }
+
+    #[test]
+    fn test_try_from_u64() {
+        // Valid conversions
+        assert_eq!(EvmChain::try_from(1).unwrap(), EvmChain::Ethereum);
+        assert_eq!(EvmChain::try_from(137).unwrap(), EvmChain::Polygon);
+        assert_eq!(EvmChain::try_from(324).unwrap(), EvmChain::Zksync);
+
+        // Invalid conversion
+        let invalid_chain = EvmChain::try_from(9999);
+        assert!(invalid_chain.is_err());
+        if let Err(ChainAdapterError::InvalidChain(ref err)) = invalid_chain {
+            assert_eq!(err, "9999");
+        }
+    }
+
+    #[test]
+    fn test_rpc_fallback() {
+        assert_eq!(
+            EvmChain::Ethereum.rpc_fallback(),
+            "https://ethereum.drpc.org"
+        );
+        assert_eq!(
+            EvmChain::Polygon.rpc_fallback(),
+            "https://polygon.llamarpc.com"
+        );
+        assert_eq!(
+            EvmChain::Zksync.rpc_fallback(),
+            "https://mainnet.era.zksync.io"
+        );
+    }
+
+    #[test]
+    fn test_graphql_fallback() {
+        assert_eq!(
+            EvmChain::Ethereum.graphql_fallback(),
+            "https://ethereum.drpc.org"
+        );
+        assert_eq!(
+            EvmChain::Polygon.graphql_fallback(),
+            "https://polygon.llamarpc.com"
+        );
+        assert_eq!(
+            EvmChain::Zksync.graphql_fallback(),
+            "https://mainnet.era.zksync.io"
+        );
+    }
+
+    #[test]
+    fn test_from_evm_chain_to_u64() {
+        assert_eq!(u64::from(&EvmChain::Ethereum), 1);
+        assert_eq!(u64::from(&EvmChain::Polygon), 137);
+        assert_eq!(u64::from(&EvmChain::Zksync), 324);
+    }
 }
