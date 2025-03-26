@@ -4,7 +4,7 @@ use {
             AstLiteral, BinaryOperator, Expr, Function, IndexItem, IndexOperator, OrderByExpr,
             Query, Select, SetExpr, Statement, TableAlias, TableFactor, TableWithJoins,
         },
-        data::{Schema, SchemaIndex, SchemaIndexOrd, TableError},
+        //data::{Schema, SchemaIndex, SchemaIndexOrd, TableError},
         result::{Error, Result},
     },
     std::collections::HashMap,
@@ -122,8 +122,14 @@ fn plan_query(schema_map: &HashMap<String, Schema>, query: Query) -> Result<Quer
             } = *select;
 
             let TableWithJoins { relation, joins } = from;
-            let (name, alias) = match relation {
-                TableFactor::Table { name, alias, .. } => (name, alias),
+            let (chain_name, name, alias, existing_table) = match relation {
+                TableFactor::Table {
+                    chain_name,
+                    name,
+                    alias,
+                    existing_table,
+                    ..
+                } => (chain_name, name, alias, existing_table),
                 TableFactor::Derived { .. }
                 | TableFactor::Series { .. }
                 | TableFactor::Dictionary { .. } => {
@@ -132,7 +138,13 @@ fn plan_query(schema_map: &HashMap<String, Schema>, query: Query) -> Result<Quer
             };
 
             let from = TableWithJoins {
-                relation: TableFactor::Table { name, alias, index },
+                relation: TableFactor::Table {
+                    chain_name,
+                    name,
+                    alias,
+                    index,
+                    existing_table,
+                },
                 joins,
             };
 
@@ -207,8 +219,14 @@ fn plan_select(
             selection,
         } => {
             let TableWithJoins { relation, joins } = from;
-            let (name, alias) = match relation {
-                TableFactor::Table { name, alias, .. } => (name, alias),
+            let (chain_name, name, alias, existing_table) = match relation {
+                TableFactor::Table {
+                    chain_name,
+                    name,
+                    alias,
+                    existing_table,
+                    ..
+                } => (chain_name, name, alias, existing_table),
                 TableFactor::Derived { .. }
                 | TableFactor::Series { .. }
                 | TableFactor::Dictionary { .. } => {
@@ -222,7 +240,13 @@ fn plan_select(
                 cmp_expr: Some((index_op, index_value_expr)),
             });
             let from = TableWithJoins {
-                relation: TableFactor::Table { name, alias, index },
+                relation: TableFactor::Table {
+                    chain_name,
+                    name,
+                    alias,
+                    index,
+                    existing_table,
+                },
                 joins,
             };
 

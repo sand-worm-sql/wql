@@ -12,7 +12,7 @@ use crate::{ast::Statement, result::Result, store::Store};
 
 pub use {
     self::validate::validate, error::*, index::plan as plan_index, join::plan as plan_join,
-     schema::fetch_schema_map,
+    schema::fetch_schema_map,
 };
 
 pub async fn plan<T: Store>(storage: &T, statement: Statement) -> Result<Statement> {

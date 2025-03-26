@@ -90,7 +90,6 @@ impl Index for MockStorage {}
 impl IndexMut for MockStorage {}
 impl Transaction for MockStorage {}
 
-
 #[cfg(test)]
 mod tests {
     use {
