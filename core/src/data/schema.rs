@@ -1,6 +1,6 @@
 use {
     crate::{
-        ast::{ColumnDef, Expr, ForeignKey, OrderByExpr, Statement, ToSql},
+        ast::{ColumnDef, Expr, OrderByExpr, Statement, ToSql},
         prelude::{parse, translate},
         result::Result,
     },

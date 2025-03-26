@@ -29,15 +29,6 @@ pub trait ToSqlUnquoted {
     fn to_sql_unquoted(&self) -> String;
 }
 
-#[derive(PartialEq, Debug, Clone, Eq, Hash, Serialize, Deserialize)]
-pub struct ForeignKey {
-    pub name: String,
-    pub referencing_column_name: String,
-    pub referenced_table_name: String,
-    pub referenced_column_name: String,
-    pub on_delete: ReferentialAction,
-    pub on_update: ReferentialAction,
-}
 
 #[derive(PartialEq, Debug, Clone, Eq, Hash, Serialize, Deserialize, Display)]
 pub enum ReferentialAction {
@@ -172,28 +163,6 @@ impl ToSql for Assignment {
     }
 }
 
-impl ToSql for ForeignKey {
-    fn to_sql(&self) -> String {
-        let ForeignKey {
-            referencing_column_name,
-            referenced_table_name,
-            referenced_column_name,
-            name,
-            on_delete,
-            on_update,
-        } = self;
-
-        format!(
-            r#"CONSTRAINT "{}" FOREIGN KEY ("{}") REFERENCES "{}" ("{}") ON DELETE {} ON UPDATE {}"#,
-            name,
-            referencing_column_name,
-            referenced_table_name,
-            referenced_column_name,
-            on_delete,
-            on_update
-        )
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Array {
@@ -205,7 +174,7 @@ pub struct Array {
 mod tests {
     use {
         crate::ast::{
-            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr, ForeignKey,
+            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr,
             OperateFunctionArg, OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr,
             Statement, TableFactor, TableWithJoins, ToSql, Values, Variable,
         },
@@ -290,22 +259,6 @@ mod tests {
             Assignment {
                 id: "count".to_owned(),
                 value: Expr::Literal(AstLiteral::Number(BigDecimal::from_str("5").unwrap()))
-            }
-            .to_sql()
-        )
-    }
-
-    #[test]
-    fn to_sql_foreign_key() {
-        assert_eq!(
-            r#"CONSTRAINT "fk_id" FOREIGN KEY ("id") REFERENCES "Test" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION"#,
-            ForeignKey {
-                name: "fk_id".into(),
-                referencing_column_name: "id".into(),
-                referenced_table_name: "Test".into(),
-                referenced_column_name: "id".into(),
-                on_delete: ReferentialAction::NoAction,
-                on_update: ReferentialAction::NoAction,
             }
             .to_sql()
         )
