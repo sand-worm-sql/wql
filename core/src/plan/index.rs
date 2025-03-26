@@ -4,7 +4,7 @@ use {
             AstLiteral, BinaryOperator, Expr, Function, IndexItem, IndexOperator, OrderByExpr,
             Query, Select, SetExpr, Statement, TableAlias, TableFactor, TableWithJoins,
         },
-        //data::{Schema, SchemaIndex, SchemaIndexOrd, TableError},
+        data::{Schema, SchemaIndex, SchemaIndexOrd, TableError},
         result::{Error, Result},
     },
     std::collections::HashMap,
