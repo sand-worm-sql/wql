@@ -117,7 +117,7 @@ pub enum SchemaParseError {
 //                     name: "name".to_owned(),
 //                     data_type: DataType::Text,
 //                     nullable: true,
-//                     default: Some(Expr::Literal(AstLiteral::QuotedString("glue".to_owned()))),
+//                     default: Some(Expr::Literal(AstLiteral::QuotedString("worm".to_owned()))),
 //                     unique: None,
 //                     comment: None,
 //                 },
@@ -128,7 +128,7 @@ pub enum SchemaParseError {
 //             comment: None,
 //         };
 
-//         let ddl = r#"CREATE TABLE "User" ("id" INT NOT NULL, "name" TEXT NULL DEFAULT 'glue');"#;
+//         let ddl = r#"CREATE TABLE "User" ("id" INT NOT NULL, "name" TEXT NULL DEFAULT 'worm');"#;
 //         assert_eq!(schema.to_ddl(), ddl);
 
 //         let actual = Schema::from_ddl(ddl).unwrap();

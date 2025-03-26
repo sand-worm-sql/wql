@@ -189,19 +189,19 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                     alias: alias_or_name(alias, object_name),
                     size: translate_table_args(args)?,
                 }),
-                ("GLUE_OBJECTS", _) => Ok(TableFactor::Dictionary {
+                ("WORM_OBJECTS", _) => Ok(TableFactor::Dictionary {
                     dict: Dictionary::GlueObjects,
                     alias: alias_or_name(alias, object_name),
                 }),
-                ("GLUE_TABLES", _) => Ok(TableFactor::Dictionary {
+                ("WORM_TABLES", _) => Ok(TableFactor::Dictionary {
                     dict: Dictionary::GlueTables,
                     alias: alias_or_name(alias, object_name),
                 }),
-                ("GLUE_INDEXES", _) => Ok(TableFactor::Dictionary {
+                ("WORM_INDEXES", _) => Ok(TableFactor::Dictionary {
                     dict: Dictionary::GlueIndexes,
                     alias: alias_or_name(alias, object_name),
                 }),
-                ("GLUE_TABLE_COLUMNS", _) => Ok(TableFactor::Dictionary {
+                ("WORM_TABLE_COLUMNS", _) => Ok(TableFactor::Dictionary {
                     dict: Dictionary::GlueTableColumns,
                     alias: alias_or_name(alias, object_name),
                 }),

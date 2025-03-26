@@ -3,7 +3,7 @@
 // re-export
 pub use {chrono, sqlparser};
 
-// mod glue;
+// mod worm;
 mod mock;
 mod result;
 
@@ -22,7 +22,7 @@ pub mod prelude {
         chains_adapter::ChainEnitityResolver,
         data::{Key, Value},
         //executor::{execute, Payload, PayloadVariable},
-        //glue::Glue,
+        //worm::Glue,
         parse_sql::parse,
         plan::plan,
         result::{Error, Result},

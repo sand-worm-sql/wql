@@ -756,11 +756,11 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = "VALUES (1, 'glue', 3), (2, 'sql', 2)".to_owned();
+        let actual = "VALUES (1, 'worm', 3), (2, 'sql', 2)".to_owned();
         let expected = SetExpr::Values(Values(vec![
             vec![
                 Expr::Literal(AstLiteral::Number(BigDecimal::from_str("1").unwrap())),
-                Expr::Literal(AstLiteral::QuotedString("glue".to_owned())),
+                Expr::Literal(AstLiteral::QuotedString("worm".to_owned())),
                 Expr::Literal(AstLiteral::Number(BigDecimal::from_str("3").unwrap())),
             ],
             vec![
@@ -808,7 +808,7 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "VALUES (1 + 1, 'glue'), (3 - 2, 'sql')".to_owned();
+        let actual = "VALUES (1 + 1, 'worm'), (3 - 2, 'sql')".to_owned();
         let expected = SetExpr::Values(Values(vec![
             vec![
                 Expr::BinaryOp {
@@ -820,7 +820,7 @@ mod tests {
                         BigDecimal::from_str("1").unwrap(),
                     ))),
                 },
-                Expr::Literal(AstLiteral::QuotedString("glue".to_owned())),
+                Expr::Literal(AstLiteral::QuotedString("worm".to_owned())),
             ],
             vec![
                 Expr::BinaryOp {
@@ -842,7 +842,7 @@ mod tests {
     #[test]
     fn to_sql_select() {
         let actual =
-            r#"SELECT * FROM "base.FOO" AS "F" GROUP BY "name" HAVING "name" = 'glue'"#.to_owned();
+            r#"SELECT * FROM "base.FOO" AS "F" GROUP BY "name" HAVING "name" = 'worm'"#.to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
@@ -863,13 +863,13 @@ mod tests {
             having: Some(Expr::BinaryOp {
                 left: Box::new(Expr::Identifier("name".to_owned())),
                 op: BinaryOperator::Eq,
-                right: Box::new(Expr::Literal(AstLiteral::QuotedString("glue".to_owned()))),
+                right: Box::new(Expr::Literal(AstLiteral::QuotedString("worm".to_owned()))),
             }),
         }
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#"SELECT * FROM "base.FOO" WHERE "name" = 'glue'"#.to_owned();
+        let actual = r#"SELECT * FROM "base.FOO" WHERE "name" = 'worm'"#.to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
@@ -885,7 +885,7 @@ mod tests {
             selection: Some(Expr::BinaryOp {
                 left: Box::new(Expr::Identifier("name".to_owned())),
                 op: BinaryOperator::Eq,
-                right: Box::new(Expr::Literal(AstLiteral::QuotedString("glue".to_owned()))),
+                right: Box::new(Expr::Literal(AstLiteral::QuotedString("worm".to_owned()))),
             }),
             group_by: Vec::new(),
             having: None,
@@ -896,7 +896,7 @@ mod tests {
 
     #[test]
     fn to_sql_unquoted_select() {
-        let actual = "SELECT * FROM chain.FOO AS F GROUP BY name HAVING name = 'glue'".to_owned();
+        let actual = "SELECT * FROM chain.FOO AS F GROUP BY name HAVING name = 'worm'".to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
@@ -917,13 +917,13 @@ mod tests {
             having: Some(Expr::BinaryOp {
                 left: Box::new(Expr::Identifier("name".to_owned())),
                 op: BinaryOperator::Eq,
-                right: Box::new(Expr::Literal(AstLiteral::QuotedString("glue".to_owned()))),
+                right: Box::new(Expr::Literal(AstLiteral::QuotedString("worm".to_owned()))),
             }),
         }
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "SELECT * FROM base.FOO WHERE name = 'glue'".to_owned();
+        let actual = "SELECT * FROM base.FOO WHERE name = 'worm'".to_owned();
         let expected = Select {
             projection: vec![SelectItem::Wildcard],
             from: TableWithJoins {
@@ -939,7 +939,7 @@ mod tests {
             selection: Some(Expr::BinaryOp {
                 left: Box::new(Expr::Identifier("name".to_owned())),
                 op: BinaryOperator::Eq,
-                right: Box::new(Expr::Literal(AstLiteral::QuotedString("glue".to_owned()))),
+                right: Box::new(Expr::Literal(AstLiteral::QuotedString("worm".to_owned()))),
             }),
             group_by: Vec::new(),
             having: None,
@@ -1080,11 +1080,11 @@ mod tests {
         .to_sql();
         assert_eq!(actual, expected);
 
-        let actual = r#""GLUE_TABLES" AS "glue""#;
+        let actual = r#""WORM_TABLES" AS "worm""#;
         let expected = TableFactor::Dictionary {
             dict: Dictionary::GlueTables,
             alias: TableAlias {
-                name: "glue".to_owned(),
+                name: "worm".to_owned(),
                 columns: Vec::new(),
             },
         }
@@ -1150,11 +1150,11 @@ mod tests {
         .to_sql_unquoted();
         assert_eq!(actual, expected);
 
-        let actual = "GLUE_TABLES AS glue";
+        let actual = "WORM_TABLES AS worm";
         let expected = TableFactor::Dictionary {
             dict: Dictionary::GlueTables,
             alias: TableAlias {
-                name: "glue".to_owned(),
+                name: "worm".to_owned(),
                 columns: Vec::new(),
             },
         }

@@ -158,7 +158,7 @@ where
     }
 
     fn execute(&mut self, sql: impl AsRef<str>) -> Result<()> {
-        // match block_on(self.glue.execute(sql)) {
+        // match block_on(self.worm.execute(sql)) {
         //     Ok(payloads) => self.print.payloads(&payloads)?,
         //     Err(e) => {
         //         println!("[error] {}\n", e);
@@ -172,7 +172,7 @@ where
         let mut sqls = String::new();
         File::open(filename)?.read_to_string(&mut sqls)?;
         // for sql in sqls.split(';').filter(|sql| !sql.trim().is_empty()) {
-        //     match block_on(self.glue.execute(sql)) {
+        //     match block_on(self.worm.execute(sql)) {
         //         Ok(payloads) => {
         //             //self.print.payloads(&payloads)?
         //         },
