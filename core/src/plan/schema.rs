@@ -19,46 +19,7 @@ pub async fn fetch_schema_map<T: Store>(
     statement: &Statement,
 ) -> Result<HashMap<String, Schema>> {
     match statement {
-        Statement::Query(query) => scan_query(storage, query).await,
-        Statement::Insert {
-            table_name, source, ..
-        } => {
-            let table_schema = storage
-                .fetch_schema(table_name)
-                .await?
-                .map(|schema| HashMap::from([(table_name.to_owned(), schema)]))
-                .unwrap_or_else(HashMap::new);
-            let source_schema_list = scan_query(storage, source).await?;
-            let schema_list = table_schema.into_iter().chain(source_schema_list).collect();
-
-            Ok(schema_list)
-        }
-        Statement::CreateTable { name, source, .. } => {
-            let table_schema = storage
-                .fetch_schema(name)
-                .await?
-                .map(|schema| HashMap::from([(name.to_owned(), schema)]))
-                .unwrap_or_else(HashMap::new);
-            let source_schema_list = match source {
-                Some(source) => scan_query(storage, source).await?,
-                None => HashMap::new(),
-            };
-            let schema_list = table_schema.into_iter().chain(source_schema_list).collect();
-
-            Ok(schema_list)
-        }
-        Statement::DropTable { names, .. } => {
-            stream::iter(names)
-                .filter_map(|table_name| async {
-                    storage
-                        .fetch_schema(table_name)
-                        .await
-                        .map(|schema| Some((table_name.clone(), schema?)))
-                        .transpose()
-                })
-                .try_collect()
-                .await
-        }
+        Statement::Query(query) => scan_query(storage, query).await, 
         _ => Ok(HashMap::new()),
     }
 }

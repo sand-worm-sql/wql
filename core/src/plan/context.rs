@@ -4,7 +4,6 @@ pub enum Context<'a> {
     Data {
         alias: String,
         columns: Vec<&'a str>,
-        primary_key: Option<&'a str>,
         next: Option<Rc<Context<'a>>>,
     },
     Bridge {
@@ -17,13 +16,11 @@ impl<'a> Context<'a> {
     pub fn new(
         alias: String,
         columns: Vec<&'a str>,
-        primary_key: Option<&'a str>,
         next: Option<Rc<Context<'a>>>,
     ) -> Self {
         Context::Data {
             alias,
             columns,
-            primary_key,
             next,
         }
     }
@@ -77,23 +74,6 @@ impl<'a> Context<'a> {
             Self::Bridge { left, right } => {
                 left.contains_aliased_column(target_alias, target_column)
                     || right.contains_aliased_column(target_alias, target_column)
-            }
-        }
-    }
-
-    pub fn contains_primary_key(&self, target_column: &str) -> bool {
-        match self {
-            Self::Data {
-                primary_key: Some(primary_key),
-                ..
-            } if primary_key == &target_column => true,
-            Self::Data { next, .. } => next
-                .as_ref()
-                .map(|next| next.contains_primary_key(target_column))
-                .unwrap_or(false),
-            Self::Bridge { left, right } => {
-                left.contains_primary_key(target_column)
-                    || right.contains_primary_key(target_column)
             }
         }
     }
