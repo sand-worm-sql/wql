@@ -595,7 +595,7 @@ mod tests {
         let actual = plan_join(&storage, sql);
         let expected = chain("sui")
             .select("Player")
-            .join("PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .on("Player.name = 'abcd' AND Player.name != 'barcode'");
         test!(
