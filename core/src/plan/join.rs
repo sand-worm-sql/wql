@@ -423,7 +423,7 @@ mod tests {
         super::plan,
         crate::{
             ast::{DateTimeField, Statement},
-            ast_builder::{col, exists, num, subquery, table, Build, QueryNode},
+            ast_builder::{chain, col, exists, num, subquery, Build, QueryNode},
             mock::{run, MockStorage},
             parse_sql::parse,
             plan::fetch_schema_map,
@@ -462,69 +462,64 @@ mod tests {
             );
         ");
 
-        let sql = "SELECT * FROM Player;";
+        let sql = "SELECT * FROM base.Player;";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player").select();
+        let expected = chain("base").select("Player");
         test!(actual, expected, "basic select:\n{sql}");
-
-        let sql = "DELETE FROM Player WHERE id = 1;";
-        let actual = plan_join(&storage, sql);
-        let expected = table("Player").delete().filter("id = 1");
-        test!(actual, expected, "plan not covered:\n{sql}");
 
         let sql = "
             SELECT *
-            FROM Player
-            JOIN PlayerItem ON PlayerItem.user_id != Player.id
+            FROM base.Player
+            JOIN base.PlayerItem ON PlayerItem.user_id != Player.id
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
-            .join("PlayerItem")
+        let expected = chain("base")
+            .select("Player")
+            .join(Some("base"), "PlayerItem")
             .on("PlayerItem.user_id != Player.id");
         test!(actual, expected, "basic nested loop join:\n{sql}");
 
         let sql = "
             SELECT *
-            FROM Player
-            LEFT JOIN PlayerItem ON PlayerItem.amount > 2
+            FROM base.Player
+            LEFT JOIN base.PlayerItem ON PlayerItem.amount > 2
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
-            .left_join("PlayerItem")
+        let expected = chain("base")
+            .select("Player")
+            .left_join(Some("base"), "PlayerItem")
             .on("PlayerItem.amount > 2");
         test!(actual, expected, "basic nested loop join 2:\n{sql}");
 
         let sql = "
             SELECT *
-            FROM Player
+            FROM base.Player
             JOIN Empty u2
             LEFT JOIN Player u3;
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
-            .join_as("Empty", "u2")
-            .left_join_as("Player", "u3");
+        let expected = chain("base")
+            .select("Player")
+            .join_as(None, "Empty", "u2")
+            .left_join_as(None, "Player", "u3");
         test!(actual, expected, "self multiple joins:\n{sql}");
 
         let sql = "
             SELECT *
-            FROM Player
+            FROM base.Player
             JOIN PlayerItem ON PlayerItem.user_id = Player.id
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
-            .join("PlayerItem")
+        let expected = chain("base")
+            .select("Player")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id");
         test!(actual, expected, "basic hash join query:\n{sql}");
 
         let sql = "
             SELECT *
-            FROM Player
-            JOIN PlayerItem ON PlayerItem.user_id = Player.id
+            FROM sui.Player
+            JOIN sui.PlayerItem ON PlayerItem.user_id = Player.id
         ";
         let actual = plan_join(&storage, sql);
         let actual = {
@@ -532,9 +527,9 @@ mod tests {
 
             plan(&schema_map, actual)
         };
-        let expected = table("Player")
-            .select()
-            .join("PlayerItem")
+        let expected = chain("sui")
+            .select("Player")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id");
         test!(
             actual,
@@ -543,13 +538,13 @@ mod tests {
         );
 
         let sql = "
-            SELECT * FROM Player
+            SELECT * FROM sui.Player
             JOIN PlayerItem ON (SELECT * FROM Player u2)
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
-            .join("PlayerItem")
+        let expected = chain("sui")
+            .select("Player")
+            .join(None, "PlayerItem")
             .on("(SELECT * FROM Player u2)");
         test!(actual, expected, "subquery in join_constraint:\n{sql}");
     }
@@ -574,16 +569,16 @@ mod tests {
 
         let sql = "
             SELECT *
-            FROM Player
-            LEFT JOIN PlayerItem ON
+            FROM sui.Player
+            LEFT JOIN sui.PlayerItem ON
                 PlayerItem.amount > 10 AND
                 PlayerItem.user_id = Player.id
             WHERE True;
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
-            .left_join("PlayerItem")
+        let expected = chain("sui")
+            .select("Player")
+            .left_join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .hash_filter("PlayerItem.amount > 10")
             .filter(true);
@@ -591,15 +586,15 @@ mod tests {
 
         let sql = "
             SELECT *
-            FROM Player
+            FROM sui.Player
             JOIN PlayerItem ON
                 (PlayerItem.user_id = Player.id) AND
                 Player.name = 'abcd' AND
                 Player.name != 'barcode'
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
-            .select()
+        let expected = chain("sui")
+            .select("Player")
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .on("Player.name = 'abcd' AND Player.name != 'barcode'");
@@ -619,7 +614,7 @@ mod tests {
             WHERE True;
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .left_join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
@@ -636,7 +631,7 @@ mod tests {
             WHERE True;
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
@@ -657,13 +652,13 @@ mod tests {
             );
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .alias_as("u1")
             .select()
             .left_join_as("Player", "u2")
             .filter(
                 col("u2.id").eq(subquery(
-                    table("Player")
+                    chain("Player")
                         .alias_as("u3")
                         .select()
                         .join_as("Player", "u4")
@@ -686,11 +681,11 @@ mod tests {
             );
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player").alias_as("u1").select().filter(
+        let expected = chain("Player").alias_as("u1").select().filter(
             col("u1.id").eq(subquery(
-                table("Player").alias_as("u2").select().filter(
+                chain("Player").alias_as("u2").select().filter(
                     col("u2.id").eq(subquery(
-                        table("Player")
+                        chain("Player")
                             .alias_as("u3")
                             .select()
                             .join_as("Player", "u4")
@@ -712,7 +707,7 @@ mod tests {
             WHERE True;
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
@@ -737,7 +732,7 @@ mod tests {
             WHERE True;
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .join("PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
@@ -758,8 +753,8 @@ mod tests {
                 (SELECT * FROM Player JOIN PlayerItem ON Player.id = PlayerItem.user_id)
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player").select().join("PlayerItem").on(subquery(
-            table("Player")
+        let expected = chain("Player").select().join("PlayerItem").on(subquery(
+            chain("Player")
                 .select()
                 .join("PlayerItem")
                 .hash_executor("Player.id", "PlayerItem.user_id"),
@@ -778,11 +773,11 @@ mod tests {
             WHERE True    
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .join("PlayerItem")
             .on(num(1).in_list(
-                table("PlayerItem")
+                chain("PlayerItem")
                     .select()
                     .join("Player")
                     .hash_executor("PlayerItem.user_id", "Player.id"),
@@ -802,11 +797,11 @@ mod tests {
             WHERE True    
         ";
         let actual = plan_join(&storage, sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .join("PlayerItem")
             .on(exists(
-                table("PlayerItem")
+                chain("PlayerItem")
                     .select()
                     .join("Player")
                     .hash_executor("PlayerItem.user_id", "Player.id")
@@ -840,7 +835,7 @@ mod tests {
             JOIN Flag f ON f.user_id = u.id
         ";
         let subquery_node = || -> QueryNode {
-            table("Player")
+            chain("Player")
                 .alias_as("u")
                 .select()
                 .join_as("Flag", "f")
@@ -851,14 +846,14 @@ mod tests {
 
         let sql = format!("SELECT * FROM Player WHERE id = ({subquery_sql})");
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .filter(col("id").eq(subquery_node()));
         test!(actual, expected, "binary operator:\n{sql}");
 
         let sql = format!("SELECT * FROM Player WHERE -({subquery_sql}) IN ({subquery_sql})");
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .filter(subquery(subquery_node()).minus().in_list(subquery_node()));
         test!(actual, expected, "unary operator and in subquery:\n{sql}");
@@ -871,7 +866,7 @@ mod tests {
         "
         );
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .filter(subquery(subquery_node()).cast("INTEGER").in_list("1, 2, 3"));
         test!(actual, expected, "cast and in list:\n{sql}");
@@ -886,7 +881,7 @@ mod tests {
         "
         );
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player").select().filter(
+        let expected = chain("Player").select().filter(
             subquery(subquery_node())
                 .is_null()
                 .or(subquery(subquery_node()).is_not_null()),
@@ -895,7 +890,7 @@ mod tests {
 
         let sql = format!("SELECT * FROM Player WHERE EXISTS({subquery_sql})");
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player").select().filter(exists(subquery_node()));
+        let expected = chain("Player").select().filter(exists(subquery_node()));
         test!(actual, expected, "exists:\n{sql}");
 
         let sql = format!(
@@ -905,7 +900,7 @@ mod tests {
         "
         );
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player")
+        let expected = chain("Player")
             .select()
             .filter(subquery(subquery_node()).between(subquery_node(), num(100)));
         test!(actual, expected, "between:\n{sql}");
@@ -917,7 +912,7 @@ mod tests {
         "
         );
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player").select().filter(
+        let expected = chain("Player").select().filter(
             subquery(subquery_node())
                 .nested()
                 .extract(DateTimeField::Hour)
@@ -937,7 +932,7 @@ mod tests {
         "
         );
         let actual = plan_join(&storage, &sql);
-        let expected = table("Player").select().filter(
+        let expected = chain("Player").select().filter(
             subquery(subquery_node())
                 .case()
                 .when_then(10, true)

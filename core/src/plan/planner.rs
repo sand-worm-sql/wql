@@ -215,11 +215,7 @@ pub trait Planner<'a> {
             .map(|ColumnDef { name, .. }| name.as_str())
             .collect::<Vec<_>>();
 
-        let context = Context::new(
-            alias.unwrap_or_else(|| name.to_owned()),
-            columns,
-            next,
-        );
+        let context = Context::new(alias.unwrap_or_else(|| name.to_owned()), columns, next);
         Some(Rc::new(context))
     }
 }

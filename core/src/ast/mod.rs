@@ -29,7 +29,6 @@ pub trait ToSqlUnquoted {
     fn to_sql_unquoted(&self) -> String;
 }
 
-
 #[derive(PartialEq, Debug, Clone, Eq, Hash, Serialize, Deserialize, Display)]
 pub enum ReferentialAction {
     #[strum(to_string = "NO ACTION")]
@@ -163,7 +162,6 @@ impl ToSql for Assignment {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Array {
     pub elem: Vec<Expr>,
@@ -174,9 +172,9 @@ pub struct Array {
 mod tests {
     use {
         crate::ast::{
-            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr,
-            OperateFunctionArg, OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr,
-            Statement, TableFactor, TableWithJoins, ToSql, Values, Variable,
+            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr, OperateFunctionArg,
+            OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr, Statement,
+            TableFactor, TableWithJoins, ToSql, Values, Variable,
         },
         bigdecimal::BigDecimal,
         std::str::FromStr,

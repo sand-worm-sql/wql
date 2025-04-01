@@ -33,7 +33,7 @@ pub struct Schema {
     pub column_defs: Option<Vec<ColumnDef>>,
     pub indexes: Vec<SchemaIndex>,
     pub comment: Option<String>,
-    pub chain_name: Option<String>, 
+    pub chain_name: Option<String>,
 }
 
 #[derive(ThisError, Debug, PartialEq, Serialize)]

@@ -2,8 +2,8 @@ mod bigdecimal_ext;
 mod interval;
 mod key;
 mod literal;
-mod string_ext;
 mod schema;
+mod string_ext;
 mod table;
 
 pub mod value;

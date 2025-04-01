@@ -13,11 +13,7 @@ pub enum Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new(
-        alias: String,
-        columns: Vec<&'a str>,
-        next: Option<Rc<Context<'a>>>,
-    ) -> Self {
+    pub fn new(alias: String, columns: Vec<&'a str>, next: Option<Rc<Context<'a>>>) -> Self {
         Context::Data {
             alias,
             columns,

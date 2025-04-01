@@ -1,4 +1,3 @@
-mod alter_table;
 mod data_row;
 mod function;
 mod index;
@@ -57,7 +56,7 @@ pub trait Store {
             .into_iter()
             .flat_map(|schema| {
                 let Schema {
-                    table_name: referencing_table_name, 
+                    table_name: referencing_table_name,
                     ..
                 } = schema;
 

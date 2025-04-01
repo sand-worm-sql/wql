@@ -19,7 +19,7 @@ pub async fn fetch_schema_map<T: Store>(
     statement: &Statement,
 ) -> Result<HashMap<String, Schema>> {
     match statement {
-        Statement::Query(query) => scan_query(storage, query).await, 
+        Statement::Query(query) => scan_query(storage, query).await,
         _ => Ok(HashMap::new()),
     }
 }
