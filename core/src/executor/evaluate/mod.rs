@@ -509,7 +509,7 @@ async fn evaluate_function<'a, 'b: 'a, 'c: 'a, T: GStore>(
         Function::Floor(expr) => f::floor(name, eval(expr).await?),
         Function::Radians(expr) => f::radians(name, eval(expr).await?),
         Function::Degrees(expr) => f::degrees(name, eval(expr).await?),
-        Function::Pi() => return Ok(Evaluated::Value(Value::F64(std::f64::consts::PI))),
+        Function::Pi() => return Ok(Evaluated::Value(Value::I32(std::f64::consts::PI as i32))),
         Function::Exp(expr) => f::exp(name, eval(expr).await?),
         Function::Log { antilog, base } => {
             let antilog = eval(antilog).await?;
