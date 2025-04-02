@@ -21,23 +21,32 @@ pub fn translate_data_type(sql_data_type: &SqlDataType) -> Result<DataType> {
         SqlDataType::UInt16 => Ok(DataType::Uint16),
         SqlDataType::UInt32 => Ok(DataType::Uint32),
         SqlDataType::UInt64 => Ok(DataType::Uint64),
+        SqlDataType::UInt128 => Ok(DataType::Uint128),
+
+        SqlDataType::Float32 => Ok(DataType::Float32),
+        SqlDataType::Float64 => Ok(DataType::Float),
+
         SqlDataType::UnsignedInt(None) | SqlDataType::UnsignedInteger(None) => Ok(DataType::Uint64),
         SqlDataType::UnsignedInt8(None) => Ok(DataType::Uint8),
 
-        SqlDataType::Bytea => Ok(DataType::Bytea),
+        SqlDataType::Float(None) | SqlDataType::Float(Some(64)) => Ok(DataType::Float),
 
         SqlDataType::Text => Ok(DataType::Text),
+        SqlDataType::Bytea => Ok(DataType::Bytea),
         SqlDataType::Date => Ok(DataType::Date),
         SqlDataType::Timestamp(None, SqlTimezoneInfo::None) => Ok(DataType::Timestamp),
         SqlDataType::Time(None, SqlTimezoneInfo::None) => Ok(DataType::Time),
         SqlDataType::Interval => Ok(DataType::Interval),
         SqlDataType::Uuid => Ok(DataType::Uuid),
+        SqlDataType::Decimal(SqlExactNumberInfo::None) => Ok(DataType::Decimal),
         SqlDataType::Custom(name, _idents) => {
             let name = name.0.first().map(|v| v.value.to_uppercase());
 
             match name.as_deref() {
                 Some("MAP") => Ok(DataType::Map),
                 Some("LIST") => Ok(DataType::List),
+                Some("POINT") => Ok(DataType::Point),
+                Some("INET") => Ok(DataType::Inet),
 
                 _ => Err(TranslateError::UnsupportedDataType(sql_data_type.to_string()).into()),
             }
@@ -71,14 +80,20 @@ mod tests {
         test!("INTEGER UNSIGNED" => SqlDataType::UnsignedInteger(None) => Ok(DataType::Uint64));
 
         test!("INT8 UNSIGNED" => SqlDataType::UnsignedInt8(None) => Ok(DataType::Uint8));
-        test!("BYTEA" => SqlDataType::Bytea => Ok(DataType::Bytea));
+
+        test!("FLOAT" => SqlDataType::Float(None) => Ok(DataType::Float));
+        test!("FLOAT(64)" => SqlDataType::Float(Some(64)) => Ok(DataType::Float));
+
         test!("TEXT" => SqlDataType::Text => Ok(DataType::Text));
+
+        test!("BYTEA" => SqlDataType::Bytea => Ok(DataType::Bytea));
 
         test!("DATE" => SqlDataType::Date => Ok(DataType::Date));
         test!("TIMESTAMP" => SqlDataType::Timestamp(None, SqlTimezoneInfo::None) => Ok(DataType::Timestamp));
         test!("TIME" => SqlDataType::Time(None, SqlTimezoneInfo::None) =>  Ok(DataType::Time));
         test!("INTERVAL" => SqlDataType::Interval => Ok(DataType::Interval));
         test!("UUID" => SqlDataType::Uuid => Ok(DataType::Uuid));
+        test!("DECIMAL" => SqlDataType::Decimal(SqlExactNumberInfo::None) => Ok(DataType::Decimal));
     }
 
     #[test]
@@ -97,5 +112,7 @@ mod tests {
 
         test!("MAP" => Ok(DataType::Map));
         test!("LIST" => Ok(DataType::List));
+        test!("POINT" => Ok(DataType::Point));
+        test!("INET" => Ok(DataType::Inet));
     }
 }
