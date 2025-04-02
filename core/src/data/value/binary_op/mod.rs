@@ -1,5 +1,9 @@
 use crate::{prelude::Value, result::Result};
 
+mod decimal;
+mod f32;
+mod f64;
+
 mod integer;
 
 pub trait TryBinaryOperator {

@@ -6,7 +6,7 @@ use {
     },
     crate::{
         ast::DataType,
-        data::{value::uuid::parse_uuid, BigDecimalExt, Interval, Literal},
+        data::{value::uuid::parse_uuid, BigDecimalExt, Interval, Literal, Point},
         result::{Error, Result},
     },
     bigdecimal::BigDecimal,
@@ -27,6 +27,7 @@ impl TryFrom<&Literal<'_>> for Value {
             Literal::Number(v) => v
                 .to_i64()
                 .map(Value::I64)
+                .or_else(|| v.to_f64().map(Value::F64))
                 .ok_or_else(|| ValueError::FailedToParseNumber.into()),
             Literal::Boolean(v) => Ok(Value::Bool(*v)),
             Literal::Text(v) => Ok(Value::Str(v.as_ref().to_owned())),
@@ -61,6 +62,8 @@ impl Value {
             (Value::U32(l), Literal::Number(r)) => r.to_u32().map(|r| *l == r).unwrap_or(false),
             (Value::U64(l), Literal::Number(r)) => r.to_u64().map(|r| *l == r).unwrap_or(false),
             (Value::U128(l), Literal::Number(r)) => r.to_u128().map(|r| *l == r).unwrap_or(false),
+            (Value::F32(l), Literal::Number(r)) => r.to_f32().map(|r| *l == r).unwrap_or(false),
+            (Value::F64(l), Literal::Number(r)) => r.to_f64().map(|r| *l == r).unwrap_or(false),
             (Value::Str(l), Literal::Text(r)) => l == r.as_ref(),
             (Value::Bytea(l), Literal::Bytea(r)) => l == r,
             (Value::Date(l), Literal::Text(r)) => match r.parse::<NaiveDate>() {
@@ -76,6 +79,19 @@ impl Value {
                 None => false,
             },
             (Value::Uuid(l), Literal::Text(r)) => parse_uuid(r).map(|r| l == &r).unwrap_or(false),
+            (Value::Inet(l), Literal::Text(r)) => match IpAddr::from_str(r) {
+                Ok(x) => l == &x,
+                Err(_) => false,
+            },
+            (Value::Inet(l), Literal::Number(r)) => {
+                if let Some(x) = r.to_u32() {
+                    l == &Ipv4Addr::from(x)
+                } else if let Some(x) = r.to_u128() {
+                    l == &Ipv6Addr::from(x)
+                } else {
+                    false
+                }
+            }
             (Value::Null, Literal::Null) => false,
             _ => false,
         }
@@ -93,11 +109,26 @@ impl Value {
             (Value::U32(l), Literal::Number(r)) => l.partial_cmp(&r.to_u32()?),
             (Value::U64(l), Literal::Number(r)) => l.partial_cmp(&r.to_u64()?),
             (Value::U128(l), Literal::Number(r)) => l.partial_cmp(&r.to_u128()?),
+            (Value::F32(l), Literal::Number(r)) => l.partial_cmp(&r.to_f32()?),
+            (Value::F64(l), Literal::Number(r)) => l.partial_cmp(&r.to_f64()?),
+            (Value::Decimal(l), Literal::Number(r)) => {
+                BigDecimal::new(l.mantissa().into(), l.scale() as i64).partial_cmp(r)
+            }
             (Value::Str(l), Literal::Text(r)) => Some(l.as_str().cmp(r)),
             (Value::Date(l), Literal::Text(r)) => l.partial_cmp(&r.parse::<NaiveDate>().ok()?),
             (Value::Timestamp(l), Literal::Text(r)) => l.partial_cmp(&parse_timestamp(r)?),
             (Value::Time(l), Literal::Text(r)) => l.partial_cmp(&parse_time(r)?),
             (Value::Uuid(l), Literal::Text(r)) => l.partial_cmp(&parse_uuid(r).ok()?),
+            (Value::Inet(l), Literal::Text(r)) => l.partial_cmp(&IpAddr::from_str(r).ok()?),
+            (Value::Inet(l), Literal::Number(r)) => {
+                if let Some(x) = r.to_u32() {
+                    l.partial_cmp(&Ipv4Addr::from(x))
+                } else if let Some(x) = r.to_u128() {
+                    l.partial_cmp(&Ipv6Addr::from(x))
+                } else {
+                    None
+                }
+            }
             _ => None,
         }
     }
@@ -145,11 +176,31 @@ impl Value {
                 .to_u128()
                 .map(Value::U128)
                 .ok_or_else(|| ValueError::FailedToParseNumber.into()),
+            (DataType::Float32, Literal::Number(v)) => v
+                .to_f32()
+                .map(Value::F32)
+                .ok_or_else(|| ValueError::UnreachableNumberParsing.into()),
+            (DataType::Float, Literal::Number(v)) => v
+                .to_f64()
+                .map(Value::F64)
+                .ok_or_else(|| ValueError::UnreachableNumberParsing.into()),
             (DataType::Text, Literal::Text(v)) => Ok(Value::Str(v.to_string())),
             (DataType::Bytea, Literal::Bytea(v)) => Ok(Value::Bytea(v.to_vec())),
             (DataType::Bytea, Literal::Text(v)) => hex::decode(v.as_ref())
                 .map(Value::Bytea)
                 .map_err(|_| ValueError::FailedToParseHexString(v.to_string()).into()),
+            (DataType::Inet, Literal::Text(v)) => IpAddr::from_str(v.as_ref())
+                .map(Value::Inet)
+                .map_err(|_| ValueError::FailedToParseInetString(v.to_string()).into()),
+            (DataType::Inet, Literal::Number(v)) => {
+                if let Some(x) = v.to_u32() {
+                    Ok(Value::Inet(IpAddr::V4(Ipv4Addr::from(x))))
+                } else {
+                    Ok(Value::Inet(IpAddr::V6(Ipv6Addr::from(
+                        v.to_u128().unwrap(),
+                    ))))
+                }
+            }
             (DataType::Date, Literal::Text(v)) => v
                 .parse::<NaiveDate>()
                 .map(Value::Date)
@@ -164,6 +215,11 @@ impl Value {
             (DataType::Uuid, Literal::Bytea(v)) => parse_uuid(&hex::encode(v)).map(Value::Uuid),
             (DataType::Map, Literal::Text(v)) => Value::parse_json_map(v),
             (DataType::List, Literal::Text(v)) => Value::parse_json_list(v),
+            (DataType::Decimal, Literal::Number(v)) => v
+                .to_string()
+                .parse::<Decimal>()
+                .map(Value::Decimal)
+                .map_err(|_| ValueError::FailedToParseDecimal(v.to_string()).into()),
             (_, Literal::Null) => Ok(Value::Null),
             _ => Err(ValueError::IncompatibleLiteralForDataType {
                 data_type: data_type.clone(),
@@ -328,6 +384,47 @@ impl Value {
                 Ok(Value::U128(v))
             }
 
+            (DataType::Float32, Literal::Text(v)) => v
+                .parse::<f32>()
+                .map(Value::F32)
+                .map_err(|_| ValueError::LiteralCastFromTextToFloatFailed(v.to_string()).into()),
+            (DataType::Float32, Literal::Number(v)) => {
+                v.to_f32().map(Value::F32).ok_or_else(|| {
+                    ValueError::UnreachableLiteralCastFromNumberToFloat(v.to_string()).into()
+                })
+            }
+            (DataType::Float32, Literal::Boolean(v)) => {
+                let v = if *v { 1.0 } else { 0.0 };
+
+                Ok(Value::F32(v))
+            }
+            (DataType::Float, Literal::Text(v)) => v
+                .parse::<f64>()
+                .map(Value::F64)
+                .map_err(|_| ValueError::LiteralCastFromTextToFloatFailed(v.to_string()).into()),
+            (DataType::Float, Literal::Number(v)) => v.to_f64().map(Value::F64).ok_or_else(|| {
+                ValueError::UnreachableLiteralCastFromNumberToFloat(v.to_string()).into()
+            }),
+            (DataType::Float, Literal::Boolean(v)) => {
+                let v = if *v { 1.0 } else { 0.0 };
+
+                Ok(Value::F64(v))
+            }
+            (DataType::Decimal, Literal::Text(v)) => v
+                .parse::<Decimal>()
+                .map(Value::Decimal)
+                .map_err(|_| ValueError::LiteralCastFromTextToDecimalFailed(v.to_string()).into()),
+            (DataType::Decimal, Literal::Number(v)) => v
+                .to_string()
+                .parse::<Decimal>()
+                .map(Value::Decimal)
+                .map_err(|_| ValueError::LiteralCastFromTextToDecimalFailed(v.to_string()).into()),
+            (DataType::Decimal, Literal::Boolean(v)) => {
+                let v = if *v { Decimal::ONE } else { Decimal::ZERO };
+
+                Ok(Value::Decimal(v))
+            }
+
             (DataType::Text, Literal::Number(v)) => Ok(Value::Str(v.to_string())),
             (DataType::Text, Literal::Text(v)) => Ok(Value::Str(v.to_string())),
             (DataType::Text, Literal::Boolean(v)) => {
@@ -350,6 +447,9 @@ impl Value {
             | (DataType::Uint32, Literal::Null)
             | (DataType::Uint64, Literal::Null)
             | (DataType::Uint128, Literal::Null)
+            | (DataType::Float32, Literal::Null)
+            | (DataType::Float, Literal::Null)
+            | (DataType::Decimal, Literal::Null)
             | (DataType::Text, Literal::Null) => Ok(Value::Null),
             (DataType::Date, Literal::Text(v)) => parse_date(v)
                 .map(Value::Date)
@@ -360,6 +460,21 @@ impl Value {
             (DataType::Timestamp, Literal::Text(v)) => parse_timestamp(v)
                 .map(Value::Timestamp)
                 .ok_or_else(|| ValueError::LiteralCastToTimestampFailed(v.to_string()).into()),
+            (DataType::Inet, Literal::Number(v)) => {
+                if let Some(x) = v.to_u32() {
+                    Ok(Value::Inet(IpAddr::V4(Ipv4Addr::from(x))))
+                } else if let Some(x) = v.to_u128() {
+                    Ok(Value::Inet(IpAddr::V6(Ipv6Addr::from(x))))
+                } else {
+                    Err(ValueError::FailedToParseInetString(v.to_string()).into())
+                }
+            }
+            (DataType::Inet, Literal::Text(v)) => IpAddr::from_str(v)
+                .map(Value::Inet)
+                .map_err(|_| ValueError::FailedToParseInetString(v.to_string()).into()),
+            (DataType::Point, Literal::Text(v)) => Point::from_wkt(v)
+                .map(Value::Point)
+                .map_err(|_| ValueError::FailedToParsePoint(v.to_string()).into()),
             (DataType::Map, Literal::Text(v)) => Value::parse_json_map(v),
             (DataType::List, Literal::Text(v)) => Value::parse_json_list(v),
             _ => Err(ValueError::UnimplementedLiteralCast {
@@ -378,7 +493,13 @@ mod tests {
         crate::data::{Literal, Value},
         bigdecimal::BigDecimal,
         chrono::{NaiveDate, NaiveDateTime, NaiveTime},
-        std::{borrow::Cow, cmp::Ordering, str::FromStr},
+        rust_decimal::Decimal,
+        std::{
+            borrow::Cow,
+            cmp::Ordering,
+            net::{IpAddr, Ipv4Addr, Ipv6Addr},
+            str::FromStr,
+        },
     };
 
     fn date(year: i32, month: u32, day: u32) -> NaiveDate {
@@ -413,7 +534,8 @@ mod tests {
         let uuid_text = "936DA01F9ABD4d9d80C702AF85C822A8";
         let uuid = parse_uuid(uuid_text).unwrap();
 
-        let to_bytea = || hex::decode("123456").unwrap();
+        let bytea = || hex::decode("123456").unwrap();
+        let inet = |v: &str| Value::Inet(IpAddr::from_str(v).unwrap());
 
         assert!(Value::Bool(true).evaluate_eq_with_literal(&Literal::Boolean(true)));
         assert!(Value::I8(8).evaluate_eq_with_literal(num!("8")));
@@ -427,8 +549,17 @@ mod tests {
         assert!(Value::U32(64).evaluate_eq_with_literal(num!("64")));
         assert!(Value::U64(64).evaluate_eq_with_literal(num!("64")));
         assert!(Value::U128(64).evaluate_eq_with_literal(num!("64")));
+        assert!(Value::F32(7.123).evaluate_eq_with_literal(num!("7.123")));
+        assert!(Value::F64(7.123).evaluate_eq_with_literal(num!("7.123")));
         assert!(Value::Str("Hello".to_owned()).evaluate_eq_with_literal(text!("Hello")));
-        assert!(Value::Bytea(to_bytea()).evaluate_eq_with_literal(&Literal::Bytea(to_bytea())));
+        assert!(Value::Bytea(bytea()).evaluate_eq_with_literal(&Literal::Bytea(bytea())));
+        assert!(inet("127.0.0.1").evaluate_eq_with_literal(text!("127.0.0.1")));
+        assert!(inet("::1").evaluate_eq_with_literal(text!("::1")));
+        assert!(inet("0.0.0.0").evaluate_eq_with_literal(num!("0")));
+        assert!(!inet("::1").evaluate_eq_with_literal(num!("0")));
+        assert!(inet("::2:4cb0:16ea").evaluate_eq_with_literal(num!("9876543210")));
+        assert!(!inet("::1").evaluate_eq_with_literal(text!("-1")));
+        assert!(!inet("::1").evaluate_eq_with_literal(num!("-1")));
         assert!(Value::Date(date(2021, 11, 20)).evaluate_eq_with_literal(text!("2021-11-20")));
         assert!(!Value::Date(date(2021, 11, 20)).evaluate_eq_with_literal(text!("202=abcdef")));
         assert!(Value::Timestamp(date_time(2021, 11, 20, 10, 0, 0, 0))
@@ -459,6 +590,13 @@ mod tests {
         test(Value::U32(10), num(3), Some(Ordering::Greater));
         test(Value::U64(10), num(10), Some(Ordering::Equal));
         test(Value::U128(10), num(10), Some(Ordering::Equal));
+        test(Value::F32(10.0), num(10), Some(Ordering::Equal));
+        test(Value::F64(10.0), num(10), Some(Ordering::Equal));
+        test(
+            Value::Decimal(Decimal::new(215, 2)),
+            num(3),
+            Some(Ordering::Less),
+        );
         test(
             Value::Str("Hello".to_owned()),
             text("Hello"),
@@ -482,6 +620,26 @@ mod tests {
         test(
             Value::Uuid(parse_uuid("936DA01F9ABD4d9d80C702AF85C822A8").unwrap()),
             text("936DA01F9ABD4d9d80C702AF85C822A8"),
+            Some(Ordering::Equal),
+        );
+        test(
+            Value::Inet(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1))),
+            text("215.87.1.1"),
+            Some(Ordering::Less),
+        );
+        test(
+            Value::Inet(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1))),
+            text("215.87.1.1"),
+            Some(Ordering::Less),
+        );
+        test(
+            Value::Inet(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 255))),
+            Literal::Number(Cow::Owned(BigDecimal::new(4294967295u32.into(), 0))),
+            Some(Ordering::Equal),
+        );
+        test(
+            Value::Inet(IpAddr::from_str("::2:4cb0:16ea").unwrap()),
+            Literal::Number(Cow::Owned(BigDecimal::new(9876543210u128.into(), 0))),
             Some(Ordering::Equal),
         );
         test(Value::Null, num(1), None);
@@ -543,6 +701,7 @@ mod tests {
         use {
             crate::{ast::DataType, data::ValueError},
             chrono::NaiveDate,
+            rust_decimal::Decimal,
             std::{borrow::Cow, str::FromStr},
         };
 
@@ -564,7 +723,8 @@ mod tests {
             };
         }
 
-        let to_bytea = |v| hex::decode(v).unwrap();
+        let bytea = |v| hex::decode(v).unwrap();
+        let inet = |v| IpAddr::from_str(v).unwrap();
 
         test!(DataType::Boolean, Literal::Boolean(true), Value::Bool(true));
         test!(DataType::Int, num!("123456789"), Value::I64(123456789));
@@ -579,23 +739,45 @@ mod tests {
         test!(DataType::Uint64, num!("64"), Value::U64(64));
         test!(DataType::Uint128, num!("64"), Value::U128(64));
         test!(
+            DataType::Float32,
+            num!("123456789"),
+            Value::F32(123456789.0_f32)
+        );
+        test!(DataType::Float, num!("123456789"), Value::F64(123456789.0));
+        test!(
             DataType::Text,
             text!("Good!"),
             Value::Str("Good!".to_owned())
         );
         test!(
             DataType::Bytea,
-            Literal::Bytea(to_bytea("1234")),
-            Value::Bytea(to_bytea("1234"))
+            Literal::Bytea(bytea("1234")),
+            Value::Bytea(bytea("1234"))
         );
-        test!(
-            DataType::Bytea,
-            text!("1234"),
-            Value::Bytea(to_bytea("1234"))
-        );
+        test!(DataType::Bytea, text!("1234"), Value::Bytea(bytea("1234")));
         assert_eq!(
             Value::try_from_literal(&DataType::Bytea, &text!("123")),
             Err(ValueError::FailedToParseHexString("123".to_owned()).into())
+        );
+        test!(DataType::Inet, text!("::1"), Value::Inet(inet("::1")));
+        test!(
+            DataType::Inet,
+            num!("4294967295"),
+            Value::Inet(inet("255.255.255.255"))
+        );
+        test!(
+            DataType::Inet,
+            num!("9876543210"),
+            Value::Inet(inet("::2:4cb0:16ea"))
+        );
+        test!(
+            DataType::Inet,
+            num!("9876543210"),
+            Value::Inet(inet("::2:4cb0:16ea"))
+        );
+        assert_eq!(
+            Value::try_from_literal(&DataType::Inet, &text!("123")),
+            Err(ValueError::FailedToParseInetString("123".to_owned()).into())
         );
         test!(
             DataType::Date,
@@ -619,7 +801,7 @@ mod tests {
         );
         test!(
             DataType::Uuid,
-            Literal::Bytea(to_bytea("936DA01F9ABD4d9d80C702AF85C822A8")),
+            Literal::Bytea(bytea("936DA01F9ABD4d9d80C702AF85C822A8")),
             Value::Uuid(195965723427462096757863453463987888808)
         );
 
@@ -657,6 +839,11 @@ mod tests {
         ]"#
             )
         );
+        test!(
+            DataType::Decimal,
+            num!("200"),
+            Value::Decimal(Decimal::new(200, 0))
+        );
     }
 
     #[test]
@@ -675,7 +862,7 @@ mod tests {
             };
         }
 
-        let to_bytea = |v| hex::decode(v).unwrap();
+        let bytea = |v| hex::decode(v).unwrap();
 
         macro_rules! test {
             ($from: expr, $expected: expr) => {
@@ -685,15 +872,11 @@ mod tests {
 
         test!(text!("hello"), Value::Str("hello".to_owned()));
         test!(&text!("hallo"), Value::Str("hallo".to_owned()));
-        test!(
-            Literal::Bytea(to_bytea("1234")),
-            Value::Bytea(to_bytea("1234"))
-        );
-        test!(
-            &Literal::Bytea(to_bytea("1234")),
-            Value::Bytea(to_bytea("1234"))
-        );
+        test!(Literal::Bytea(bytea("1234")), Value::Bytea(bytea("1234")));
+        test!(&Literal::Bytea(bytea("1234")), Value::Bytea(bytea("1234")));
         test!(num!("1234567890"), Value::I64(1234567890));
+        test!(num!("1.0"), Value::F32(1.0_f32));
+        test!(num!("1.0"), Value::F64(1.0));
         test!(&Literal::Boolean(false), Value::Bool(false));
         assert!(matches!(Value::try_from(&Literal::Null), Ok(Value::Null)))
     }
@@ -802,6 +985,31 @@ mod tests {
         test!(DataType::Uint128, Literal::Boolean(false), Value::U128(0));
 
         test!(
+            DataType::Float32,
+            text!("12345.67"),
+            Value::F32(12345.67_f32)
+        );
+        test!(
+            DataType::Float32,
+            num!("123456.78"),
+            Value::F32(123456.78_f32)
+        );
+        test!(
+            DataType::Float32,
+            Literal::Boolean(true),
+            Value::F32(1.0_f32)
+        );
+        test!(
+            DataType::Float32,
+            Literal::Boolean(false),
+            Value::F32(0.0_f32)
+        );
+
+        test!(DataType::Float, text!("12345.6789"), Value::F64(12345.6789));
+        test!(DataType::Float, num!("123456.789"), Value::F64(123456.789));
+        test!(DataType::Float, Literal::Boolean(true), Value::F64(1.0));
+        test!(DataType::Float, Literal::Boolean(false), Value::F64(0.0));
+        test!(
             DataType::Text,
             num!("1234567890"),
             Value::Str("1234567890".to_owned())
@@ -835,6 +1043,8 @@ mod tests {
         test_null!(DataType::Uint32, Literal::Null);
         test_null!(DataType::Uint64, Literal::Null);
         test_null!(DataType::Uint128, Literal::Null);
+        test_null!(DataType::Float32, Literal::Null);
+        test_null!(DataType::Float, Literal::Null);
         test_null!(DataType::Text, Literal::Null);
         test!(
             DataType::Date,
@@ -850,6 +1060,21 @@ mod tests {
             DataType::Timestamp,
             text!("2022-12-20 10:00:00.987"),
             Value::Timestamp(timestamp(2022, 12, 20, 10, 0, 0, 987))
+        );
+        test!(
+            DataType::Inet,
+            num!("1234567890"),
+            Value::Inet(IpAddr::from(Ipv4Addr::from(1234567890)))
+        );
+        test!(
+            DataType::Inet,
+            num!("91234567890"),
+            Value::Inet(IpAddr::from(Ipv6Addr::from(91234567890)))
+        );
+        test!(
+            DataType::Inet,
+            text!("::1"),
+            Value::Inet(IpAddr::from_str("::1").unwrap())
         );
         test!(
             DataType::Map,
