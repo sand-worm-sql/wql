@@ -5,6 +5,7 @@ mod literal;
 mod schema;
 mod string_ext;
 mod table;
+mod point;
 
 pub mod value;
 
@@ -14,7 +15,7 @@ pub use {
     interval::{Interval, IntervalError},
     key::{Key, KeyError},
     literal::{Literal, LiteralError},
-    // point::Point,
+    point::Point,
     // row::{Row, RowError},
     schema::{Schema, SchemaIndex, SchemaIndexOrd, SchemaParseError},
     string_ext::{StringExt, StringExtError},

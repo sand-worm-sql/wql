@@ -277,3 +277,4 @@ mod tests {
         assert_eq!(u64::from(&EvmChain::Zksync), 324);
     }
 }
+ 
