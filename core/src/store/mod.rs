@@ -17,7 +17,6 @@ impl<S: StoreMut + IndexMut + AlterTable + Transaction + CustomFunction + Custom
 }
 
 pub use {
-    alter_table::{AlterTable, AlterTableError},
     data_row::DataRow,
     function::{CustomFunction, CustomFunctionMut},
     index::{Index, IndexError, IndexMut},

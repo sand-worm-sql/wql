@@ -21,7 +21,7 @@ pub mod prelude {
     pub use crate::{
         ast::DataType,
         chains_adapter::ChainEnitityResolver,
-        data::{Key, Value},
+        data::{Key,Row, Value},
         //executor::{execute, Payload, PayloadVariable},
         //worm::Glue,
         parse_sql::parse,
