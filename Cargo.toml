@@ -3,15 +3,11 @@ resolver = "2"
 members = [
   "cli",
   "core",
-  "chains-support/evm-adapter",
-  "chains-support/sui-adapter",
   "utils",
 ]
 
 default-members = [
   "cli",
-  "chains-support/evm-adapter",
-  "chains-support/sui-adapter",
   "utils"
 ]
 
