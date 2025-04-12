@@ -2,7 +2,7 @@ use {
     super::{context::RowContext, evaluate::evaluate_stateless, filter::check_expr},
     crate::{
         ast::{
-            ColumnDef, ColumnUniqueOption, Dictionary, Expr, IndexItem, Join, Query, Select,
+            ColumnDef, Dictionary, Expr, IndexItem, Join, Query, Select,
             SelectItem, SetExpr, TableAlias, TableFactor, TableWithJoins, ToSql, ToSqlUnquoted,
             Values,
         },
@@ -283,10 +283,6 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
                                         Value::Str(column_def.name),
                                         Value::I64(index as i64 + 1),
                                         Value::Bool(column_def.nullable),
-                                        column_def
-                                            .unique
-                                            .map(|unique| Value::Str(unique.to_sql()))
-                                            .unwrap_or(Value::Null),
                                         column_def
                                             .default
                                             .map(|expr| Value::Str(expr.to_sql()))
