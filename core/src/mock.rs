@@ -3,8 +3,8 @@ use {
         data::{Key, Schema},
         result::{Error, Result},
         store::{
-            AlterTable, CustomFunction, CustomFunctionMut, DataRow, Index, IndexMut, Metadata,
-            RowIter, Store, StoreMut, Transaction,
+             CustomFunction, CustomFunctionMut, DataRow, Index, IndexMut, Metadata,
+            RowIter, Store, Transaction,
         },
     },
     async_trait::async_trait,
@@ -35,11 +35,6 @@ pub struct MockStorage {
     schema_map: HashMap<String, Schema>,
 }
 
-#[async_trait(?Send)]
-impl CustomFunction for MockStorage {}
-
-#[async_trait(?Send)]
-impl CustomFunctionMut for MockStorage {}
 
 #[async_trait(?Send)]
 impl Store for MockStorage {
@@ -97,7 +92,7 @@ mod tests {
         crate::{
             ast::{ColumnDef, DataType, Expr, OrderByExpr},
             data::Key,
-            store::{AlterTable, Index, IndexMut, Transaction},
+            store::{ Index, IndexMut, Transaction},
             store::{Store, StoreMut},
         },
         futures::executor::block_on,

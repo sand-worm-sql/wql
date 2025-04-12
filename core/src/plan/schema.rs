@@ -7,7 +7,7 @@ use {
         },
         data::Schema,
         result::Result,
-        // store::Store,
+        store::Store,
     },
     async_recursion::async_recursion,
     futures::stream::{self, StreamExt, TryStreamExt},

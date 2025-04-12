@@ -1,13 +1,13 @@
 mod bigdecimal_ext;
+mod function;
 mod interval;
 mod key;
 mod literal;
+mod point;
+mod row;
 mod schema;
 mod string_ext;
 mod table;
-mod point;
-mod row;
- mod function;
 
 pub mod value;
 

@@ -9,7 +9,6 @@ mod result;
 
 pub mod ast;
 pub mod ast_builder;
-pub mod chains_adapter;
 pub mod data;
 pub mod executor;
 pub mod parse_sql;
@@ -20,8 +19,7 @@ pub mod translate;
 pub mod prelude {
     pub use crate::{
         ast::DataType,
-        chains_adapter::ChainEnitityResolver,
-        data::{Key,Row, Value},
+        data::{Key, Row, Value},
         //executor::{execute, Payload, PayloadVariable},
         //worm::Glue,
         parse_sql::parse,

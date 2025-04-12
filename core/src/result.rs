@@ -2,20 +2,24 @@ use {serde::Serialize, std::fmt::Debug, thiserror::Error as ThisError};
 
 pub use crate::{
     ast_builder::AstBuilderError,
-    chains_adapter::ChainAdapterError,
     data::{
         ConvertError,
         IntervalError,
         KeyError,
         LiteralError,
         StringExtError,
-        ValueError, // RowError, SchemaParseError,
-                    // StringExtError, TableError, ValueError,
+        ValueError, 
+        RowError, 
+        SchemaParseError,
+        TableError
     },
     executor::{
         AggregateError,
         SelectError,
-        // EvaluateError, ExecuteError, FetchError,  SortError, ValidateError,
+        EvaluateError,
+        ExecuteError,
+        FetchError,  
+        SortError, 
     },
     //plan::PlanError,
     translate::TranslateError,
@@ -35,26 +39,27 @@ pub enum Error {
     #[error("ast-builder: {0}")]
     AstBuilder(#[from] AstBuilderError),
 
-    #[error("ast-builder: {0}")]
-    ChainAdapter(#[from] ChainAdapterError),
+    #[error("execute: {0}")]
+    Execute(#[from] ExecuteError),
 
-    // #[error("execute: {0}")]
-    // Execute(#[from] ExecuteError),
+    #[error("fetch: {0}")]
+    Fetch(#[from] FetchError),
 
-    // #[error("fetch: {0}")]
-    // Fetch(#[from] FetchError),
     #[error("select: {0}")]
     Select(#[from] SelectError),
-    // #[error("evaluate: {0}")]
-    // Evaluate(#[from] EvaluateError),
+
+    #[error("evaluate: {0}")]
+    Evaluate(#[from] EvaluateError),
+
     #[error("aggregate: {0}")]
     Aggregate(#[from] AggregateError),
-    // #[error("sort: {0}")]
-    // Sort(#[from] SortError),
-    // #[error("table: {0}")]
-    // Table(#[from] TableError),
-    // #[error("validate: {0}")]
-    // Validate(#[from] ValidateError),
+
+    #[error("sort: {0}")]
+    Sort(#[from] SortError),
+
+    #[error("table: {0}")]
+    Table(#[from] TableError),
+
     // #[error("row: {0}")]
     // Row(#[from] RowError),
     #[error("key: {0}")]
