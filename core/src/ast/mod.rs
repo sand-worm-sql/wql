@@ -37,19 +37,23 @@ pub enum ReferentialAction {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Statement {
-    ShowChainEntitiesColumns {
+    /// SELECT, VALUES
+    Query(Query),
+
+    /// SHOW VARIABLE
+    Show(Show),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Show {
+    ChainEntitiesColumns {
         chain_name: String,
         entity_name: String,
     },
-    ShowChainEntities {
+    ChainEntities {
         chain_name: String,
     },
-    /// SELECT, VALUES
-    Query(Query),
-  
-    /// SHOW VARIABLE
-    ShowVariable(Variable),
-    ShowIndexes(String),
+    Variable(Variable),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -60,21 +64,30 @@ pub struct Assignment {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Variable {
+    Tables,
     Chains,
-    Functions,
+    // Functions,
     Version,
 }
 
 impl ToSql for Statement {
     fn to_sql(&self) -> String {
         match self {
-            Statement::ShowChainEntities { chain_name } => {
-                format!("SHOW CHAIN ENTITIES FROM {chain_name};")
-            }
-            Statement::ShowVariable(variable) => match variable {
-                Variable::Chains => "SHOW CHAINS;".to_owned(),
-                Variable::Functions => "SHOW FUNCTIONS;".to_owned(),
-                Variable::Version => "SHOW VERSIONS;".to_owned(),
+            Statement::Show(show_stmt) => match show_stmt {
+                Show::ChainEntities { chain_name } => {
+                    format!("SHOW CHAIN ENTITIES FROM {chain_name};")
+                }
+                Show::ChainEntitiesColumns {
+                    chain_name,
+                    entity_name,
+                } => {
+                    format!("SHOW COLUMNS FROM {entity_name} ON {chain_name};")
+                }
+                Show::Variable(var) => match var {
+                    Variable::Tables => "SHOW TABLES;".to_owned(),
+                    Variable::Chains => "SHOW CHAINS;".to_owned(),
+                    Variable::Version => "SHOW VERSIONS;".to_owned(),
+                },
             },
             _ => "(..statement..)".to_owned(),
         }
@@ -98,7 +111,7 @@ mod tests {
     use {
         crate::ast::{
             Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr, OperateFunctionArg,
-            OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr, Statement,
+            OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr, Show, Statement,
             TableFactor, TableWithJoins, ToSql, Values, Variable,
         },
         bigdecimal::BigDecimal,
@@ -109,30 +122,22 @@ mod tests {
     fn to_sql_show_columns() {
         assert_eq!(
             "SHOW CHAIN ENTITIES FROM base;",
-            Statement::ShowChainEntities {
+            Statement::Show(Show::ChainEntities {
                 chain_name: "base".into()
-            }
+            })
             .to_sql()
         )
-    }
-
-
-    #[test]
-    fn to_sql_transaction() {
-        assert_eq!("START TRANSACTION;", Statement::StartTransaction.to_sql());
-        assert_eq!("COMMIT;", Statement::Commit.to_sql());
-        assert_eq!("ROLLBACK;", Statement::Rollback.to_sql());
     }
 
     #[test]
     fn to_sql_show_variable() {
         assert_eq!(
             "SHOW CHAINS;",
-            Statement::ShowVariable(Variable::Chains).to_sql()
+            Statement::Show(Show::Variable(Variable::Chains)).to_sql()
         );
         assert_eq!(
             "SHOW VERSIONS;",
-            Statement::ShowVariable(Variable::Version).to_sql()
+            Statement::Show(Show::Variable(Variable::Version)).to_sql()
         );
     }
 

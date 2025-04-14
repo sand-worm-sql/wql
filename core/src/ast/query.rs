@@ -85,7 +85,6 @@ pub enum TableFactor {
 pub enum Dictionary {
     GlueTables,
     GlueTableColumns,
-    GlueIndexes,
     GlueObjects,
 }
 
