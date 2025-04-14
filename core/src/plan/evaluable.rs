@@ -174,7 +174,7 @@ mod tests {
     #[test]
     fn evaluable() {
         let context = {
-            let left_child = Context::new("Empty".to_owned(), Vec::new(),  None);
+            let left_child = Context::new("Empty".to_owned(), Vec::new(), None);
             let left = Context::new(
                 "Foo".to_owned(),
                 vec!["id", "name"],

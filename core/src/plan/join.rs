@@ -841,7 +841,7 @@ mod tests {
             chain("sui")
                 .alias_as("Player", "u")
                 .select()
-                .join_as(Some("sui"),"Flag", "f")
+                .join_as(Some("sui"), "Flag", "f")
                 .hash_executor("f.user_id", "u.id")
                 .project("u.id")
                 .into()

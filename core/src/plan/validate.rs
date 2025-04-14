@@ -13,8 +13,6 @@ type SchemaMap = HashMap<String, Schema>;
 pub fn validate(schema_map: &SchemaMap, statement: &Statement) -> Result<()> {
     let query = match statement {
         Statement::Query(query) => Some(query),
-        Statement::Insert { source, .. } => Some(source),
-        Statement::CreateTable { source, .. } => source.as_deref(),
         _ => None,
     };
 
