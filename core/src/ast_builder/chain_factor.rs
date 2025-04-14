@@ -49,16 +49,6 @@ pub fn chain_tables() -> ChainFactorNode<'static> {
     }
 }
 
-pub fn chain_table_indexes() -> ChainFactorNode<'static> {
-    ChainFactorNode {
-        chain_name: "chain".to_owned(),
-        chain_query_type: ChainQueryType::Dictionary(Dictionary::GlueIndexes),
-        entity_name: Some("enitity_indexes".to_owned()),
-        table_alias: None,
-        index: None,
-    }
-}
-
 pub fn chain_table_columns() -> ChainFactorNode<'static> {
     ChainFactorNode {
         chain_name: "chain".to_owned(),

@@ -6,7 +6,6 @@ mod error;
 mod expr;
 mod expr_list;
 mod expr_with_alias;
-mod index;
 mod index_item;
 mod order_by_expr;
 mod order_by_expr_list;
@@ -28,9 +27,7 @@ pub use expr::{
 /// Available expression builder functions
 pub use {
     chain_factor::ChainFactorNode,
-    chain_factor::{
-        chain_query_objects, chain_table_columns, chain_table_indexes, chain_tables, series,
-    },
+    chain_factor::{chain_query_objects, chain_table_columns, chain_tables, series},
     chain_name::chain,
     data_type::DataTypeNode,
     expr::{
@@ -40,7 +37,6 @@ pub use {
     },
     expr_list::ExprList,
     expr_with_alias::ExprWithAliasNode,
-    index::{CreateIndexNode, DropIndexNode},
     index_item::{
         non_clustered, primary_key, CmpExprNode, IndexItemNode, NonClusteredNode, PrimaryKeyNode,
     },

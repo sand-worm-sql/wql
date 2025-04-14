@@ -1,7 +1,7 @@
 use super::{
     chain_factor::ChainQueryType, show_chain_entities::ShowChainEntitiesNode,
-    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode, CreateIndexNode,
-    DropIndexNode, OrderByExprNode, SelectNode,
+    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode, OrderByExprNode,
+    SelectNode,
 };
 
 #[derive(Clone, Debug)]
@@ -47,20 +47,6 @@ impl<'a> ChainNode {
             entity_name: Some(entity_name.to_owned()),
             index: None,
         }
-    }
-
-    pub fn create_index<T: Into<OrderByExprNode<'a>>>(
-        self,
-        entity_name: &str,
-        name: &str,
-        column: T,
-    ) -> CreateIndexNode<'a> {
-        self.entity(entity_name);
-        CreateIndexNode::new(entity_name.to_owned(), name.to_owned(), column.into())
-    }
-
-    pub fn drop_index(self, table_name: &str, name: &str) -> DropIndexNode {
-        DropIndexNode::new(table_name.to_owned(), name.to_owned())
     }
 
     pub fn select(self, entity_name: &str) -> SelectNode<'a> {

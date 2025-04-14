@@ -1,6 +1,9 @@
 use {
     super::Build,
-    crate::{ast::Statement, result::Result},
+    crate::{
+        ast::{Show, Statement},
+        result::Result,
+    },
 };
 
 #[derive(Clone, Debug)]
@@ -20,12 +23,10 @@ impl ShowChainEntitiesColumnsNode {
 
 impl Build for ShowChainEntitiesColumnsNode {
     fn build(self) -> Result<Statement> {
-        let chain_name = self.chain_name;
-        let entity_name = self.entity_name;
-        Ok(Statement::ShowChainEntitiesColumns {
-            chain_name,
-            entity_name,
-        })
+        Ok(Statement::Show(Show::ChainEntitiesColumns {
+            chain_name: self.chain_name,
+            entity_name: self.entity_name,
+        }))
     }
 }
 
@@ -36,7 +37,7 @@ mod tests {
     #[test]
     fn show_chain_entities_columns() {
         let actual = chain("sui").show_chain_entities_columns("block").build();
-        let expected = "SHOW COLUMNS FROM sui.blocks;";
+        let expected = "SHOW COLUMNS FROM block ON sui;";
         test(actual, expected);
     }
 }

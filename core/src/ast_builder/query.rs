@@ -130,8 +130,8 @@ mod test {
                 TableFactor, TableWithJoins,
             },
             ast_builder::{
-                chain, chain_query_objects, chain_table_columns, chain_table_indexes, chain_tables,
-                col, series, test_query, SelectItemList,
+                chain, chain_query_objects, chain_table_columns, chain_tables, col, series,
+                test_query, SelectItemList,
             },
         },
         pretty_assertions::assert_eq,
@@ -264,10 +264,6 @@ mod test {
 
         let actual = chain_tables().select().into();
         let expected = "SELECT * FROM chain.entity_tables";
-        test_query(actual, expected);
-
-        let actual = chain_table_indexes().select().into();
-        let expected = "SELECT * FROM chain.entity_indexes";
         test_query(actual, expected);
 
         let actual = chain_table_columns().select().into();
