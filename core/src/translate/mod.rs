@@ -7,6 +7,8 @@ mod function;
 mod operator;
 mod query;
 
+use crate::ast::Show;
+
 pub use self::{
     data_type::translate_data_type,
     ddl::{translate_column_def, translate_operate_function_arg},
@@ -32,90 +34,72 @@ use {
 pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
     match sql_statement {
         SqlStatement::Query(query) => translate_query(query).map(Statement::Query),
-        SqlStatement::DropFunction {
-            if_exists,
-            func_desc,
-            ..
-        } => Ok(Statement::DropFunction {
-            if_exists: *if_exists,
-            names: func_desc
-                .iter()
-                .map(|v| translate_object_name(&v.name))
-                .collect::<Result<Vec<_>>>()?,
-        }),
-        SqlStatement::CreateIndex(SqlCreateIndex {
-            name,
-            table_name,
-            columns,
-            ..
-        }) => {
-            if columns.len() > 1 {
-                return Err(TranslateError::CompositeIndexNotSupported.into());
-            }
-
-            let Some(name) = name else {
-                return Err(TranslateError::UnsupportedUnnamedIndex.into());
-            };
-
-            let name = translate_object_name(name)?;
-
-            if name.to_uppercase() == "PRIMARY" {
-                return Err(TranslateError::ReservedIndexName(name).into());
-            };
-
-            Ok(Statement::CreateIndex {
-                name,
-                table_name: translate_object_name(table_name)?,
-                column: translate_order_by_expr(&columns[0])?,
-            })
-        }
-        SqlStatement::Drop {
-            object_type: SqlObjectType::Index,
-            names,
-            ..
-        } => {
-            if names.len() > 1 {
-                return Err(TranslateError::TooManyParamsInDropIndex.into());
-            }
-
-            let object_name = &names[0].0;
-            if object_name.len() != 2 {
-                return Err(TranslateError::InvalidParamsInDropIndex.into());
-            }
-
-            let table_name = object_name[0].value.to_owned();
-            let name = object_name[1].value.to_owned();
-
-            if name.to_uppercase() == "PRIMARY" {
-                return Err(TranslateError::CannotDropPrimary.into());
-            };
-
-            Ok(Statement::DropIndex { name, table_name })
-        }
-        SqlStatement::StartTransaction { .. } => Ok(Statement::StartTransaction),
-        SqlStatement::Commit { .. } => Ok(Statement::Commit),
-        SqlStatement::Rollback { .. } => Ok(Statement::Rollback),
         SqlStatement::ShowTables {
             filter: None,
             db_name: None,
             ..
-        } => Ok(Statement::ShowVariable(Variable::Chains)),
-        SqlStatement::ShowFunctions { filter: None } => {
-            Ok(Statement::ShowVariable(Variable::Functions))
-        }
+        } => Ok(Statement::Show(Show::Variable(Variable::Tables))),
+
         SqlStatement::ShowVariable { variable } => match (variable.len(), variable.first()) {
             (1, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
-                "VERSION" => Ok(Statement::ShowVariable(Variable::Version)),
+                "VERSION" => Ok(Statement::Show(Show::Variable(Variable::Version))),
+                "CHAINS" => Ok(Statement::Show(Show::Variable(Variable::Chains))),
+                "TABLES" => Ok(Statement::Show(Show::Variable(Variable::Tables))),
                 v => Err(TranslateError::UnsupportedShowVariableKeyword(v.to_owned()).into()),
             },
-            (3, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
-                "INDEXES" => match variable.get(2) {
-                    Some(tablename) => Ok(Statement::ShowIndexes(tablename.value.to_owned())),
-                    _ => Err(TranslateError::UnsupportedShowVariableStatement(
-                        sql_statement.to_string(),
-                    )
-                    .into()),
-                },
+            (4, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
+                "CHAIN" => {
+                    let entity_keyword = variable.get(1).map(|v| v.value.to_uppercase());
+                    let from_keyword = variable.get(2).map(|v| v.value.to_uppercase());
+                    let chain_name = variable.get(3).map(|v| v.value.clone());
+
+                    match (
+                        entity_keyword.as_deref(),
+                        from_keyword.as_deref(),
+                        chain_name,
+                    ) {
+                        (Some("ENTITIES"), Some("FROM"), Some(chain)) => {
+                            Ok(Statement::Show(Show::ChainEntities { chain_name: chain }))
+                        }
+                        _ => Err(TranslateError::UnsupportedShowVariableStatement(
+                            sql_statement.to_string(),
+                        )
+                        .into()),
+                    }
+                }
+                _ => Err(TranslateError::UnsupportedShowVariableStatement(
+                    sql_statement.to_string(),
+                )
+                .into()),
+            },
+            _ => Err(
+                TranslateError::UnsupportedShowVariableStatement(sql_statement.to_string()).into(),
+            ),
+            (5, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
+                "COLUMNS" => {
+                    let from_keyword = variable.get(1).map(|v| v.value.to_uppercase());
+                    let entity_name = variable.get(2).map(|v| v.value.clone());
+                    let on_keyword = variable.get(3).map(|v| v.value.to_uppercase());
+                    let chain_name = variable.get(4).map(|v| v.value.clone());
+
+                    match (
+                        from_keyword.as_deref(),
+                        on_keyword.as_deref(),
+                        entity_name,
+                        chain_name,
+                    ) {
+                        (Some("FROM"), Some("ON"), Some(entity), Some(chain)) => {
+                            Ok(Statement::Show(Show::ChainEntitiesColumns {
+                                entity_name: entity,
+                                chain_name: chain,
+                            }))
+                        }
+                        _ => Err(TranslateError::UnsupportedShowVariableStatement(
+                            sql_statement.to_string(),
+                        )
+                        .into()),
+                    }
+                }
                 _ => Err(TranslateError::UnsupportedShowVariableStatement(
                     sql_statement.to_string(),
                 )
@@ -128,32 +112,6 @@ pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
         // SqlStatement::ShowColumns { table_name, .. } => Ok(Statement::ShowColumns {
         //     table_name: translate_object_name(table_name)?,
         // }),
-        SqlStatement::CreateFunction {
-            or_replace,
-            name,
-            args,
-            function_body: Some(SqlCreateFunctionBody::Return(return_)),
-            ..
-        } => {
-            let args = args
-                .as_ref()
-                .map(|args| {
-                    args.iter()
-                        .map(translate_operate_function_arg)
-                        .collect::<Result<Vec<_>>>()
-                })
-                .transpose()?;
-            Ok(Statement::CreateFunction {
-                or_replace: *or_replace,
-                name: translate_object_name(name)?,
-                args: args.unwrap_or_default(),
-                return_: translate_expr(return_)?,
-            })
-        }
-        SqlStatement::CreateFunction { .. } => {
-            Err(TranslateError::UnsupportedEmptyFunctionBody.into())
-        }
-
         _ => Err(TranslateError::UnsupportedStatement(sql_statement.to_string()).into()),
     }
 }

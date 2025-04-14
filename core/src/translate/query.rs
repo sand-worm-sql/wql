@@ -197,10 +197,6 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                     dict: Dictionary::GlueTables,
                     alias: alias_or_name(alias, object_name),
                 }),
-                ("WORM_INDEXES", _) => Ok(TableFactor::Dictionary {
-                    dict: Dictionary::GlueIndexes,
-                    alias: alias_or_name(alias, object_name),
-                }),
                 ("WORM_TABLE_COLUMNS", _) => Ok(TableFactor::Dictionary {
                     dict: Dictionary::GlueTableColumns,
                     alias: alias_or_name(alias, object_name),
