@@ -3,25 +3,11 @@ use {serde::Serialize, std::fmt::Debug, thiserror::Error as ThisError};
 pub use crate::{
     ast_builder::AstBuilderError,
     data::{
-        ConvertError,
-        IntervalError,
-        KeyError,
-        LiteralError,
-        StringExtError,
-        ValueError, 
-        RowError, 
-        SchemaParseError,
-        TableError
+        ConvertError, IntervalError, KeyError, LiteralError, RowError, SchemaParseError,
+        StringExtError, TableError, ValueError,
     },
-    executor::{
-        AggregateError,
-        SelectError,
-        EvaluateError,
-        ExecuteError,
-        FetchError,  
-        SortError, 
-    },
-    //plan::PlanError,
+    executor::{AggregateError, EvaluateError, ExecuteError, FetchError, SelectError, SortError},
+    plan::PlanError,
     translate::TranslateError,
 };
 
@@ -60,8 +46,8 @@ pub enum Error {
     #[error("table: {0}")]
     Table(#[from] TableError),
 
-    // #[error("row: {0}")]
-    // Row(#[from] RowError),
+    #[error("row: {0}")]
+    Row(#[from] RowError),
     #[error("key: {0}")]
     Key(#[from] KeyError),
     #[error("value: {0}")]
@@ -74,10 +60,10 @@ pub enum Error {
     Interval(#[from] IntervalError),
     #[error("string-ext: {0}")]
     StringExt(#[from] StringExtError),
-    //  #[error("plan: {0}")]
-    //Plan(#[from] PlanError),
-    // #[error("schema-parse: {0}")]
-    // Schema(#[from] SchemaParseError),
+    #[error("plan: {0}")]
+    Plan(#[from] PlanError),
+    #[error("schema-parse: {0}")]
+    Schema(#[from] SchemaParseError),
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
