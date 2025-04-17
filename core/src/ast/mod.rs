@@ -80,7 +80,7 @@ impl ToSql for Statement {
                     chain_name,
                     entity_name,
                 } => {
-                    format!("SHOW COLUMNS FROM {entity_name} ON {chain_name};")
+                    format!("SHOW CHAIN ENTITIES IN {entity_name} FROM {chain_name};")
                 }
                 Show::Variable(var) => match var {
                     Variable::Tables => "SHOW TABLES;".to_owned(),

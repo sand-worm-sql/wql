@@ -24,8 +24,10 @@ use {
     },
     sqlparser::ast::{
         Assignment as SqlAssignment, AssignmentTarget as SqlAssignmentTarget,
-        Ident as SqlIdent, ObjectName as SqlObjectName,
-        ReferentialAction as SqlReferentialAction, Statement as SqlStatement, TableFactor, TableWithJoins,
+        CreateFunctionBody as SqlCreateFunctionBody, CreateIndex as SqlCreateIndex,
+        Ident as SqlIdent, ObjectName as SqlObjectName, ObjectType as SqlObjectType,
+        ReferentialAction as SqlReferentialAction, Statement as SqlStatement,
+        TableConstraint as SqlTableConstraint, TableFactor, TableWithJoins,
     },
 };
 
@@ -62,22 +64,24 @@ fn translate_show_variable(variable: &[SqlIdent], sql_statement: &SqlStatement) 
                 _ => unsupported_show_variable(sql_statement),
             }
         }
-        (5, Some(keyword)) if keyword.value.eq_ignore_ascii_case("COLUMNS") => {
-            let from_keyword = variable.get(1).map(|v| v.value.to_uppercase());
-            let entity_name = variable.get(2).map(|v| v.value.clone());
-            let on_keyword = variable.get(3).map(|v| v.value.to_uppercase());
-            let chain_name = variable.get(4).map(|v| v.value.clone());
+        (6, Some(keyword)) if keyword.value.eq_ignore_ascii_case("CHAIN") => {
+            let subcommand     = variable.get(1).map(|v| v.value.to_uppercase()); // ENTITIES or COLUMNS
+            let in_keyword     = variable.get(2).map(|v| v.value.to_uppercase()); // IN
+            let entity_name    = variable.get(3).map(|v| v.value.clone());  
+            let from_keyword   = variable.get(4).map(|v| v.value.to_uppercase()); // FROM
+            let chain_name     = variable.get(5).map(|v| v.value.clone());        // block
 
             match (
+                subcommand.as_deref(),
+                in_keyword.as_deref(),
                 from_keyword.as_deref(),
-                on_keyword.as_deref(),
-                entity_name,
                 chain_name,
+                entity_name,
             ) {
-                (Some("FROM"), Some("ON"), Some(entity), Some(chain)) => {
-                    Ok(Statement::Show(Show::ChainEntitiesColumns {
-                        entity_name: entity,
+                (Some("ENTITIES"), Some("IN"), Some("FROM"), Some(chain), Some(entity)) => {
+                    Ok(Statement::Show(Show::ChainEntitiesColumns  {
                         chain_name: chain,
+                        entity_name: entity
                     }))
                 }
                 _ => unsupported_show_variable(sql_statement),

@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn show_chain_entities_columns() {
         let actual = chain("sui").show_chain_entities_columns("block").build();
-        let expected = "SHOW COLUMNS FROM block ON sui;";
+        let expected = "SHOW CHAIN ENTITIES IN block FROM sui;";
         test(actual, expected);
     }
 }
