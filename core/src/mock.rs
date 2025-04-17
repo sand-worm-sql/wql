@@ -4,7 +4,7 @@ use {
         result::{Error, Result},
         store::{
              CustomFunction, CustomFunctionMut, DataRow, Index, IndexMut, Metadata,
-            RowIter, Store, Transaction,
+            RowIter, Store, Transaction, StoreMut
         },
     },
     async_trait::async_trait,
