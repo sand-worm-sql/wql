@@ -198,7 +198,6 @@ impl Function {
                 end_index: expr3,
                 values: None,
             } => Exprs::Triple([expr, expr2, expr3].into_iter()),
-            Self::Custom { name: _, exprs } => Exprs::VariableArgs(exprs.iter()),
             Self::Coalesce(exprs) => Exprs::VariableArgs(exprs.iter()),
             Self::Concat(exprs) => Exprs::VariableArgs(exprs.iter()),
             Self::ConcatWs { separator, exprs } => {

@@ -39,81 +39,58 @@ pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
             db_name: None,
             ..
         } => Ok(Statement::Show(Show::Variable(Variable::Tables))),
-
-        SqlStatement::ShowVariable { variable } => match (variable.len(), variable.first()) {
-            (1, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
-                "VERSION" => Ok(Statement::Show(Show::Variable(Variable::Version))),
-                "CHAINS" => Ok(Statement::Show(Show::Variable(Variable::Chains))),
-                "TABLES" => Ok(Statement::Show(Show::Variable(Variable::Tables))),
-                v => Err(TranslateError::UnsupportedShowVariableKeyword(v.to_owned()).into()),
-            },
-            (4, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
-                "CHAIN" => {
-                    let entity_keyword = variable.get(1).map(|v| v.value.to_uppercase());
-                    let from_keyword = variable.get(2).map(|v| v.value.to_uppercase());
-                    let chain_name = variable.get(3).map(|v| v.value.clone());
-
-                    match (
-                        entity_keyword.as_deref(),
-                        from_keyword.as_deref(),
-                        chain_name,
-                    ) {
-                        (Some("ENTITIES"), Some("FROM"), Some(chain)) => {
-                            Ok(Statement::Show(Show::ChainEntities { chain_name: chain }))
-                        }
-                        _ => Err(TranslateError::UnsupportedShowVariableStatement(
-                            sql_statement.to_string(),
-                        )
-                        .into()),
-                    }
-                }
-                _ => Err(TranslateError::UnsupportedShowVariableStatement(
-                    sql_statement.to_string(),
-                )
-                .into()),
-            },
-            _ => Err(
-                TranslateError::UnsupportedShowVariableStatement(sql_statement.to_string()).into(),
-            ),
-            (5, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
-                "COLUMNS" => {
-                    let from_keyword = variable.get(1).map(|v| v.value.to_uppercase());
-                    let entity_name = variable.get(2).map(|v| v.value.clone());
-                    let on_keyword = variable.get(3).map(|v| v.value.to_uppercase());
-                    let chain_name = variable.get(4).map(|v| v.value.clone());
-
-                    match (
-                        from_keyword.as_deref(),
-                        on_keyword.as_deref(),
-                        entity_name,
-                        chain_name,
-                    ) {
-                        (Some("FROM"), Some("ON"), Some(entity), Some(chain)) => {
-                            Ok(Statement::Show(Show::ChainEntitiesColumns {
-                                entity_name: entity,
-                                chain_name: chain,
-                            }))
-                        }
-                        _ => Err(TranslateError::UnsupportedShowVariableStatement(
-                            sql_statement.to_string(),
-                        )
-                        .into()),
-                    }
-                }
-                _ => Err(TranslateError::UnsupportedShowVariableStatement(
-                    sql_statement.to_string(),
-                )
-                .into()),
-            },
-            _ => Err(
-                TranslateError::UnsupportedShowVariableStatement(sql_statement.to_string()).into(),
-            ),
-        },
-        // SqlStatement::ShowColumns { table_name, .. } => Ok(Statement::ShowColumns {
-        //     table_name: translate_object_name(table_name)?,
-        // }),
+        SqlStatement::ShowVariable { variable } => translate_show_variable(variable, sql_statement),
         _ => Err(TranslateError::UnsupportedStatement(sql_statement.to_string()).into()),
     }
+}
+
+fn translate_show_variable(variable: &[SqlIdent], sql_statement: &SqlStatement) -> Result<Statement> {
+    match (variable.len(), variable.first()) {
+        (1, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
+            "VERSION" => Ok(Statement::Show(Show::Variable(Variable::Version))),
+            "CHAINS" => Ok(Statement::Show(Show::Variable(Variable::Chains))),
+            "TABLES" => Ok(Statement::Show(Show::Variable(Variable::Tables))),
+            v => Err(TranslateError::UnsupportedShowVariableKeyword(v.to_owned()).into()),
+        },
+        (4, Some(keyword)) if keyword.value.eq_ignore_ascii_case("CHAIN") => {
+            let entity_keyword = variable.get(1).map(|v| v.value.to_uppercase());
+            let from_keyword = variable.get(2).map(|v| v.value.to_uppercase());
+            let chain_name = variable.get(3).map(|v| v.value.clone());
+
+            match (entity_keyword.as_deref(), from_keyword.as_deref(), chain_name) {
+                (Some("ENTITIES"), Some("FROM"), Some(chain)) => {
+                    Ok(Statement::Show(Show::ChainEntities { chain_name: chain }))
+                }
+                _ => unsupported_show_variable(sql_statement),
+            }
+        }
+        (5, Some(keyword)) if keyword.value.eq_ignore_ascii_case("COLUMNS") => {
+            let from_keyword = variable.get(1).map(|v| v.value.to_uppercase());
+            let entity_name = variable.get(2).map(|v| v.value.clone());
+            let on_keyword = variable.get(3).map(|v| v.value.to_uppercase());
+            let chain_name = variable.get(4).map(|v| v.value.clone());
+
+            match (
+                from_keyword.as_deref(),
+                on_keyword.as_deref(),
+                entity_name,
+                chain_name,
+            ) {
+                (Some("FROM"), Some("ON"), Some(entity), Some(chain)) => {
+                    Ok(Statement::Show(Show::ChainEntitiesColumns {
+                        entity_name: entity,
+                        chain_name: chain,
+                    }))
+                }
+                _ => unsupported_show_variable(sql_statement),
+            }
+        }
+        _ => unsupported_show_variable(sql_statement),
+    }
+}
+
+fn unsupported_show_variable(sql_statement: &SqlStatement) -> Result<Statement> {
+    Err(TranslateError::UnsupportedShowVariableStatement(sql_statement.to_string()).into())
 }
 
 pub fn translate_assignment(sql_assignment: &SqlAssignment) -> Result<Assignment> {
@@ -200,4 +177,16 @@ pub fn translate_referential_action(
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+    use sqlparser::dialect::GenericDialect;
+    use sqlparser::parser::Parser;
+
+    #[test]
+    fn test_translate_show_tables() {
+        let dialect = GenericDialect {};
+        let ast = Parser::parse_sql(&dialect, "SHOW TABLES").unwrap();
+        let stmt = translate(&ast[0]);
+        assert!(matches!(stmt, Ok(Statement::Show(Show::Variable(Variable::Tables)))));
+    }
+} 

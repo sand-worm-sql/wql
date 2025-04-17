@@ -26,6 +26,9 @@ pub enum TranslateError {
     #[error("invalid params in drop index, expected: table_name.index_name")]
     InvalidParamsInDropIndex,
 
+    #[error("unsupported function: {0}")]
+    UnsupportedFunction(String),
+
     #[error("function args.length not matching: {name}, expected: {expected}, found: {found}")]
     FunctionArgsLengthNotMatching {
         name: String,

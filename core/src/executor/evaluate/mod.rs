@@ -48,6 +48,7 @@ pub async fn evaluate_stateless<'a, 'b: 'a>(
     evaluate_inner(storage, context, None, expr).await
 }
 
+
 #[async_recursion(?Send)]
 async fn evaluate_inner<'a, 'b: 'a, 'c: 'a, T>(
     storage: Option<&'a T>,
@@ -346,53 +347,6 @@ async fn evaluate_function<'a, 'b: 'a, 'c: 'a, T: GStore>(
         Function::Concat(exprs) => {
             let exprs = stream::iter(exprs).then(eval).try_collect().await?;
             f::concat(exprs)
-        }
-        Function::Custom { name, exprs } => {
-            let CustomFunction {
-                func_name,
-                args,
-                body,
-            } = storage
-                .ok_or(EvaluateError::UnsupportedCustomFunction)?
-                .fetch_function(name)
-                .await?
-                .ok_or_else(|| EvaluateError::UnsupportedFunction(name.to_string()))?;
-
-            let min = args.iter().filter(|arg| arg.default.is_none()).count();
-            let max = args.len();
-
-            if !(min..=max).contains(&exprs.len()) {
-                return Err((EvaluateError::FunctionArgsLengthNotWithinRange {
-                    name: func_name.to_owned(),
-                    expected_minimum: min,
-                    expected_maximum: max,
-                    found: exprs.len(),
-                })
-                .into());
-            }
-
-            let exprs = exprs.iter().chain(
-                args.iter()
-                    .skip(exprs.len())
-                    .filter_map(|arg| arg.default.as_ref()),
-            );
-
-            let context = stream::iter(args.iter().zip(exprs))
-                .then(|(arg, expr)| async {
-                    eval(expr)
-                        .await?
-                        .try_into_value(&arg.data_type, true)
-                        .map(|value| (arg.name.to_owned(), value))
-                })
-                .try_collect()
-                .await
-                .map(|values| {
-                    let row = Cow::Owned(Row::Map(values));
-                    let context = RowContext::new(name, row, None);
-                    Some(Rc::new(context))
-                })?;
-
-            return evaluate_inner(storage, context, None, body).await;
         }
         Function::ConcatWs { separator, exprs } => {
             let separator = eval(separator).await?;

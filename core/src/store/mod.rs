@@ -4,8 +4,8 @@ mod index;
 mod metadata;
 mod transaction;
 
-pub trait GStore: Store + Index + Metadata + CustomFunction {}
-impl<S: Store + Index + Metadata + CustomFunction> GStore for S {}
+pub trait GStore: Store + Metadata {}
+impl<S: Store + Metadata > GStore for S {}
 
 pub trait GStoreMut:
      IndexMut + Transaction + CustomFunction + CustomFunctionMut

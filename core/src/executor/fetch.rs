@@ -8,7 +8,7 @@ use {
         data::{get_alias, get_index, Key, Row, Value},
         executor::{evaluate::evaluate, select::select},
         result::Result,
-        store::{DataRow, GStore},
+        store::{DataRow, GStore, Metadata},
     },
     async_recursion::async_recursion,
     futures::{
@@ -19,6 +19,7 @@ use {
     std::{borrow::Cow, collections::HashMap, fmt::Debug, iter, rc::Rc},
     thiserror::Error as ThisError,
 };
+
 
 #[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum FetchError {
@@ -111,63 +112,11 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
         TableFactor::Table { name, .. } => {
             let rows = {
                 #[derive(futures_enum::Stream)]
-                enum Rows<I1, I2, I3, I4> {
-                    Indexed(I1),
-                    PrimaryKey(I2),
-                    PrimaryKeyEmpty(I3),
-                    FullScan(I4),
+                enum Rows<I1> {
+                    FullScan(I1),
                 }
 
                 match get_index(table_factor) {
-                    Some(IndexItem::NonClustered {
-                        name: index_name,
-                        asc,
-                        cmp_expr,
-                    }) => {
-                        let cmp_value = match cmp_expr {
-                            Some((op, expr)) => {
-                                let evaluated = evaluate(storage, None, None, expr).await?;
-
-                                Some((op, evaluated.try_into()?))
-                            }
-                            None => None,
-                        };
-
-                        let rows = storage
-                            .scan_indexed_data(name, index_name, *asc, cmp_value)
-                            .await?
-                            .map_ok(move |(_, data_row)| match data_row {
-                                DataRow::Vec(values) => Row::Vec {
-                                    columns: Rc::clone(&columns),
-                                    values,
-                                },
-                                DataRow::Map(values) => Row::Map(values),
-                            });
-
-                        Rows::Indexed(rows)
-                    }
-                    Some(IndexItem::PrimaryKey(expr)) => {
-                        let filter_context = filter_context.as_ref().map(Rc::clone);
-                        let key = evaluate(storage, filter_context, None, expr)
-                            .await
-                            .and_then(Value::try_from)
-                            .and_then(Key::try_from)?;
-
-                        match storage.fetch_data(name, &key).await? {
-                            Some(data_row) => {
-                                let row = match data_row {
-                                    DataRow::Vec(values) => Row::Vec {
-                                        columns: Rc::clone(&columns),
-                                        values,
-                                    },
-                                    DataRow::Map(values) => Row::Map(values),
-                                };
-
-                                Rows::PrimaryKey(stream::once(future::ready(Ok(row))))
-                            }
-                            None => Rows::PrimaryKeyEmpty(stream::empty()),
-                        }
-                    }
                     _ => {
                         let rows = storage.scan_data(name).await?.map_ok(move |(_, data_row)| {
                             match data_row {
@@ -216,7 +165,7 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
                 match dict {
                     Dictionary::GlueObjects => {
                         let schemas = storage.fetch_all_schemas().await?;
-                        let table_metas = storage
+                        let table_metas =  storage
                             .scan_table_meta()
                             .await?
                             .collect::<Result<HashMap<_, _>>>()?;

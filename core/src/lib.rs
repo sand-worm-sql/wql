@@ -20,7 +20,7 @@ pub mod prelude {
     pub use crate::{
         ast::DataType,
         data::{Key, Row, Value},
-        //executor::{execute, Payload, PayloadVariable},
+        executor::{execute, Payload, PayloadVariable},
         //worm::Glue,
         parse_sql::parse,
         plan::plan,
