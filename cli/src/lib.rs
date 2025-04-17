@@ -56,7 +56,6 @@ enum Storage {
     File,
 }
 
-
 pub fn run() -> Result<()> {
     let args = Args::parse();
     let path = args.path.as_deref().and_then(Path::to_str);
@@ -151,6 +150,6 @@ pub fn dump_database<T: Store + Transaction>(storage: &mut T, dump_path: PathBuf
     //         writeln!(&file)?;
     //     }
 
-        Ok(())
+    Ok(())
     //})
 }
