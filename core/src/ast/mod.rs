@@ -66,7 +66,6 @@ pub struct Assignment {
 pub enum Variable {
     Tables,
     Chains,
-    // Functions,
     Version,
 }
 
@@ -110,9 +109,8 @@ pub struct Array {
 mod tests {
     use {
         crate::ast::{
-            Assignment, AstLiteral, BinaryOperator, ColumnDef, DataType, Expr, OperateFunctionArg,
-            OrderByExpr, Query, ReferentialAction, Select, SelectItem, SetExpr, Show, Statement,
-            TableFactor, TableWithJoins, ToSql, Values, Variable,
+            Assignment, AstLiteral, Expr, Show, Statement,
+            ToSql, Variable,
         },
         bigdecimal::BigDecimal,
         std::str::FromStr,
