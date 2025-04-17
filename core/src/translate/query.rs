@@ -190,15 +190,15 @@ fn translate_table_factor(sql_table_factor: &SqlTableFactor) -> Result<TableFact
                     size: translate_table_args(args)?,
                 }),
                 ("WORM_OBJECTS", _) => Ok(TableFactor::Dictionary {
-                    dict: Dictionary::GlueObjects,
+                    dict: Dictionary::WormObjects,
                     alias: alias_or_name(alias, object_name),
                 }),
                 ("WORM_TABLES", _) => Ok(TableFactor::Dictionary {
-                    dict: Dictionary::GlueTables,
+                    dict: Dictionary::WormTables,
                     alias: alias_or_name(alias, object_name),
                 }),
                 ("WORM_TABLE_COLUMNS", _) => Ok(TableFactor::Dictionary {
-                    dict: Dictionary::GlueTableColumns,
+                    dict: Dictionary::WormTableColumns,
                     alias: alias_or_name(alias, object_name),
                 }),
                 _ => {
@@ -250,7 +250,6 @@ fn translate_join(sql_join: &SqlJoin) -> Result<Join> {
         join_operator: sql_join_operator,
         ..
     } = sql_join;
-    println!("join: {:?}", relation);
     let translate_constraint = |sql_join_constraint: &SqlJoinConstraint| match sql_join_constraint {
         SqlJoinConstraint::On(expr) => translate_expr(expr).map(JoinConstraint::On),
         SqlJoinConstraint::None => Ok(JoinConstraint::None),

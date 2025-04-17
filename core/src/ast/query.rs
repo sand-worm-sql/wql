@@ -83,9 +83,9 @@ pub enum TableFactor {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum Dictionary {
-    GlueTables,
-    GlueTableColumns,
-    GlueObjects,
+    WormTables,
+    WormTableColumns,
+    WormObjects,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -1081,7 +1081,7 @@ mod tests {
 
         let actual = r#""WORM_TABLES" AS "worm""#;
         let expected = TableFactor::Dictionary {
-            dict: Dictionary::GlueTables,
+            dict: Dictionary::WormTables,
             alias: TableAlias {
                 name: "worm".to_owned(),
                 columns: Vec::new(),
@@ -1151,7 +1151,7 @@ mod tests {
 
         let actual = "WORM_TABLES AS worm";
         let expected = TableFactor::Dictionary {
-            dict: Dictionary::GlueTables,
+            dict: Dictionary::WormTables,
             alias: TableAlias {
                 name: "worm".to_owned(),
                 columns: Vec::new(),

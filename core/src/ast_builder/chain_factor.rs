@@ -32,7 +32,7 @@ impl<'a> ChainFactorNode<'a> {
 pub fn chain_query_objects() -> ChainFactorNode<'static> {
     ChainFactorNode {
         chain_name: "chain".to_owned(),
-        chain_query_type: ChainQueryType::Dictionary(Dictionary::GlueObjects),
+        chain_query_type: ChainQueryType::Dictionary(Dictionary::WormObjects),
         entity_name: Some("enitity_objects".to_owned()),
         table_alias: None,
         index: None,
@@ -42,7 +42,7 @@ pub fn chain_query_objects() -> ChainFactorNode<'static> {
 pub fn chain_tables() -> ChainFactorNode<'static> {
     ChainFactorNode {
         chain_name: "chain".to_owned(),
-        chain_query_type: ChainQueryType::Dictionary(Dictionary::GlueTables),
+        chain_query_type: ChainQueryType::Dictionary(Dictionary::WormTables),
         entity_name: Some("enitity_tables".to_owned()),
         table_alias: None,
         index: None,
@@ -52,7 +52,7 @@ pub fn chain_tables() -> ChainFactorNode<'static> {
 pub fn chain_table_columns() -> ChainFactorNode<'static> {
     ChainFactorNode {
         chain_name: "chain".to_owned(),
-        chain_query_type: ChainQueryType::Dictionary(Dictionary::GlueTableColumns),
+        chain_query_type: ChainQueryType::Dictionary(Dictionary::WormTableColumns),
         entity_name: Some("enitity_columns".to_owned()),
         table_alias: None,
         index: None,

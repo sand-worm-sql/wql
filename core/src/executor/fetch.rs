@@ -160,7 +160,7 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
                 }
 
                 match dict {
-                    Dictionary::GlueObjects => {
+                    Dictionary::WormObjects => {
                         let schemas = storage.fetch_all_schemas().await?;
                         let table_metas =  storage
                             .scan_table_meta()
@@ -196,7 +196,7 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
 
                         Rows::Objects(stream::iter(rows))
                     }
-                    Dictionary::GlueTables => {
+                    Dictionary::WormTables => {
                         let schemas = storage.fetch_all_schemas().await?;
                         let rows = schemas.into_iter().map(move |schema| {
                             Ok(Row::Vec {
@@ -210,7 +210,7 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
 
                         Rows::Tables(stream::iter(rows))
                     }
-                    Dictionary::GlueTableColumns => {
+                    Dictionary::WormTableColumns => {
                         let schemas = storage.fetch_all_schemas().await?;
                         let rows = schemas.into_iter().flat_map(move |schema| {
                             let columns = Rc::clone(&columns);
@@ -304,13 +304,13 @@ where
         }
         TableFactor::Series { .. } => Ok(Some(vec!["N".to_owned()])),
         TableFactor::Dictionary { dict, .. } => Ok(Some(match dict {
-            Dictionary::GlueObjects => vec![
+            Dictionary::WormObjects => vec![
                 "OBJECT_NAME".to_owned(),
                 "OBJECT_TYPE".to_owned(),
                 "CREATED".to_owned(),
             ],
-            Dictionary::GlueTables => vec!["TABLE_NAME".to_owned(), "COMMENT".to_owned()],
-            Dictionary::GlueTableColumns => vec![
+            Dictionary::WormTables => vec!["TABLE_NAME".to_owned(), "COMMENT".to_owned()],
+            Dictionary::WormTableColumns => vec![
                 "TABLE_NAME".to_owned(),
                 "COLUMN_NAME".to_owned(),
                 "COLUMN_ID".to_owned(),
