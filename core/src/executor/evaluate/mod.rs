@@ -8,7 +8,7 @@ use {
     super::{context::RowContext, select::select},
     crate::{
         ast::{Aggregate, Expr, Function},
-        data::{CustomFunction, Interval, Literal, Row, Value},
+        data::{Interval, Literal, Row, Value},
         mock::MockStorage,
         result::{Error, Result},
         store::GStore,

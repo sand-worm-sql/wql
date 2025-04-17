@@ -1,6 +1,6 @@
 use super::{
     chain_factor::ChainQueryType, show_chain_entities::ShowChainEntitiesNode,
-    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode, OrderByExprNode,
+    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode,
     SelectNode,
 };
 

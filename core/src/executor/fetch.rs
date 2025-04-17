@@ -2,19 +2,16 @@ use {
     super::{context::RowContext, evaluate::evaluate_stateless, filter::check_expr},
     crate::{
         ast::{
-            ColumnDef, Dictionary, Expr, IndexItem, Join, Query, Select, SelectItem, SetExpr,
-            TableAlias, TableFactor, TableWithJoins, ToSql, ToSqlUnquoted, Values,
+            Dictionary, Expr, Join, Query, Select, SelectItem, SetExpr,
+            TableAlias, TableFactor, TableWithJoins, ToSql, Values,
         },
         data::{get_alias, get_index, Key, Row, Value},
-        executor::{evaluate::evaluate, select::select},
+        executor::select::select,
         result::Result,
         store::{DataRow, GStore, Metadata},
     },
     async_recursion::async_recursion,
-    futures::{
-        future,
-        stream::{self, Stream, StreamExt, TryStreamExt},
-    },
+    futures::stream::{self, Stream, StreamExt, TryStreamExt},
     serde::Serialize,
     std::{borrow::Cow, collections::HashMap, fmt::Debug, iter, rc::Rc},
     thiserror::Error as ThisError,

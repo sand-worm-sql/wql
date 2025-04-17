@@ -3,7 +3,7 @@
 // re-export
 pub use {chrono, sqlparser};
 
-// mod worm;
+mod worm;
 mod mock;
 mod result;
 
@@ -21,7 +21,7 @@ pub mod prelude {
         ast::DataType,
         data::{Key, Row, Value},
         executor::{execute, Payload, PayloadVariable},
-        //worm::Glue,
+        worm::Worm,
         parse_sql::parse,
         plan::plan,
         result::{Error, Result},

@@ -24,10 +24,8 @@ use {
     },
     sqlparser::ast::{
         Assignment as SqlAssignment, AssignmentTarget as SqlAssignmentTarget,
-        CreateFunctionBody as SqlCreateFunctionBody, CreateIndex as SqlCreateIndex,
-        Ident as SqlIdent, ObjectName as SqlObjectName, ObjectType as SqlObjectType,
-        ReferentialAction as SqlReferentialAction, Statement as SqlStatement,
-        TableConstraint as SqlTableConstraint, TableFactor, TableWithJoins,
+        Ident as SqlIdent, ObjectName as SqlObjectName,
+        ReferentialAction as SqlReferentialAction, Statement as SqlStatement, TableFactor, TableWithJoins,
     },
 };
 

@@ -3,7 +3,7 @@ use {
     crate::{
         ast::{Join, JoinExecutor, JoinOperator, Select, TableAlias, TableFactor},
         ast_builder::{
-            chain_name, select::Prebuild, ChainFactorNode, ExprList, ExprNode, FilterNode,
+            select::Prebuild, ChainFactorNode, ExprList, ExprNode, FilterNode,
             GroupByNode, HashJoinNode, JoinConstraintNode, LimitNode, OffsetNode, OrderByExprList,
             OrderByNode, ProjectNode, QueryNode, SelectItemList, SelectNode,
         },

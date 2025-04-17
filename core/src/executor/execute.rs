@@ -1,26 +1,19 @@
 use {
-    super::{
-        fetch::fetch,
-        select::{select, select_with_labels},
-    },
+    super::select::select_with_labels,
     crate::{
         ast::{
-            AstLiteral, BinaryOperator, DataType, Dictionary, Expr, Query, SelectItem, SetExpr,
-            Show, Statement, TableAlias, TableFactor, TableWithJoins, Variable,
+            DataType,
+            Show, Statement, Variable,
         },
-        data::{Key, Row, Schema, Value},
+        data::Value,
         error::Error,
         result::Result,
         store::{GStore, GStoreMut},
     },
-    futures::{
-        future::join_all,
-        stream::{StreamExt, TryStreamExt},
-    },
+    futures::stream::{StreamExt, TryStreamExt},
     reqwest::Client,
     serde::{Deserialize, Serialize},
-    serde_json::{json, Error as SerdeError, Value as JsonValue},
-    std::{collections::HashMap, env::var, fmt::Debug, hash::Hash, rc::Rc, str::FromStr},
+    std::{collections::HashMap, env::var, fmt::Debug, hash::Hash, str::FromStr},
     thiserror::Error as ThisError,
 };
 
