@@ -1,6 +1,6 @@
 use {
     crate::{
-        command::{Command, CommandError, SetOption},
+        command::{Command, CommandError},
         helper::CliHelper,
         print::Print,
     },
@@ -13,23 +13,31 @@ use {
         io::{Read, Result, Write},
         path::Path,
     },
+    wql_core::{
+        prelude::Worm,
+        store::{GStore, GStoreMut},
+    },
 };
 
-pub struct Cli<W>
+pub struct Cli<T, W>
 where
+    T: GStore + GStoreMut,
     W: Write,
 {
+    worm: Worm<T>,
     print: Print<W>,
 }
 
-impl<W> Cli<W>
+impl<T, W> Cli<T, W>
 where
+    T: GStore + GStoreMut,
     W: Write,
 {
-    pub fn new(output: W) -> Self {
+    pub fn new(storage: T, output: W) -> Self {
+        let worm = Worm::new(storage);
         let print = Print::new(output, None, Default::default());
 
-        Self { print }
+        Self { worm, print }
     }
 
     pub fn run(&mut self) -> std::result::Result<(), Box<dyn Error>> {
@@ -43,7 +51,7 @@ where
         rl.set_helper(Some(CliHelper));
 
         loop {
-            let line = match rl.readline("sand-worm-sql> ") {
+            let line = match rl.readline("worm> ") {
                 Ok(line) => line,
                 Err(ReadlineError::Interrupted) => {
                     println!("^C");
@@ -106,10 +114,6 @@ where
                     println!("bye\n");
                     break;
                 }
-                Command::Chain => {
-                    self.print.chains()?;
-                    continue;
-                }
                 Command::Execute(sql) => self.execute(sql)?,
                 Command::ExecuteFromFile(filename) => {
                     if let Err(e) = self.load(&filename) {
@@ -122,6 +126,8 @@ where
                 Command::SpoolOff => {
                     self.print.spool_off();
                 }
+                Command::Set(option) => self.print.set_option(option),
+                Command::Show(option) => self.print.show_option(option)?,
                 Command::Edit(file_name) => {
                     match file_name {
                         Some(file_name) => {
@@ -130,15 +136,13 @@ where
                         }
                         None => {
                             let mut builder = Builder::new();
-                            builder.prefix("worm_").suffix(".wql");
+                            builder.prefix("worm_").suffix(".sql");
                             let last = rl.history().last().map_or_else(|| "", String::as_str);
                             let edited = edit_with_builder(last, &builder)?;
                             rl.add_history_entry(edited);
                         }
                     };
                 }
-                Command::Set(option) => self.print.set_option(option),
-                Command::Show(option) => self.print.show_option(option)?,
                 Command::Run => {
                     let sql = rl.history().last().ok_or(CommandError::LackOfSQLHistory);
 
@@ -158,12 +162,12 @@ where
     }
 
     fn execute(&mut self, sql: impl AsRef<str>) -> Result<()> {
-        // match block_on(self.worm.execute(sql)) {
-        //     Ok(payloads) => self.print.payloads(&payloads)?,
-        //     Err(e) => {
-        //         println!("[error] {}\n", e);
-        //     }
-        // };
+        match block_on(self.worm.execute(sql)) {
+            Ok(payloads) => self.print.payloads(&payloads)?,
+            Err(e) => {
+                println!("[error] {}\n", e);
+            }
+        };
 
         Ok(())
     }
@@ -171,17 +175,15 @@ where
     pub fn load<P: AsRef<Path>>(&mut self, filename: P) -> Result<()> {
         let mut sqls = String::new();
         File::open(filename)?.read_to_string(&mut sqls)?;
-        // for sql in sqls.split(';').filter(|sql| !sql.trim().is_empty()) {
-        //     match block_on(self.worm.execute(sql)) {
-        //         Ok(payloads) => {
-        //             //self.print.payloads(&payloads)?
-        //         },
-        //         Err(e) => {
-        //             println!("[error] {}\n", e);
-        //             break;
-        //         }
-        //     }
-        // }
+        for sql in sqls.split(';').filter(|sql| !sql.trim().is_empty()) {
+            match block_on(self.worm.execute(sql)) {
+                Ok(payloads) => self.print.payloads(&payloads)?,
+                Err(e) => {
+                    println!("[error] {}\n", e);
+                    break;
+                }
+            }
+        }
 
         Ok(())
     }

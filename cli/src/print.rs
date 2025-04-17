@@ -1,12 +1,15 @@
 use {
     crate::command::{SetOption, ShowOption},
     std::{
+        collections::{HashMap, HashSet},
         fmt::Display,
         fs::File,
         io::{Result as IOResult, Write},
         path::Path,
     },
+    strum_macros::Display,
     tabled::{builder::Builder, Style, Table},
+    wql_core::prelude::{Payload, PayloadVariable},
 };
 
 pub struct Print<W: Write> {
@@ -90,95 +93,122 @@ impl<'a, W: Write> Print<W> {
         }
     }
 
-    pub fn chains(&mut self) -> IOResult<()> {
-        const HEADER: [&str; 2] = ["chain", "description"];
-        const SUB_CHAIN_HEADER: [&str; 2] = ["subchain", "description"];
-
-        const MAIN_CHAINS: [[&str; 2]; 12] = [
-            ["eth", "Ethereum Mainnet     "],
-            ["sui", "Sui Network         "],
-            ["tron", "Tron Blockchain     "],
-            ["avalanche", "Avalanche C-Chain   "],
-            ["bnb", "Binance Smart Chain "],
-            ["celo", "Celo Blockchain     "],
-            ["fantom", "Fantom Opera        "],
-            ["gnosis", "Gnosis Chain        "],
-            ["kava", "Kava Blockchain     "],
-            ["moonbeam", "Moonbeam Network    "],
-            ["ronin", "Ronin Blockchain    "],
-            ["moonriver", "Moonriver Network   "],
-        ];
-
-        const ETH_SUB_CHAINS: [[&str; 2]; 12] = [
-            ["arb", "Arbitrum One       "],
-            ["op", "Optimism Layer 2   "],
-            ["base", "Base L2 by Coinbase"],
-            ["blast", "Blast Network      "],
-            ["polygon", "Polygon PoS Chain  "],
-            ["sepolia", "Sepolia Testnet    "],
-            ["mantle", "Mantle Network     "],
-            ["zksync", "zkSync Era L2      "],
-            ["taiko", "Taiko Rollup       "],
-            ["scroll", "Scroll zkEVM   "],
-            ["linea", "Linea zkEVM        "],
-            ["zora", "Zora Network       "],
-        ];
-
-        let mut main_chain_table = self.get_table(HEADER);
-        for row in MAIN_CHAINS {
-            main_chain_table.add_record(row);
-        }
-        let main_chain_table = self.build_table(main_chain_table);
-
-        let mut sub_chain_table = self.get_table(SUB_CHAIN_HEADER);
-        for row in ETH_SUB_CHAINS {
-            sub_chain_table.add_record(row);
-        }
-        let sub_chain_table = self.build_table(sub_chain_table);
-
-        const BOLD: &str = "\x1b[1m";
-        const RESET: &str = "\x1b[0m";
-
-        writeln!(self.output, "{}Supported main chains{}", BOLD, RESET)?;
-        writeln!(self.output, "{}\n", main_chain_table)?;
-
-        writeln!(self.output, "{}Supported sub chains{}", BOLD, RESET)?;
-        writeln!(self.output, "{}\n", sub_chain_table)?;
-
-        writeln!(
-            self.output,
-            "{}Supported chains: {}{}",
-            BOLD,
-            MAIN_CHAINS.len() + ETH_SUB_CHAINS.len(),
-            RESET
-        )?;
-        Ok(())
+    pub fn payloads(&mut self, payloads: &[Payload]) -> IOResult<()> {
+        payloads.iter().try_for_each(|p| self.payload(p))
     }
 
-    pub fn help(&mut self) -> IOResult<()> {
-        const HEADER: [&str; 2] = ["command", "description"];
-        const CONTENT: [[&str; 2]; 12] = [
-            [".help", "show help"],
-            [".quit", "quit program"],
-            [".chains", "show supported chains "],
-            [".functions", "show function names"],
-            [".columns TABLE", "show columns from TABLE"],
-            [".version", "show version"],
-            [".execute PATH", "execute SQL from PATH"],
-            [".spool PATH|off", "spool to PATH or off"],
-            [".show OPTION", "show print option eg).show all"],
-            [".set OPTION", "set print option eg).set tabular off"],
-            [".edit [PATH]", "open editor with last command or PATH"],
-            [".run ", "execute last command"],
-        ];
-
-        let mut table = self.get_table(HEADER);
-        for row in CONTENT {
-            table.add_record(row);
+    pub fn payload(&mut self, payload: &Payload) -> IOResult<()> {
+        #[derive(Display)]
+        #[strum(serialize_all = "snake_case")]
+        enum Target {
+            Table,
+            Row,
         }
-        let table = self.build_table(table);
+        let mut affected = |n: usize, target: Target, msg: &str| -> IOResult<()> {
+            let payload = format!("{n} {target}{} {msg}", if n > 1 { "s" } else { "" });
+            self.writeln(payload)
+        };
 
-        writeln!(self.output, "{}\n", table)
+        use Target::*;
+        match payload {
+            Payload::ShowVariable(PayloadVariable::Version(v)) => {
+                self.writeln(format!("v{v}"))?;
+            }
+            Payload::ShowVariable(PayloadVariable::Tables(names)) => {
+                let mut table = self.get_table(["tables"]);
+                for name in names {
+                    table.add_record([name]);
+                }
+                let table = self.build_table(table);
+                self.writeln(table)?;
+            }
+            Payload::ShowVariable(PayloadVariable::Functions(names)) => {
+                let mut table = self.get_table(["functions"]);
+                for name in names {
+                    table.add_record([name]);
+                }
+                let table = self.build_table(table);
+                self.writeln(table)?;
+            }
+            Payload::ShowColumns(columns) => {
+                let mut table = self.get_table(["Field", "Type"]);
+                for (field, field_type) in columns {
+                    table.add_record([field, &field_type.to_string()]);
+                }
+                let table = self.build_table(table);
+                self.writeln(table)?;
+            }
+            Payload::ShowChains(chains) => {
+                let mut table = self.get_table(["Chain", "Description"]);
+                for (name, desc) in chains {
+                    table.add_record([name, desc]);
+                }
+                let table = self.build_table(table);
+                self.writeln(table)?;
+            }
+            Payload::ShowChainsEntities(entities) => {
+                let mut table = self.get_table(["Entity", "Chain"]);
+                for (entity, chain) in entities {
+                    table.add_record([entity, chain]);
+                }
+                let table = self.build_table(table);
+                self.writeln(table)?;
+            }
+            Payload::Select { labels, rows } => match &self.option.tabular {
+                true => {
+                    let mut table = self.get_table(labels.iter().map(AsRef::as_ref));
+                    for row in rows {
+                        let row: Vec<String> = row.iter().map(Into::into).collect();
+                        table.add_record(row);
+                    }
+                    let table = self.build_table(table);
+                    self.writeln(table)?;
+                }
+                false => {
+                    self.write_header(labels.iter().map(AsRef::as_ref))?;
+                    let rows = rows.iter().map(|r| r.iter().map(String::from));
+                    self.write_rows(rows)?;
+                }
+            },
+            Payload::SelectMap(rows) => {
+                let mut labels = rows
+                    .iter()
+                    .flat_map(HashMap::keys)
+                    .map(AsRef::as_ref)
+                    .collect::<HashSet<&str>>()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                labels.sort();
+
+                match &self.option.tabular {
+                    true => {
+                        let mut table = self.get_table(labels.clone());
+                        for row in rows {
+                            let row = labels
+                                .iter()
+                                .map(|label| row.get(*label).map(Into::into).unwrap_or_default())
+                                .collect::<Vec<String>>();
+
+                            table.add_record(row);
+                        }
+                        let table = self.build_table(table);
+                        self.writeln(table)?;
+                    }
+                    false => {
+                        self.write_header(labels.iter().map(AsRef::as_ref))?;
+
+                        let rows = rows.iter().map(|row| {
+                            labels
+                                .iter()
+                                .map(|label| row.get(*label).map(String::from).unwrap_or_default())
+                        });
+                        self.write_rows(rows)?;
+                    }
+                }
+            }
+        }
+
+        Ok(())
     }
 
     fn write_rows(
@@ -233,20 +263,30 @@ impl<'a, W: Write> Print<W> {
         self.write(labels)
     }
 
-    pub fn show_option(&mut self, option: ShowOption) -> IOResult<()> {
-        let payload = self.option.format(option);
-        self.writeln(payload)?;
+    pub fn help(&mut self) -> IOResult<()> {
+        const HEADER: [&str; 2] = ["command", "description"];
+        const CONTENT: [[&str; 2]; 12] = [
+            [".help", "show help"],
+            [".quit", "quit program"],
+            [".tables", "show table names"],
+            [".functions", "show function names"],
+            [".columns TABLE", "show columns from TABLE"],
+            [".version", "show version"],
+            [".execute PATH", "execute SQL from PATH"],
+            [".spool PATH|off", "spool to PATH or off"],
+            [".show OPTION", "show print option eg).show all"],
+            [".set OPTION", "set print option eg).set tabular off"],
+            [".edit [PATH]", "open editor with last command or PATH"],
+            [".run ", "execute last command"],
+        ];
 
-        Ok(())
-    }
-
-    pub fn set_option(&mut self, option: SetOption) {
-        match option {
-            SetOption::Tabular(value) => self.option.tabular(value),
-            SetOption::Colsep(value) => self.option.colsep(value),
-            SetOption::Colwrap(value) => self.option.colwrap(value),
-            SetOption::Heading(value) => self.option.heading(value),
+        let mut table = self.get_table(HEADER);
+        for row in CONTENT {
+            table.add_record(row);
         }
+        let table = self.build_table(table);
+
+        writeln!(self.output, "{}\n", table)
     }
 
     pub fn spool_on<P: AsRef<Path>>(&mut self, filename: P) -> IOResult<()> {
@@ -269,6 +309,22 @@ impl<'a, W: Write> Print<W> {
 
     fn build_table(&self, builder: Builder) -> Table {
         builder.build().with(Style::markdown())
+    }
+
+    pub fn set_option(&mut self, option: SetOption) {
+        match option {
+            SetOption::Tabular(value) => self.option.tabular(value),
+            SetOption::Colsep(value) => self.option.colsep(value),
+            SetOption::Colwrap(value) => self.option.colwrap(value),
+            SetOption::Heading(value) => self.option.heading(value),
+        }
+    }
+
+    pub fn show_option(&mut self, option: ShowOption) -> IOResult<()> {
+        let payload = self.option.format(option);
+        self.writeln(payload)?;
+
+        Ok(())
     }
 }
 
