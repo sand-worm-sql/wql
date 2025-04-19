@@ -1,6 +1,7 @@
 use {serde::Serialize, std::fmt::Debug, thiserror::Error as ThisError};
 
 pub use crate::{
+    adapter::AdapterError,
     ast_builder::AstBuilderError,
     data::{
         ConvertError, IntervalError, KeyError, LiteralError, RowError, SchemaParseError,
@@ -24,6 +25,9 @@ pub enum Error {
 
     #[error("ast-builder: {0}")]
     AstBuilder(#[from] AstBuilderError),
+
+    #[error("data: {0}")]
+    AdapterError(#[from] AdapterError),
 
     #[error("execute: {0}")]
     Execute(#[from] ExecuteError),

@@ -5,16 +5,10 @@ mod metadata;
 mod transaction;
 
 pub trait GStore: Store + Metadata {}
-impl<S: Store + Metadata > GStore for S {}
+impl<S: Store + Metadata> GStore for S {}
 
-pub trait GStoreMut:
-     IndexMut + Transaction + CustomFunction + CustomFunctionMut
-{
-}
-impl<S: IndexMut + Transaction + CustomFunction + CustomFunctionMut>
-    GStoreMut for S
-{
-}
+pub trait GStoreMut: IndexMut + Transaction + CustomFunction + CustomFunctionMut {}
+impl<S: IndexMut + Transaction + CustomFunction + CustomFunctionMut> GStoreMut for S {}
 
 pub use {
     data_row::DataRow,

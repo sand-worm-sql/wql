@@ -3,10 +3,11 @@
 // re-export
 pub use {chrono, sqlparser};
 
-mod worm;
 mod mock;
 mod result;
+mod worm;
 
+pub mod adapter;
 pub mod ast;
 pub mod ast_builder;
 pub mod data;
@@ -21,11 +22,11 @@ pub mod prelude {
         ast::DataType,
         data::{Key, Row, Value},
         executor::{execute, Payload, PayloadVariable},
-        worm::Worm,
         parse_sql::parse,
         plan::plan,
         result::{Error, Result},
         translate::translate,
+        worm::Worm,
     };
 }
 

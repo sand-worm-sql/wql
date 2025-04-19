@@ -1,7 +1,6 @@
 use super::{
     chain_factor::ChainQueryType, show_chain_entities::ShowChainEntitiesNode,
-    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode,
-    SelectNode,
+    show_chain_entities_columns::ShowChainEntitiesColumnsNode, ChainFactorNode, SelectNode,
 };
 
 #[derive(Clone, Debug)]

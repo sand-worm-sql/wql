@@ -48,7 +48,6 @@ pub async fn evaluate_stateless<'a, 'b: 'a>(
     evaluate_inner(storage, context, None, expr).await
 }
 
-
 #[async_recursion(?Send)]
 async fn evaluate_inner<'a, 'b: 'a, 'c: 'a, T>(
     storage: Option<&'a T>,

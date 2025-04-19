@@ -2,8 +2,8 @@ use {
     super::{context::RowContext, evaluate::evaluate_stateless, filter::check_expr},
     crate::{
         ast::{
-            Dictionary, Expr, Join, Query, Select, SelectItem, SetExpr,
-            TableAlias, TableFactor, TableWithJoins, ToSql, Values,
+            Dictionary, Expr, Join, Query, Select, SelectItem, SetExpr, TableAlias, TableFactor,
+            TableWithJoins, ToSql, Values,
         },
         data::{get_alias, get_index, Key, Row, Value},
         executor::select::select,
@@ -16,7 +16,6 @@ use {
     std::{borrow::Cow, collections::HashMap, fmt::Debug, iter, rc::Rc},
     thiserror::Error as ThisError,
 };
-
 
 #[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum FetchError {
@@ -162,7 +161,7 @@ pub async fn fetch_relation_rows<'a, T: GStore>(
                 match dict {
                     Dictionary::WormObjects => {
                         let schemas = storage.fetch_all_schemas().await?;
-                        let table_metas =  storage
+                        let table_metas = storage
                             .scan_table_meta()
                             .await?
                             .collect::<Result<HashMap<_, _>>>()?;

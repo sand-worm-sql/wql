@@ -44,7 +44,10 @@ pub fn translate(sql_statement: &SqlStatement) -> Result<Statement> {
     }
 }
 
-fn translate_show_variable(variable: &[SqlIdent], sql_statement: &SqlStatement) -> Result<Statement> {
+fn translate_show_variable(
+    variable: &[SqlIdent],
+    sql_statement: &SqlStatement,
+) -> Result<Statement> {
     match (variable.len(), variable.first()) {
         (1, Some(keyword)) => match keyword.value.to_uppercase().as_str() {
             "VERSION" => Ok(Statement::Show(Show::Variable(Variable::Version))),
@@ -57,7 +60,11 @@ fn translate_show_variable(variable: &[SqlIdent], sql_statement: &SqlStatement) 
             let from_keyword = variable.get(2).map(|v| v.value.to_uppercase());
             let chain_name = variable.get(3).map(|v| v.value.clone());
 
-            match (entity_keyword.as_deref(), from_keyword.as_deref(), chain_name) {
+            match (
+                entity_keyword.as_deref(),
+                from_keyword.as_deref(),
+                chain_name,
+            ) {
                 (Some("ENTITIES"), Some("FROM"), Some(chain)) => {
                     Ok(Statement::Show(Show::ChainEntities { chain_name: chain }))
                 }
@@ -65,11 +72,11 @@ fn translate_show_variable(variable: &[SqlIdent], sql_statement: &SqlStatement) 
             }
         }
         (6, Some(keyword)) if keyword.value.eq_ignore_ascii_case("CHAIN") => {
-            let subcommand     = variable.get(1).map(|v| v.value.to_uppercase()); // ENTITIES or COLUMNS
-            let in_keyword     = variable.get(2).map(|v| v.value.to_uppercase()); // IN
-            let entity_name    = variable.get(3).map(|v| v.value.clone());  
-            let from_keyword   = variable.get(4).map(|v| v.value.to_uppercase()); // FROM
-            let chain_name     = variable.get(5).map(|v| v.value.clone());        // block
+            let subcommand = variable.get(1).map(|v| v.value.to_uppercase()); // ENTITIES or COLUMNS
+            let in_keyword = variable.get(2).map(|v| v.value.to_uppercase()); // IN
+            let entity_name = variable.get(3).map(|v| v.value.clone());
+            let from_keyword = variable.get(4).map(|v| v.value.to_uppercase()); // FROM
+            let chain_name = variable.get(5).map(|v| v.value.clone()); // block
 
             match (
                 subcommand.as_deref(),
@@ -79,9 +86,9 @@ fn translate_show_variable(variable: &[SqlIdent], sql_statement: &SqlStatement) 
                 entity_name,
             ) {
                 (Some("ENTITIES"), Some("IN"), Some("FROM"), Some(chain), Some(entity)) => {
-                    Ok(Statement::Show(Show::ChainEntitiesColumns  {
+                    Ok(Statement::Show(Show::ChainEntitiesColumns {
                         chain_name: chain,
-                        entity_name: entity
+                        entity_name: entity,
                     }))
                 }
                 _ => unsupported_show_variable(sql_statement),
@@ -189,6 +196,9 @@ mod tests {
         let dialect = GenericDialect {};
         let ast = Parser::parse_sql(&dialect, "SHOW TABLES").unwrap();
         let stmt = translate(&ast[0]);
-        assert!(matches!(stmt, Ok(Statement::Show(Show::Variable(Variable::Tables)))));
+        assert!(matches!(
+            stmt,
+            Ok(Statement::Show(Show::Variable(Variable::Tables)))
+        ));
     }
-} 
+}

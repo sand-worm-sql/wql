@@ -108,10 +108,7 @@ pub struct Array {
 #[cfg(test)]
 mod tests {
     use {
-        crate::ast::{
-            Assignment, AstLiteral, Expr, Show, Statement,
-            ToSql, Variable,
-        },
+        crate::ast::{Assignment, AstLiteral, Expr, Show, Statement, ToSql, Variable},
         bigdecimal::BigDecimal,
         std::str::FromStr,
     };

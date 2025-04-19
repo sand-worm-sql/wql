@@ -1,10 +1,7 @@
 use {
     super::select::select_with_labels,
     crate::{
-        ast::{
-            DataType,
-            Show, Statement, Variable,
-        },
+        ast::{DataType, Show, Statement, Variable},
         data::Value,
         error::Error,
         result::Result,

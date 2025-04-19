@@ -687,9 +687,7 @@ pub fn translate_function(sql_function: &SqlFunction) -> Result<Expr> {
             let list = translate_expr(args[0])?;
             Ok(Expr::Function(Box::new(Function::Dedup(list))))
         }
-        _ => {
-            Err(TranslateError::UnsupportedFunction(name).into())
-        }
+        _ => Err(TranslateError::UnsupportedFunction(name).into()),
     }
 }
 

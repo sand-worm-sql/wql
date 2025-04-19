@@ -2,9 +2,7 @@ use {
     crate::{
         data::{Key, Schema},
         result::{Error, Result},
-        store::{
-            DataRow, RowIter, Store, StoreMut, Metadata
-        },
+        store::{DataRow, Metadata, RowIter, Store, StoreMut},
     },
     async_trait::async_trait,
     std::collections::HashMap,
@@ -12,7 +10,7 @@ use {
 
 #[cfg(test)]
 use {
-    crate::{ parse_sql::parse, translate::translate},
+    crate::{parse_sql::parse, translate::translate},
     futures::executor::block_on,
 };
 
@@ -28,8 +26,6 @@ pub fn run(sql: &str) -> MockStorage {
 
     storage
 }
-
-
 
 #[derive(Default, Debug)]
 pub struct MockStorage {
@@ -83,7 +79,6 @@ impl StoreMut for MockStorage {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use {
@@ -102,7 +97,6 @@ mod tests {
         assert!(block_on(storage.scan_data("Foo")).is_err());
         assert!(block_on(storage.fetch_data("Foo", &Key::None)).is_err());
         assert!(block_on(storage.fetch_schema("__Err__")).is_err());
-        storage.scan_table_meta();
 
         assert!(matches!(block_on(storage.fetch_schema("Foo")), Ok(None)));
     }

@@ -17,7 +17,6 @@ serde = { version = "1" }
 serde_json = { version = "1" }
 serde_with = "1.14"
 thiserror = { version = "1" }
-getrandom = { version = "0.3.1", features = ["js"] }
 futures = { version = "0.3", features = ["async-await"] }
 csv = "1.1"
 eql_macros = "0.1.0"
