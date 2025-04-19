@@ -7,4 +7,21 @@ license.workspace = true
 repository.workspace = true
 documentation.workspace = true
 
+
 [dependencies]
+alloy = { version = "0.6.4", features = ["std", "contract", "provider-http", "network", "rpc-types"] }
+alloy-eip7702 = "0.4.1"
+pest = "2.7.10"
+pest_derive = "2.6"
+tokio = { version = "1", features = ["macros", "rt"] }
+serde = { version = "1" }
+serde_json = { version = "1" }
+serde_with = "1.14"
+thiserror = { version = "1" }
+getrandom = { version = "0.3.1", features = ["js"] }
+futures = { version = "0.3", features = ["async-await"] }
+csv = "1.1"
+eql_macros = "0.1.0"
+parquet = "54.0.0"
+arrow = "54.0.0"
+anyhow = "1.0.90"
