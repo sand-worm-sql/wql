@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [
+members = [ "chains-support/evm-adapter", "chains-support/sui-adapter",
   "cli",
   "core",
   "utils",
