@@ -201,7 +201,7 @@ mod tests {
             .left_join_as(Some("base"), "blocks", "B")
             .limit(10)
             .build();
-        let expected = "SELECT * FROM base.transations LEFT JOIN blocks AS B LIMIT 10";
+        let expected = "SELECT * FROM base.transations LEFT JOIN base.blocks AS B LIMIT 10";
         test(actual, expected);
 
         // group by node -> limit node -> build

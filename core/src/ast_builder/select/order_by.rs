@@ -195,7 +195,7 @@ mod tests {
             .limit(3)
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             GROUP BY city
             HAVING COUNT(name) < 100
             ORDER BY name
@@ -212,7 +212,7 @@ mod tests {
             .order_by("id asc")
             .build();
         let expected = "
-            SELECT * FROM Foo
+            SELECT * FROM sui.Foo
             WHERE id > 10 AND id < 20
             ORDER BY id ASC";
         test(actual, expected);
@@ -256,7 +256,7 @@ mod tests {
         // hash join node -> order by node -> build
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"), "PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .order_by("Player.score DESC")
             .build();
@@ -280,11 +280,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: true,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },

@@ -84,11 +84,11 @@ impl<'a> JoinNode<'a> {
                     existing_table: chain_name.is_none(),
                 },
                 None => TableFactor::Table {
-                    chain_name: None,
+                    chain_name: chain_name.clone(),
                     name,
                     alias: None,
                     index: None,
-                    existing_table: true,
+                    existing_table: chain_name.is_none(),
                 },
             },
         }
@@ -101,7 +101,7 @@ impl<'a> JoinNode<'a> {
     pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
@@ -111,7 +111,7 @@ impl<'a> JoinNode<'a> {
     pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
@@ -121,7 +121,7 @@ impl<'a> JoinNode<'a> {
     pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             None,
             JoinOperatorType::Left,
@@ -136,7 +136,7 @@ impl<'a> JoinNode<'a> {
     ) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,

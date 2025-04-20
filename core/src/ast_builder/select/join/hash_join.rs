@@ -51,7 +51,7 @@ impl<'a> HashJoinNode<'a> {
     pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             None,
             JoinOperatorType::Inner,
@@ -61,7 +61,7 @@ impl<'a> HashJoinNode<'a> {
     pub fn join_as(self, chain_name: Option<&str>, table_name: &str, alias: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Inner,
@@ -71,7 +71,7 @@ impl<'a> HashJoinNode<'a> {
     pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             None,
             JoinOperatorType::Left,
@@ -86,7 +86,7 @@ impl<'a> HashJoinNode<'a> {
     ) -> JoinNode<'a> {
         JoinNode::new(
             self,
-            chain_name.map(|name| name.to_owned()),
+            chain_name.map(String::from),
             table_name.to_owned(),
             Some(alias.to_owned()),
             JoinOperatorType::Left,
@@ -224,7 +224,7 @@ mod tests {
 
         let actual = chain("base")
             .select("Player")
-            .join(None, "PlayerItem")
+            .join(Some("sui"), "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
             .hash_filter("PlayerItem.amount > 10")
             .hash_filter("PlayerItem.amount * 3 <= 2")
@@ -232,11 +232,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: None,
+                    chain_name: Some("sui".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: true,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {

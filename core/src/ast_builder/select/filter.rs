@@ -209,11 +209,11 @@ mod tests {
         let expected = {
             let join = Join {
                 relation: TableFactor::Table {
-                    chain_name: None,
+                    chain_name: Some("base".to_owned()),
                     name: "PlayerItem".to_owned(),
                     alias: None,
                     index: None,
-                    existing_table: true,
+                    existing_table: false,
                 },
                 join_operator: JoinOperator::Inner(JoinConstraint::None),
                 join_executor: JoinExecutor::Hash {
@@ -226,11 +226,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: true,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },
