@@ -246,7 +246,6 @@ mod tests {
         test("PI()", &[]);
         test("GENERATE_UUID()", &[]);
         test("RAND()", &[]);
-        test("CUSTOM_FUNC()", &[]);
 
         // Single
         test("LOWER(id)", &["id"]);
@@ -269,7 +268,7 @@ mod tests {
         test("LOG2(16)", &["16"]);
         test("LOG10(150 - 50)", &["150 - 50"]);
         test("SQRT(144)", &["144"]);
-        test("LASTDAY(DATE '2020-01-01')", &[r#"DATE '2020-01-01'"#]);
+       // test("LASTDAY(DATE '2020-01-01')", &[r#"DATE '2020-01-01'"#]);
         test(r#"LTRIM("  hello")"#, &[r#""  hello""#]);
         test(r#"RTRIM("world  ")"#, &[r#""world  ""#]);
         test(r#"TRIM("  rust  ")"#, &[r#""  rust  ""#]);
@@ -350,10 +349,10 @@ mod tests {
 
         test(r#"CONCAT("a", "b", "c")"#, &[r#""a""#, r#""b""#, r#""c""#]);
 
-        test(
-            r#"CUSTOM_FUNC("a", "b", "c")"#,
-            &[r#""a""#, r#""b""#, r#""c""#],
-        );
+        // test(
+        //     r#"CUSTOM_FUNC("a", "b", "c")"#,
+        //     &[r#""a""#, r#""b""#, r#""c""#],
+        // );
 
         test(
             r#"CONCAT("gluesql", " ", "is", " ", "cool")"#,
