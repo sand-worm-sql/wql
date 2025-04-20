@@ -8,6 +8,8 @@ repository.workspace = true
 documentation.workspace = true
 
 [dependencies]
+wql-core.workspace = true
+
 alloy = { version = "0.6.4", features = ["std", "contract", "provider-http", "network", "rpc-types"] }
 alloy-eip7702 = "0.4.1"
 pest = "2.7.10"

@@ -1844,6 +1844,7 @@ dependencies = [
  "serde_with",
  "thiserror 1.0.69",
  "tokio",
+ "wql-core",
 ]
 
 [[package]]
