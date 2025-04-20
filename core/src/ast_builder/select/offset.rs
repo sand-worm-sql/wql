@@ -218,7 +218,7 @@ mod tests {
             .on("Foo.id = Bar.id")
             .offset(10)
             .build();
-        let expected = "SELECT * FROM mina.Foo JOIN Bar ON Foo.id = Bar.id OFFSET 10";
+        let expected = "SELECT * FROM mina.Foo JOIN mina.Bar ON Foo.id = Bar.id OFFSET 10";
         test(actual, expected);
 
         // filter node -> offset node -> build

@@ -183,11 +183,11 @@ mod test {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: true,
+                        existing_table: false,
                     },
                     joins: vec![join],
                 },
@@ -223,10 +223,10 @@ mod test {
         let actual = chain("sui")
             .select("transactions")
             .group_by("transactions_kind")
-            .having("COUNT() < 100")
+            .having("COUNT(*) < 100")
             .limit(3)
             .into();
-        let expected = "SELECT * FROM FOO GROUP BY city HAVING COUNT(name) < 100 LIMIT 3";
+        let expected = "SELECT * FROM sui.transactions GROUP BY transactions_kind HAVING COUNT(*) < 100 LIMIT 3";
         test_query(actual, expected);
 
         let actual = chain("sui").select("transations").offset(10).into();
@@ -259,15 +259,15 @@ mod test {
         test_query(actual, expected);
 
         let actual = chain_query_objects().select().into();
-        let expected = "SELECT * FROM chain.query_objects";
+        let expected = "SELECT * FROM  WORM_OBJECTS";
         test_query(actual, expected);
 
         let actual = chain_tables().select().into();
-        let expected = "SELECT * FROM chain.entity_tables";
+        let expected = "SELECT * FROM  WORM_TABLES";
         test_query(actual, expected);
 
         let actual = chain_table_columns().select().into();
-        let expected = "SELECT * FROM chain.entity_columns";
+        let expected = "SELECT * FROM  WORM_TABLE_COLUMNS";
         test_query(actual, expected);
 
         let actual = series("1 + 2").select().into();

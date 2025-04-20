@@ -634,11 +634,11 @@ mod tests {
                 projection: SelectItemList::from("*").try_into().unwrap(),
                 from: TableWithJoins {
                     relation: TableFactor::Table {
-                        chain_name: None,
+                        chain_name: Some("sui".to_owned()),
                         name: "Player".to_owned(),
                         alias: None,
                         index: None,
-                        existing_table: true,
+                        existing_table: false,
                     },
                     joins: vec![join, other_join],
                 },
@@ -657,9 +657,9 @@ mod tests {
 
         let actual = chain("sui")
             .select("Player")
-            .join(Some("sui"), "PlayerItem")
+            .join(None, "PlayerItem")
             .hash_executor("PlayerItem.user_id", "Player.id")
-            .join(Some("sui"), "OtherItem")
+            .join(None, "OtherItem")
             .build();
         let expected = {
             let other_join = Join {
