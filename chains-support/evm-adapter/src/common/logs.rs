@@ -1,19 +1,20 @@
-use std::str::FromStr;
+use {
+    std::str::FromStr,
+    super::{
+        block::BlockRange,
+        entity_id::{parse_block_number_or_tag, EntityIdError},
+    },
+    alloy::{
+        eips::BlockNumberOrTag,
+        hex::FromHexError,
+        primitives::{Address, AddressError, B256},
+        rpc::types::Filter,
+    },
+    eql_macros::EnumVariants,
+    pest::iterators::{Pair, Pairs},
+    serde::{Deserialize, Serialize},
+};
 
-use super::{
-    block::BlockRange,
-    entity_id::{parse_block_number_or_tag, EntityIdError},
-};
-use crate::interpreter::frontend::parser::{ParserError, Rule};
-use alloy::{
-    eips::BlockNumberOrTag,
-    hex::FromHexError,
-    primitives::{Address, AddressError, B256},
-    rpc::types::Filter,
-};
-use eql_macros::EnumVariants;
-use pest::iterators::{Pair, Pairs};
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum LogEntityError {

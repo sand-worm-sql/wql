@@ -1,8 +1,13 @@
-use crate::common::chain::Chain;
-use alloy::primitives::{Address, Bloom, Bytes, FixedBytes, B256, U256};
-use alloy_eip7702::SignedAuthorization;
-use serde::ser::SerializeStruct;
-use serde::{Deserialize, Serialize, Serializer};
+use {
+    crate::common::chain::Chain,
+    alloy::primitives::{Address, Bloom, Bytes, FixedBytes, B256, U256},
+    alloy_eip7702::SignedAuthorization,
+    serde::{
+        ser::SerializeStruct,
+        Deserialize, Serialize, Serializer,
+    },
+};
+
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct QueryResult {

@@ -1,20 +1,23 @@
-use super::{
-    block::{BlockId, BlockRange},
-    entity_id::{parse_block_number_or_tag, EntityIdError},
-    filters::{
-        ComparisonFilterError, EqualityFilter, EqualityFilterError, Filter, FilterError, FilterType,
+use {
+    super::{
+        block::{BlockId, BlockRange},
+        entity_id::{parse_block_number_or_tag, EntityIdError},
+        filters::{
+            ComparisonFilterError, EqualityFilter, EqualityFilterError, Filter, FilterError,
+            FilterType,
+        },
+        query_result::TransactionQueryRes,
     },
-    query_result::TransactionQueryRes,
+    alloy::{
+        hex::FromHexError,
+        primitives::{Address, AddressError, B256, U256},
+    },
+    eql_macros::EnumVariants,
+    pest::iterators::{Pair, Pairs},
+    serde::{Deserialize, Serialize},
+    std::str::FromStr,
+    wql_core::ast::Query,
 };
-use crate::interpreter::frontend::parser::Rule;
-use alloy::{
-    hex::FromHexError,
-    primitives::{Address, AddressError, B256, U256},
-};
-use eql_macros::EnumVariants;
-use pest::iterators::{Pair, Pairs};
-use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
 pub struct Transaction {

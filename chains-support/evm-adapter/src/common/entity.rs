@@ -1,13 +1,20 @@
-use super::account::AccountError;
-use super::logs::LogsError;
-use super::transaction::TransactionError;
-use crate::common::{
-    account::Account, block::Block, block::BlockError, logs::Logs, transaction::Transaction,
+use {
+    super::{
+        account::AccountError,
+        logs::LogsError,
+        transaction::TransactionError,
+    },
+    crate::common::{
+        account::Account,
+        block::{Block, BlockError},
+        logs::Logs,
+        transaction::Transaction,
+    },
+    thiserror::Error as ThisError,
+    wql_core::ast::Query,
 };
-use crate::interpreter::frontend::parser::Rule;
-use pest::iterators::Pairs;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Debug)]
 pub enum EntityError {
     #[error("Unexpected token {0}")]
     UnexpectedToken(String),

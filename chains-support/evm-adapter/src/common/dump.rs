@@ -1,7 +1,9 @@
-use crate::interpreter::frontend::parser::Rule;
-use pest::iterators::Pairs;
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
+use {
+    std::fmt::Display,
+    pest::iterators::Pairs,
+    serde::{Deserialize, Serialize},
+};
+
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Dump {

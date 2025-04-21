@@ -1,17 +1,18 @@
-use std::error::Error;
-use std::sync::Arc;
-
-use super::{
-    dump::{Dump, DumpFormat},
-    query_result::ExpressionResult,
+use {
+    std::{error::Error, sync::Arc},
+    super::{
+        dump::{Dump, DumpFormat},
+        query_result::ExpressionResult,
+    },
+    arrow::{
+        array::{ArrayRef, StringArray},
+        datatypes::{DataType, Field, Schema},
+        record_batch::RecordBatch,
+    },
+    parquet::arrow::ArrowWriter,
+    serde::Serialize,
+    csv::WriterBuilder,
 };
-use arrow::array::{ArrayRef, StringArray};
-use arrow::datatypes::{DataType, Field, Schema};
-use arrow::record_batch::RecordBatch;
-use parquet::arrow::ArrowWriter;
-use serde::Serialize;
-
-use csv::WriterBuilder;
 
 pub(crate) fn dump_results(result: &ExpressionResult, dump: &Dump) -> Result<(), Box<dyn Error>> {
     match dump.format {

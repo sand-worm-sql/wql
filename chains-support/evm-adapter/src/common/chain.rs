@@ -1,15 +1,16 @@
-use crate::interpreter::frontend::parser::Rule;
-
-use super::config::Config;
-use alloy::{
-    providers::{Provider, ProviderBuilder},
-    transports::http::reqwest::Url,
+use {
+    core::fmt,
+    super::config::Config,
+    alloy::{
+        providers::{Provider, ProviderBuilder},
+        transports::http::reqwest::Url,
+    },
+    anyhow::Result,
+    eql_macros::EnumVariants,
+    pest::iterators::Pairs,
+    serde::{Deserialize, Serialize},
 };
-use anyhow::Result;
-use core::fmt;
-use eql_macros::EnumVariants;
-use pest::iterators::Pairs;
-use serde::{Deserialize, Serialize};
+
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ChainOrRpc {

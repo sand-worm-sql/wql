@@ -1,19 +1,21 @@
-use super::entity_id::{parse_block_number_or_tag, EntityIdError};
-use crate::interpreter::frontend::parser::Rule;
-use alloy::{
-    eips::BlockNumberOrTag,
-    providers::{Provider, RootProvider},
-    rpc::types::BlockTransactionsKind,
-    transports::http::{Client, Http},
+use {
+    std::{
+        fmt::{self, Display, Formatter},
+        sync::Arc,
+    },
+    super::entity_id::{parse_block_number_or_tag, EntityIdError},
+    alloy::{
+        eips::BlockNumberOrTag,
+        providers::{Provider, RootProvider},
+        rpc::types::BlockTransactionsKind,
+        transports::http::{Client, Http},
+    },
+    anyhow::Result,
+    eql_macros::EnumVariants,
+    pest::iterators::{Pair, Pairs},
+    serde::{Deserialize, Serialize},
 };
-use anyhow::Result;
-use eql_macros::EnumVariants;
-use pest::iterators::{Pair, Pairs};
-use serde::{Deserialize, Serialize};
-use std::{
-    fmt::{self, Display, Formatter},
-    sync::Arc,
-};
+
 
 #[derive(thiserror::Error, Debug)]
 pub enum BlockError {

@@ -1,11 +1,13 @@
-use super::{
-    chain::{Chain, ChainError, ChainOrRpc},
-    dump::{Dump, DumpError},
-    entity::{Entity, EntityError},
+use {
+    super::{
+        chain::{Chain, ChainError, ChainOrRpc},
+        dump::{Dump, DumpError},
+        entity::{Entity, EntityError},
+    },
+    alloy::transports::http::reqwest::Url,
+    pest::iterators::Pairs,
 };
-use crate::interpreter::frontend::parser::Rule;
-use alloy::transports::http::reqwest::Url;
-use pest::iterators::Pairs;
+
 
 #[derive(Debug, PartialEq)]
 pub enum Expression {

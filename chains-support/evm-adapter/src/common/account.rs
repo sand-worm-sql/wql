@@ -1,10 +1,13 @@
-use super::ens::NameOrAddress;
-use 
-use alloy::hex::FromHexError;
-use eql_macros::EnumVariants;
-use pest::iterators::{Pair, Pairs};
-use serde::{Deserialize, Serialize};
-use std::{fmt::Display, str::FromStr};
+use {
+    super::ens::NameOrAddress,
+    alloy::hex::FromHexError,
+    eql_macros::EnumVariants,
+    pest::iterators::{Pair, Pairs},
+    serde::{Deserialize, Serialize},
+    std::{fmt::Display, str::FromStr},
+    wql_core::ast::Query,
+};
+
 
 #[derive(thiserror::Error, Debug)]
 pub enum AccountError {

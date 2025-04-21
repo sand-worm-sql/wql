@@ -1,13 +1,13 @@
-use super::chain::Chain;
-use alloy::transports::http::reqwest::Url;
-use anyhow::Result;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::env;
-use std::fs;
-use std::path::PathBuf;
+use {
+    std::{collections::HashMap, env, fs, path::PathBuf},
+    super::chain::Chain,
+    alloy::transports::http::reqwest::Url,
+    anyhow::Result,
+    serde::{Deserialize, Serialize},
+};
 
-const CONFIG_FILE: &str = "eql-config.json";
+
+const CONFIG_FILE: &str = "evm-config.json";
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ConfigFile {
