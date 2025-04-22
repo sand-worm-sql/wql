@@ -41,7 +41,6 @@ pub enum CountExpressionError {
     NextedCountToken(String),
     #[error("Missing Count query not allowed. Unexpected token: {0}")]
     MissingCountQuery(String),
-
 }
 
 impl TryFrom<Pairs<'_, Rule>> for CountExpression {
@@ -53,20 +52,21 @@ impl TryFrom<Pairs<'_, Rule>> for CountExpression {
         for pair in pairs {
             match pair.as_rule() {
                 Rule::query => {
-                  query = Some(GetExpression::try_from(pair.into_inner())?);
+                    query = Some(GetExpression::try_from(pair.into_inner())?);
                 }
                 _ => {
-                    return Err(CountExpressionError::UnexpectedToken(pair.as_str().to_string()).into());
+                    return Err(
+                        CountExpressionError::UnexpectedToken(pair.as_str().to_string()).into(),
+                    );
                 }
             }
         }
 
-        Ok(CountExpression::new(
-            query.ok_or(CountExpressionError::MissingCountQuery(String::from("No query provided")))?
-        ))
+        Ok(CountExpression::new(query.ok_or(
+            CountExpressionError::MissingCountQuery(String::from("No query provided")),
+        )?))
     }
 }
-
 
 #[derive(Debug, PartialEq)]
 pub struct GetExpression {
@@ -106,7 +106,6 @@ impl TryFrom<Pairs<'_, Rule>> for GetExpression {
     type Error = GetExpressionError;
 
     fn try_from(pairs: Pairs<'_, Rule>) -> Result<Self, Self::Error> {
-        
         let mut entity: Option<Entity> = None;
         let mut chains: Option<Vec<ChainOrRpc>> = None;
         let mut dump: Option<Dump> = None;

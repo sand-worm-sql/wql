@@ -1,13 +1,12 @@
-use super::chain::Chain;
-use alloy::transports::http::reqwest::Url;
-use anyhow::Result;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::env;
-use std::fs;
-use std::path::PathBuf;
+use {
+    super::chain::SuiChain,
+    alloy::transports::http::reqwest::Url,
+    anyhow::Result,
+    serde::{Deserialize, Serialize},
+    std::{collections::HashMap, env, fs, path::PathBuf},
+};
 
-const CONFIG_FILE: &str = "eql-config.json";
+const CONFIG_FILE: &str = "evm-config.json";
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ConfigFile {
@@ -61,7 +60,7 @@ impl Config {
         Config { file_path: None }
     }
 
-    pub fn get_chain_default_rpc(&self, chain: &Chain) -> Result<Option<Url>> {
+    pub fn get_chain_default_rpc(&self, chain: &SuiChain) -> Result<Option<Url>> {
         match &self.file_path {
             Some(file_path) => {
                 let file = fs::read_to_string(file_path)?;
@@ -78,7 +77,7 @@ impl Config {
         }
     }
 
-    pub fn get_chain_rpcs(&self, chain: &Chain) -> Result<Option<Vec<Url>>> {
+    pub fn get_chain_rpcs(&self, chain: &SuiChain) -> Result<Option<Vec<Url>>> {
         match &self.file_path {
             Some(file_path) => {
                 let file = fs::read_to_string(file_path)?;

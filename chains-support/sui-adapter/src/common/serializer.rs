@@ -25,7 +25,7 @@ pub(crate) fn dump_results(result: &ExpressionResult, dump: &Dump) -> Result<(),
                 ExpressionResult::Block(blocks) => serialize_csv(blocks)?,
                 ExpressionResult::Transaction(txs) => serialize_csv(txs)?,
                 ExpressionResult::Log(logs) => serialize_csv(logs)?,
-                ExpressionResult::Count(count)=> serialize_csv(count)?,
+                ExpressionResult::Count(count) => serialize_csv(count)?,
             };
 
             std::fs::write(dump.path(), content)?;

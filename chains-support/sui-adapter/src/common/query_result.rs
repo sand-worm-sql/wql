@@ -27,7 +27,6 @@ pub enum ExpressionResult {
     Log(Vec<LogQueryRes>),
     #[serde(rename = "count")]
     Count(Vec<CountQueryRes>),
-
 }
 
 // TODO: should this be replaced with Alloy's Block?
@@ -344,9 +343,7 @@ pub struct CountQueryRes {
 
 impl Default for CountQueryRes {
     fn default() -> Self {
-        Self {
-            count:0
-        }
+        Self { count: 0 }
     }
 }
 
