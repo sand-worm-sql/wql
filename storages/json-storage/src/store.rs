@@ -5,7 +5,7 @@ use {
     },
     async_trait::async_trait,
     futures::stream::iter,
-    gluesql_core::{
+    wql_core::{
         data::{Key, Schema},
         error::Result,
         store::{DataRow, RowIter, Store},

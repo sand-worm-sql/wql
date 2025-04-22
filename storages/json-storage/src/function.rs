@@ -1,6 +1,6 @@
 use {
     super::JsonStorage,
-    gluesql_core::store::{CustomFunction, CustomFunctionMut},
+    wql_core::store::{CustomFunction, CustomFunctionMut},
 };
 
 impl CustomFunction for JsonStorage {}

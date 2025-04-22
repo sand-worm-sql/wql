@@ -4,7 +4,7 @@ use {
         JsonStorage,
     },
     async_trait::async_trait,
-    gluesql_core::{
+    wql_core::{
         data::{Key, Schema},
         error::Result,
         store::{DataRow, StoreMut},

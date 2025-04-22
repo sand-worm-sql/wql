@@ -1,4 +1,3 @@
-mod alter_table;
 pub mod error;
 mod function;
 mod index;
@@ -76,7 +75,7 @@ impl JsonStorage {
             table_name: table_name.to_owned(),
             column_defs,
             indexes: vec![],
-            comment,
+            comment,   
             chain_name: todo!(),
         }))
     }
