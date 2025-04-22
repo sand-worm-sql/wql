@@ -28,7 +28,8 @@ impl SuiChain {
             SuiChain::Testnet => "https://fullnode.testnet.sui.io:443",
             SuiChain::Devnet => "https://fullnode.devnet.sui.io:443",
         };
-        Url::parse(url).map_err(|e| Error::SuiChainError(SuiChainError::InvalidRpcUrl(e.to_string())))
+        Url::parse(url)
+            .map_err(|e| Error::SuiChainError(SuiChainError::InvalidRpcUrl(e.to_string())))
     }
 }
 
@@ -40,7 +41,9 @@ impl TryFrom<&str> for SuiChain {
             "mainnet" => Ok(SuiChain::Mainnet),
             "testnet" => Ok(SuiChain::Testnet),
             "devnet" => Ok(SuiChain::Devnet),
-            _ => Err(Error::SuiChainError(SuiChainError::InvalidChain(value.to_string()))),
+            _ => Err(Error::SuiChainError(SuiChainError::InvalidChain(
+                value.to_string(),
+            ))),
         }
     }
 }
