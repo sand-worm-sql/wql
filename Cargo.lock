@@ -5284,6 +5284,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "wql-json-storage"
+version = "0.0.1"
+dependencies = [
+ "async-trait",
+ "futures",
+ "hex",
+ "iter-enum",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid",
+ "wql-core",
+ "wql-utils",
+]
+
+[[package]]
 name = "wql-utils"
 version = "0.0.1"
 dependencies = [
