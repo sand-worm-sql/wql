@@ -5,14 +5,13 @@ use {
         logs::{Logs, LogsError},
         transaction::{Transaction, TransactionError},
     },
-    crate::common::block,
     crate::result::{Error, Result},
-    serde::{Deserialize, Serialize},
+    serde::Serialize,
     thiserror::Error as ThisError,
-    wql_core::ast::{Query, TableFactor, Select, SetExpr},
+    wql_core::ast::{Select, SetExpr, TableFactor},
 };
 
-#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
+#[derive(ThisError, Serialize, Debug, PartialEq)]
 pub enum EntityError {
     #[error("Unexpected token {0}")]
     UnexpectedToken(String),
@@ -26,11 +25,11 @@ pub enum EntityError {
     #[error(transparent)]
     TransactionError(#[from] TransactionError),
 
-    // #[error(transparent)]
-    // LogsError(#[from] LogsError),
+    #[error(transparent)]
+    LogsError(#[from] LogsError),
 
-    // #[error(transparent)]
-    // BlockError(#[from] BlockError),
+    #[error(transparent)]
+    BlockError(#[from] BlockError),
 
     #[error(transparent)]
     AccountError(#[from] AccountError),
@@ -71,9 +70,9 @@ fn parse_table_factor(factor: &TableFactor) -> Result<Entity> {
 
             match name.to_ascii_lowercase().as_str() {
                 "account" => Ok(Entity::Account(Account::try_from(table)?)),
-                // "block" => Ok(Entity::Block(Block::try_from(table)?)),
-                // "transaction" | "tx" => Ok(Entity::Transaction(Transaction::try_from(table)?)),
-                // "logs" | "log" => Ok(Entity::Logs(Logs::try_from(table)?)),
+                "block" => Ok(Entity::Block(Block::try_from(table)?)),
+                "transaction" | "tx" => Ok(Entity::Transaction(Transaction::try_from(table)?)),
+                "logs" | "log" => Ok(Entity::Logs(Logs::try_from(table)?)),
                 _ => Err(Error::EntityError(EntityError::MissingEntity)),
             }
         }

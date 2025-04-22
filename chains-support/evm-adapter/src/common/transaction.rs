@@ -1,23 +1,17 @@
 use {
     super::{
         block::{BlockId, BlockRange},
-        entity_id::{parse_block_number_or_tag, EntityIdError},
-        filters::{
-            ComparisonFilterError, EqualityFilter, EqualityFilterError, Filter, FilterError,
-            FilterType,
-        },
+        entity_id::EntityIdError,
+        filters::{EqualityFilter, Filter, FilterType},
         query_result::TransactionQueryRes,
     },
-    alloy::{
-        hex::FromHexError,
-        primitives::{Address, AddressError, B256, U256},
-    },
+    crate::error::Error,
+    crate::result::Result,
+    alloy::primitives::{Address, B256, U256},
     eql_macros::EnumVariants,
-    pest::iterators::{Pair, Pairs},
     serde::{Deserialize, Serialize},
-    std::str::FromStr,
-    wql_core::ast::{Query, Select, SelectItem, Expr, TableFactor},
     thiserror::Error as ThisError,
+    wql_core::ast::TableFactor,
 };
 
 #[derive(Debug, PartialEq)]
@@ -109,6 +103,21 @@ impl Transaction {
     }
 }
 
+impl TryFrom<TableFactor> for Transaction {
+    type Error = Error;
+
+    fn try_from(value: TableFactor) -> Result<Self> {
+        let mut ids: Option<Vec<B256>> = None;
+        let mut filter: Option<Vec<TransactionFilter>> = None;
+        let mut fields: Vec<TransactionField> = vec![];
+
+        Ok(Transaction {
+            ids,
+            filters: filter,
+            fields,
+        })
+    }
+}
 #[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum TransactionError {
     #[error("Unexpected token {0} for transaction")]
@@ -124,7 +133,6 @@ pub enum TransactionError {
     #[error(transparent)]
     TransactionFilterError(#[from] TransactionFilterError),
 }
-
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize, EnumVariants)]
 pub enum TransactionField {

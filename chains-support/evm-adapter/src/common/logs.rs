@@ -1,9 +1,10 @@
 use {
-    std::str::FromStr,
     super::{
         block::BlockRange,
         entity_id::{parse_block_number_or_tag, EntityIdError},
     },
+    crate::error::Error,
+    crate::result::Result,
     alloy::{
         eips::BlockNumberOrTag,
         hex::FromHexError,
@@ -11,10 +12,10 @@ use {
         rpc::types::Filter,
     },
     eql_macros::EnumVariants,
-    pest::iterators::{Pair, Pairs},
     serde::{Deserialize, Serialize},
+    thiserror::Error as ThisError,
+    wql_core::ast::TableFactor,
 };
-
 
 #[derive(Debug)]
 pub enum LogEntityError {
@@ -51,16 +52,27 @@ impl Logs {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+impl TryFrom<TableFactor> for Logs {
+    type Error = Error;
+
+    fn try_from(value: TableFactor) -> Result<Self> {
+        let mut filter: Vec<LogFilter> = Vec::new();
+        let mut fields: Vec<LogField> = Vec::new();
+
+        Ok(Logs { filter, fields })
+    }
+}
+
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum LogsError {
     #[error("Invalid log filter {0}")]
     InvalidLogFilter(String),
-    #[error(transparent)]
-    FromHexError(#[from] FromHexError),
+    #[error("Hex error: {0}")]
+    FromHexError(String),
     #[error(transparent)]
     EntityIdError(#[from] EntityIdError),
-    #[error(transparent)]
-    AddressError(#[from] AddressError),
+    #[error("Invalid address : {0}")]
+    AddressError(String),
     #[error(transparent)]
     LogFieldError(#[from] LogFieldError),
 }
@@ -154,7 +166,7 @@ impl std::fmt::Display for LogField {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum LogFieldError {
     #[error("Invalid log field: {0}")]
     InvalidLogField(String),

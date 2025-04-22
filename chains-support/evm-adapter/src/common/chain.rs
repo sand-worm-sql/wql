@@ -38,10 +38,9 @@ impl ChainOrRpc {
             Self::Chain(chain) => Ok(chain.clone()),
             Self::Rpc(rpc) => {
                 let provider = ProviderBuilder::new().on_http(rpc.clone());
-                let chain_id = provider
-                    .get_chain_id()
-                    .await
-                    .map_err(|e| Error::EvmChainError(EvmChainError::InvalidRpcUrl(e.to_string())))?;
+                let chain_id = provider.get_chain_id().await.map_err(|e| {
+                    Error::EvmChainError(EvmChainError::InvalidRpcUrl(e.to_string()))
+                })?;
                 chain_id.try_into()
             }
         }
@@ -169,7 +168,9 @@ impl TryFrom<&str> for Chain {
             "kava" => Ok(Kava),
             "gnosis" => Ok(Gnosis),
             "mekong" => Ok(Mekong),
-            _ => Err(Error::EvmChainError(EvmChainError::InvalidChain(s.to_string()))),
+            _ => Err(Error::EvmChainError(EvmChainError::InvalidChain(
+                s.to_string(),
+            ))),
         }
     }
 }
@@ -241,7 +242,9 @@ impl TryFrom<u64> for Chain {
             2222 => Ok(Kava),
             100 => Ok(Gnosis),
             7078815900 => Ok(Mekong),
-            _ => Err(Error::EvmChainError(EvmChainError::InvalidChain(id.to_string()))),
+            _ => Err(Error::EvmChainError(EvmChainError::InvalidChain(
+                id.to_string(),
+            ))),
         }
     }
 }

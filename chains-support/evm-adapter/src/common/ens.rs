@@ -52,7 +52,7 @@ pub enum EnsError {
 }
 
 /// ENS name or Ethereum Address.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize,Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum NameOrAddress {
     /// An ENS Name (format does not get checked)
     Name(String),

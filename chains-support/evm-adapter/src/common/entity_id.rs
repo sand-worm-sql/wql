@@ -1,9 +1,9 @@
 use {
+    crate::result::{Error, Result},
     alloy::eips::BlockNumberOrTag,
     serde::Serialize,
     std::fmt::Debug,
     thiserror::Error as ThisError,
-    crate::result::{Result, Error},
 };
 
 #[derive(Debug, PartialEq, Eq, ThisError, Serialize)]
@@ -21,8 +21,8 @@ pub enum EntityIdError {
 pub fn parse_block_number_or_tag(id: &str) -> Result<BlockNumberOrTag> {
     match id.trim().parse::<u64>() {
         Ok(id) => Ok(BlockNumberOrTag::Number(id)),
-        Err(_) => id
-            .parse::<BlockNumberOrTag>()
-            .map_err(|_| Error::EntityIdError(EntityIdError::InvalidBlockNumberOrTag(id.to_string()))),
+        Err(_) => id.parse::<BlockNumberOrTag>().map_err(|_| {
+            Error::EntityIdError(EntityIdError::InvalidBlockNumberOrTag(id.to_string()))
+        }),
     }
 }

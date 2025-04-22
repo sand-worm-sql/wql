@@ -1,34 +1,38 @@
 use {
-    std::{
-        fmt::{self, Display, Formatter},
-        sync::Arc,
-    },
     super::entity_id::{parse_block_number_or_tag, EntityIdError},
+    crate::result::{Error, Result},
     alloy::{
         eips::BlockNumberOrTag,
         providers::{Provider, RootProvider},
         rpc::types::BlockTransactionsKind,
         transports::http::{Client, Http},
     },
-    anyhow::Result,
     eql_macros::EnumVariants,
-    pest::iterators::{Pair, Pairs},
     serde::{Deserialize, Serialize},
+    std::{
+        fmt::{self, Display, Formatter},
+        sync::Arc,
+    },
+    thiserror::Error as ThisError,
+    wql_core::ast::TableFactor,
 };
 
-
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq)]
 pub enum BlockError {
     #[error("Unexpected token {0} for block")]
     UnexpectedToken(String),
 
     #[error(transparent)]
     EntityIdError(#[from] EntityIdError),
+
     #[error(transparent)]
     BlockFilterError(#[from] BlockFilterError),
 
     #[error(transparent)]
     BlockFieldError(#[from] BlockFieldError),
+
+    #[error(transparent)]
+    BlockRangeError(#[from] BlockRangeError),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -72,7 +76,23 @@ impl Block {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+impl TryFrom<TableFactor> for Block {
+    type Error = Error;
+
+    fn try_from(value: TableFactor) -> Result<Self> {
+        let mut fields: Vec<BlockField> = vec![];
+        let mut ids: Vec<BlockId> = vec![];
+        let mut filter: Option<Vec<BlockFilter>> = None;
+
+        Ok(Block {
+            ids: Some(ids),
+            filter,
+            fields,
+        })
+    }
+}
+
+#[derive(ThisError, Serialize, Debug, PartialEq)]
 pub enum BlockFilterError {
     #[error("Invalid block filter property: {0}")]
     InvalidBlockFilterProperty(String),
@@ -86,8 +106,7 @@ pub enum BlockFilter {
     Range(BlockRange),
 }
 
-
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq)]
 pub enum BlockFieldError {
     #[error("Invalid property for entity block: {0}")]
     InvalidBlockField(String),
@@ -171,7 +190,7 @@ impl TryFrom<&str> for BlockField {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq)]
 pub enum BlockRangeError {
     #[error("Unable to fetch block number {0}")]
     UnableToFetchBlockNumber(BlockNumberOrTag),
@@ -216,7 +235,9 @@ impl BlockRange {
 
         if let Some(end) = end_block_number {
             if start_block_number > end {
-                return Err(BlockRangeError::StartBlockMustBeLessThanEndBlock.into());
+                return Err(Error::BlockError(BlockError::BlockRangeError(
+                    BlockRangeError::StartBlockMustBeLessThanEndBlock,
+                )));
             }
         }
 
@@ -251,16 +272,27 @@ impl Display for BlockRange {
 
 pub async fn get_block_number_from_tag(
     provider: Arc<RootProvider<Http<Client>>>,
-    number_or_tag: &BlockNumberOrTag,
-) -> Result<u64> {
-    match number_or_tag {
+    block_number_or_tag: &BlockNumberOrTag,
+) -> Result<u64, Error> {
+    match block_number_or_tag {
         BlockNumberOrTag::Number(number) => Ok(*number),
-        block_tag => match provider
-            .get_block_by_number(*block_tag, BlockTransactionsKind::Hashes)
-            .await?
-        {
-            Some(block) => Ok(block.header.number),
-            None => Err(BlockRangeError::UnableToFetchBlockNumber(number_or_tag.clone()).into()),
-        },
+        tag => {
+            let block_opt = provider
+                .get_block_by_number(*tag, BlockTransactionsKind::Hashes)
+                .await
+                .map_err(|_| {
+                    Error::BlockError(BlockError::BlockRangeError(
+                        BlockRangeError::UnableToFetchBlockNumber(tag.clone()),
+                    ))
+                })?;
+
+            if let Some(block) = block_opt {
+                Ok(block.header.number)
+            } else {
+                Err(Error::BlockError(BlockError::BlockRangeError(
+                    BlockRangeError::UnableToFetchBlockNumber(tag.clone()),
+                )))
+            }
+        }
     }
 }

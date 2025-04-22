@@ -2,12 +2,8 @@ use {
     crate::common::chain::Chain,
     alloy::primitives::{Address, Bloom, Bytes, FixedBytes, B256, U256},
     alloy_eip7702::SignedAuthorization,
-    serde::{
-        ser::SerializeStruct,
-        Deserialize, Serialize, Serializer,
-    },
+    serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer},
 };
-
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub struct QueryResult {
@@ -32,7 +28,6 @@ pub enum ExpressionResult {
     Log(Vec<LogQueryRes>),
     #[serde(rename = "count")]
     Count(Vec<CountQueryRes>),
-
 }
 
 // TODO: should this be replaced with Alloy's Block?
@@ -349,9 +344,7 @@ pub struct CountQueryRes {
 
 impl Default for CountQueryRes {
     fn default() -> Self {
-        Self {
-            count:0
-        }
+        Self { count: 0 }
     }
 }
 

@@ -1,10 +1,12 @@
 use {
     super::ens::NameOrAddress,
+    crate::error::{Error, Result},
     alloy::hex::FromHexError,
     eql_macros::EnumVariants,
     serde::{Deserialize, Serialize},
     std::{fmt::Display, str::FromStr},
     thiserror::Error as ThisError,
+    wql_core::ast::TableFactor,
 };
 
 #[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
@@ -48,6 +50,18 @@ impl Account {
 
     pub fn fields(&self) -> Vec<AccountField> {
         self.fields.clone()
+    }
+}
+
+impl TryFrom<TableFactor> for Account {
+    type Error = Error;
+
+    fn try_from(value: TableFactor) -> Result<Self> {
+        let mut fields: Vec<AccountField> = vec![];
+        let mut id: Option<Vec<NameOrAddress>> = None;
+        let mut filter: Option<Vec<AccountFilter>> = None;
+
+        Ok(Account { id, filter, fields })
     }
 }
 
@@ -96,16 +110,18 @@ pub enum AccountFieldError {
 }
 
 impl TryFrom<&str> for AccountField {
-    type Error = AccountFieldError;
+    type Error = Error;
 
-    fn try_from(value: &str) -> Result<Self, AccountFieldError> {
+    fn try_from(value: &str) -> Result<Self> {
         match value {
             "address" => Ok(AccountField::Address),
             "nonce" => Ok(AccountField::Nonce),
             "balance" => Ok(AccountField::Balance),
             "code" => Ok(AccountField::Code),
             "chain" => Ok(AccountField::Chain),
-            invalid_field => Err(AccountFieldError::InvalidField(invalid_field.to_string())),
+            invalid_field => Err(Error::AccountError(AccountError::AccountFieldError(
+                AccountFieldError::InvalidField(invalid_field.to_string()),
+            ))),
         }
     }
 }

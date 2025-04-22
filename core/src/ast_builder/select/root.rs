@@ -49,7 +49,11 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
-        println!("chain name join   {:?} {:?}",chain_name, chain_name.map(String::from));
+        println!(
+            "chain name join   {:?} {:?}",
+            chain_name,
+            chain_name.map(String::from)
+        );
         JoinNode::new(
             self,
             chain_name.map(String::from),
@@ -70,7 +74,11 @@ impl<'a> SelectNode<'a> {
     }
 
     pub fn left_join(self, chain_name: Option<&str>, table_name: &str) -> JoinNode<'a> {
-        println!("chain name left join   {:?} {:?}",chain_name, chain_name.map(String::from));
+        println!(
+            "chain name left join   {:?} {:?}",
+            chain_name,
+            chain_name.map(String::from)
+        );
         JoinNode::new(
             self,
             chain_name.map(String::from),
