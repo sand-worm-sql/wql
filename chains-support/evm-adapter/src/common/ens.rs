@@ -5,6 +5,7 @@ use alloy::primitives::{address, Address, Keccak256, B256};
 use alloy::providers::RootProvider;
 use alloy::sol;
 use alloy::transports::http::{Client, Http};
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::{borrow::Cow, str::FromStr};
 
@@ -51,7 +52,7 @@ pub enum EnsError {
 }
 
 /// ENS name or Ethereum Address.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize,Deserialize)]
 pub enum NameOrAddress {
     /// An ENS Name (format does not get checked)
     Name(String),

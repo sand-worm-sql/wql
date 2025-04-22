@@ -2,14 +2,12 @@ use {
     super::ens::NameOrAddress,
     alloy::hex::FromHexError,
     eql_macros::EnumVariants,
-    pest::iterators::{Pair, Pairs},
     serde::{Deserialize, Serialize},
     std::{fmt::Display, str::FromStr},
-    wql_core::ast::Query,
+    thiserror::Error as ThisError,
 };
 
-
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum AccountError {
     #[error("Unexpected token {0}")]
     UnexpectedToken(String),
@@ -20,11 +18,11 @@ pub enum AccountError {
     #[error(transparent)]
     AccountFilterError(#[from] AccountFilterError),
 
-    #[error(transparent)]
-    FromHexError(#[from] FromHexError),
+    #[error("Invalid Hex: {0}")]
+    FromHexError(String),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Account {
     id: Option<Vec<NameOrAddress>>,
     filter: Option<Vec<AccountFilter>>,
@@ -53,84 +51,18 @@ impl Account {
     }
 }
 
-impl TryFrom<Pairs<'_, Rule>> for Account {
-    type Error = AccountError;
-
-    fn try_from(pairs: Pairs<'_, Rule>) -> Result<Self, Self::Error> {
-        let mut fields: Vec<AccountField> = vec![];
-        let mut id: Option<Vec<NameOrAddress>> = None;
-        let mut filter: Option<Vec<AccountFilter>> = None;
-
-        for pair in pairs {
-            match pair.as_rule() {
-                Rule::account_fields => {
-                    let inner_pairs = pair.into_inner();
-
-                    if let Some(pair) = inner_pairs.peek() {
-                        if pair.as_rule() == Rule::wildcard {
-                            fields = AccountField::all_variants().to_vec();
-                            continue;
-                        }
-                    }
-
-                    fields = inner_pairs
-                        .map(|pair| AccountField::try_from(pair))
-                        .collect::<Result<Vec<AccountField>, AccountFieldError>>()?;
-                }
-                Rule::account_id => {
-                    if let Some(id) = id.as_mut() {
-                        id.push(NameOrAddress::from_str(pair.as_str())?);
-                    } else {
-                        id = Some(vec![NameOrAddress::from_str(pair.as_str())?]);
-                    }
-                }
-                Rule::account_filter_list => {
-                    filter = Some(
-                        pair.into_inner()
-                            .map(|pair| AccountFilter::try_from(pair))
-                            .collect::<Result<Vec<AccountFilter>, AccountFilterError>>()?,
-                    );
-                }
-                _ => {
-                    return Err(AccountError::UnexpectedToken(pair.as_str().to_string()));
-                }
-            }
-        }
-
-        Ok(Account { id, filter, fields })
-    }
-}
-
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum AccountFilterError {
     #[error("Unexpected token {0} for account filter")]
     UnexpectedToken(String),
 
-    #[error(transparent)]
-    FromHexError(#[from] FromHexError),
+    #[error("Invalid Hex: {0}")]
+    FromHexError(String),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum AccountFilter {
     Address(NameOrAddress),
-}
-
-impl TryFrom<Pair<'_, Rule>> for AccountFilter {
-    type Error = AccountFilterError;
-
-    fn try_from(pair: Pair<'_, Rule>) -> Result<Self, Self::Error> {
-        match pair.as_rule() {
-            Rule::address_filter => {
-                let address = NameOrAddress::from_str(pair.as_str())?;
-                Ok(AccountFilter::Address(address))
-            }
-            _ => {
-                return Err(AccountFilterError::UnexpectedToken(
-                    pair.as_str().to_string(),
-                ));
-            }
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize, EnumVariants)]
@@ -154,21 +86,13 @@ impl Display for AccountField {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum AccountFieldError {
     #[error("Invalid field for entity Account: {0}")]
     InvalidField(String),
 
-    #[error(transparent)]
-    FromHexError(#[from] FromHexError),
-}
-
-impl<'a> TryFrom<Pair<'a, Rule>> for AccountField {
-    type Error = AccountFieldError;
-
-    fn try_from(pair: Pair<'a, Rule>) -> Result<Self, Self::Error> {
-        AccountField::try_from(pair.as_str())
-    }
+    #[error("Invalid Hex: {0}")]
+    FromHexError(String),
 }
 
 impl TryFrom<&str> for AccountField {

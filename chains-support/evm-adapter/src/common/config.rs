@@ -1,11 +1,10 @@
 use {
-    std::{collections::HashMap, env, fs, path::PathBuf},
     super::chain::Chain,
     alloy::transports::http::reqwest::Url,
     anyhow::Result,
     serde::{Deserialize, Serialize},
+    std::{collections::HashMap, env, fs, path::PathBuf},
 };
-
 
 const CONFIG_FILE: &str = "evm-config.json";
 

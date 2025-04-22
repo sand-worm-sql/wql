@@ -72,81 +72,6 @@ impl Block {
     }
 }
 
-impl TryFrom<Pairs<'_, Rule>> for Block {
-    type Error = BlockError;
-
-    fn try_from(pairs: Pairs<'_, Rule>) -> Result<Self, Self::Error> {
-        let mut fields: Vec<BlockField> = vec![];
-        let mut ids: Vec<BlockId> = vec![];
-        let mut filter: Option<Vec<BlockFilter>> = None;
-
-        for pair in pairs {
-            match pair.as_rule() {
-                Rule::block_fields => {
-                    let inner_pairs = pair.into_inner();
-
-                    if let Some(pair) = inner_pairs.peek() {
-                        if pair.as_rule() == Rule::wildcard {
-                            fields = BlockField::all_variants().to_vec();
-                            continue;
-                        }
-                    }
-
-                    fields = inner_pairs
-                        .map(|pair| BlockField::try_from(pair.as_str()))
-                        .collect::<Result<Vec<BlockField>, BlockFieldError>>()?;
-                }
-                // TODO: handle block number list
-                Rule::block_id => {
-                    for inner_pair in pair.into_inner() {
-                        match inner_pair.as_rule() {
-                            Rule::block_range => {
-                                let block_id = inner_pair.as_str();
-                                let (start, end) = match block_id.split_once(":") {
-                                    Some((start, end)) => {
-                                        let start = parse_block_number_or_tag(start)?;
-                                        let end = parse_block_number_or_tag(end)?;
-                                        (start, Some(end))
-                                    }
-                                    None => parse_block_number_or_tag(block_id)
-                                        .map(|start| (start, None))?,
-                                };
-                                ids.push(BlockId::Range(BlockRange::new(start, end)));
-                            }
-                            Rule::block_tag_or_number => {
-                                ids.push(BlockId::Number(parse_block_number_or_tag(
-                                    inner_pair.as_str(),
-                                )?));
-                            }
-                            _ => {
-                                return Err(BlockError::UnexpectedToken(
-                                    inner_pair.as_str().to_string(),
-                                ));
-                            }
-                        }
-                    }
-                }
-                Rule::block_filter => {
-                    filter = Some(
-                        pair.into_inner()
-                            .map(|pair| BlockFilter::try_from(pair))
-                            .collect::<Result<Vec<BlockFilter>, BlockFilterError>>()?,
-                    );
-                }
-                _ => {
-                    return Err(BlockError::UnexpectedToken(pair.as_str().to_string()));
-                }
-            }
-        }
-
-        Ok(Block {
-            ids: Some(ids),
-            filter,
-            fields,
-        })
-    }
-}
-
 #[derive(thiserror::Error, Debug)]
 pub enum BlockFilterError {
     #[error("Invalid block filter property: {0}")]
@@ -161,30 +86,6 @@ pub enum BlockFilter {
     Range(BlockRange),
 }
 
-impl TryFrom<Pair<'_, Rule>> for BlockFilter {
-    type Error = BlockFilterError;
-
-    fn try_from(value: Pair<'_, Rule>) -> Result<Self, Self::Error> {
-        match value.as_rule() {
-            Rule::blockrange_filter => {
-                let range = value.as_str().trim_start_matches("block ").trim();
-                let (start, end) = match range.split_once(":") {
-                    //if ":" is present, we have an start and an end.
-                    Some((start, end)) => (
-                        parse_block_number_or_tag(start)?,
-                        Some(parse_block_number_or_tag(end)?),
-                    ),
-                    //else we only have start.
-                    None => (parse_block_number_or_tag(range)?, None),
-                };
-                Ok(BlockFilter::Range(BlockRange { start, end }))
-            }
-            _ => Err(BlockFilterError::InvalidBlockFilterProperty(
-                value.as_str().to_string(),
-            )),
-        }
-    }
-}
 
 #[derive(thiserror::Error, Debug)]
 pub enum BlockFieldError {

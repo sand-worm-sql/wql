@@ -1,20 +1,18 @@
 use {
     super::{
-        account::AccountError,
-        logs::LogsError,
-        transaction::TransactionError,
-    },
-    crate::common::{
-        account::Account,
+        account::{Account, AccountError},
         block::{Block, BlockError},
-        logs::Logs,
-        transaction::Transaction,
+        logs::{Logs, LogsError},
+        transaction::{Transaction, TransactionError},
     },
+    crate::common::block,
+    crate::result::{Error, Result},
+    serde::{Deserialize, Serialize},
     thiserror::Error as ThisError,
-    wql_core::ast::Query,
+    wql_core::ast::{Query, TableFactor, Select, SetExpr},
 };
 
-#[derive(ThisError, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum EntityError {
     #[error("Unexpected token {0}")]
     UnexpectedToken(String),
@@ -22,14 +20,17 @@ pub enum EntityError {
     #[error("Missing entity")]
     MissingEntity,
 
+    #[error("Entity value error: {0}")]
+    EntityValueError(String),
+
     #[error(transparent)]
     TransactionError(#[from] TransactionError),
 
-    #[error(transparent)]
-    LogsError(#[from] LogsError),
+    // #[error(transparent)]
+    // LogsError(#[from] LogsError),
 
-    #[error(transparent)]
-    BlockError(#[from] BlockError),
+    // #[error(transparent)]
+    // BlockError(#[from] BlockError),
 
     #[error(transparent)]
     AccountError(#[from] AccountError),
@@ -43,31 +44,48 @@ pub enum Entity {
     Logs(Logs),
 }
 
-impl TryFrom<Pairs<'_, Rule>> for Entity {
-    type Error = EntityError;
+impl TryFrom<Select> for Entity {
+    type Error = Error;
 
-    fn try_from(pairs: Pairs<'_, Rule>) -> Result<Self, Self::Error> {
-        for pair in pairs {
-            match pair.as_rule() {
-                Rule::account_get => {
-                    let account = Account::try_from(pair.into_inner())?;
-                    return Ok(Entity::Account(account));
-                }
-                Rule::block_get => {
-                    let block = Block::try_from(pair.into_inner())?;
-                    return Ok(Entity::Block(block));
-                }
-                Rule::tx_get => {
-                    let tx = Transaction::try_from(pair.into_inner())?;
-                    return Ok(Entity::Transaction(tx));
-                }
-                Rule::log_get => {
-                    let logs = Logs::try_from(pair.into_inner())?;
-                    return Ok(Entity::Logs(logs));
-                }
-                _ => return Err(EntityError::UnexpectedToken(pair.as_str().to_string())),
+    fn try_from(select: Select) -> Result<Self> {
+        parse_table_factor(&select.from.relation)
+    }
+}
+
+fn parse_table_factor(factor: &TableFactor) -> Result<Entity> {
+    match factor {
+        TableFactor::Table {
+            chain_name,
+            name,
+            alias,
+            index,
+            existing_table,
+        } => {
+            let table = TableFactor::Table {
+                chain_name: chain_name.clone(),
+                name: name.clone(),
+                alias: alias.clone(),
+                index: index.clone(),
+                existing_table: *existing_table,
+            };
+
+            match name.to_ascii_lowercase().as_str() {
+                "account" => Ok(Entity::Account(Account::try_from(table)?)),
+                // "block" => Ok(Entity::Block(Block::try_from(table)?)),
+                // "transaction" | "tx" => Ok(Entity::Transaction(Transaction::try_from(table)?)),
+                // "logs" | "log" => Ok(Entity::Logs(Logs::try_from(table)?)),
+                _ => Err(Error::EntityError(EntityError::MissingEntity)),
             }
         }
-        Err(EntityError::MissingEntity)
+
+        TableFactor::Derived { subquery, .. } => match &subquery.body {
+            SetExpr::Select(inner) => Entity::try_from(inner.as_ref().clone()),
+            SetExpr::Values(_) => Err(Error::EntityError(EntityError::EntityValueError(
+                "VALUES expressions not supported in FROM".into(),
+            ))),
+            _ => Err(Error::EntityError(EntityError::MissingEntity)),
+        },
+
+        _ => Err(Error::EntityError(EntityError::MissingEntity)),
     }
 }

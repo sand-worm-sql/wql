@@ -1,6 +1,12 @@
-use alloy::eips::BlockNumberOrTag;
+use {
+    alloy::eips::BlockNumberOrTag,
+    serde::Serialize,
+    std::fmt::Debug,
+    thiserror::Error as ThisError,
+    crate::result::{Result, Error},
+};
 
-#[derive(Debug, PartialEq, Eq, thiserror::Error)]
+#[derive(Debug, PartialEq, Eq, ThisError, Serialize)]
 pub enum EntityIdError {
     #[error("Invalid address")]
     InvalidAddress,
@@ -12,11 +18,11 @@ pub enum EntityIdError {
     EnsResolution,
 }
 
-pub fn parse_block_number_or_tag(id: &str) -> Result<BlockNumberOrTag, EntityIdError> {
+pub fn parse_block_number_or_tag(id: &str) -> Result<BlockNumberOrTag> {
     match id.trim().parse::<u64>() {
         Ok(id) => Ok(BlockNumberOrTag::Number(id)),
         Err(_) => id
             .parse::<BlockNumberOrTag>()
-            .map_err(|_| EntityIdError::InvalidBlockNumberOrTag(id.to_string())),
+            .map_err(|_| Error::EntityIdError(EntityIdError::InvalidBlockNumberOrTag(id.to_string()))),
     }
 }

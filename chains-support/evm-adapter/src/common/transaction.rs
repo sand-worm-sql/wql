@@ -16,7 +16,8 @@ use {
     pest::iterators::{Pair, Pairs},
     serde::{Deserialize, Serialize},
     std::str::FromStr,
-    wql_core::ast::Query,
+    wql_core::ast::{Query, Select, SelectItem, Expr, TableFactor},
+    thiserror::Error as ThisError,
 };
 
 #[derive(Debug, PartialEq)]
@@ -108,73 +109,22 @@ impl Transaction {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum TransactionError {
     #[error("Unexpected token {0} for transaction")]
     UnexpectedToken(String),
+    #[error("Invalid address")]
+    AddressError(String),
     #[error(transparent)]
     EntityIdError(#[from] EntityIdError),
-    #[error(transparent)]
-    FromHexError(#[from] FromHexError),
-    #[error(transparent)]
-    AddressError(#[from] AddressError),
+    #[error("Hex error: {0}")]
+    FromHexError(String),
     #[error(transparent)]
     TransactionFieldError(#[from] TransactionFieldError),
     #[error(transparent)]
     TransactionFilterError(#[from] TransactionFilterError),
 }
 
-impl TryFrom<Pairs<'_, Rule>> for Transaction {
-    type Error = TransactionError;
-
-    fn try_from(pairs: Pairs<'_, Rule>) -> Result<Self, Self::Error> {
-        let mut ids: Option<Vec<B256>> = None;
-        let mut filter: Option<Vec<TransactionFilter>> = None;
-        let mut fields: Vec<TransactionField> = vec![];
-
-        for pair in pairs {
-            match pair.as_rule() {
-                Rule::tx_id => {
-                    if let Some(ids) = ids.as_mut() {
-                        ids.push(B256::from_str(pair.as_str())?);
-                    } else {
-                        ids = Some(vec![B256::from_str(pair.as_str())?]);
-                    }
-                }
-                Rule::tx_filter => {
-                    let next_filter = pair.into_inner().next().unwrap();
-                    if let Some(filter) = filter.as_mut() {
-                        filter.push(TransactionFilter::try_from(next_filter)?);
-                    } else {
-                        filter = Some(vec![TransactionFilter::try_from(next_filter)?]);
-                    }
-                }
-                Rule::tx_fields => {
-                    let inner_pairs = pair.into_inner();
-
-                    if let Some(pair) = inner_pairs.peek() {
-                        if pair.as_rule() == Rule::wildcard {
-                            fields = TransactionField::all_variants().to_vec();
-                            continue;
-                        }
-                    }
-                    fields = inner_pairs
-                        .map(|pair| TransactionField::try_from(pair.as_str()))
-                        .collect::<Result<Vec<TransactionField>, TransactionFieldError>>()?;
-                }
-                _ => {
-                    return Err(TransactionError::UnexpectedToken(pair.as_str().to_string()));
-                }
-            }
-        }
-
-        Ok(Transaction {
-            ids,
-            filters: filter,
-            fields,
-        })
-    }
-}
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize, EnumVariants)]
 pub enum TransactionField {
@@ -227,7 +177,7 @@ impl std::fmt::Display for TransactionField {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum TransactionFieldError {
     #[error("Invalid transaction field: {0}")]
     InvalidTransactionField(String),
@@ -266,7 +216,7 @@ impl TryFrom<&str> for TransactionField {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(ThisError, Serialize, Debug, PartialEq, Eq)]
 pub enum TransactionFilterError {
     #[error("Invalid transaction filter property: {0}")]
     InvalidTransactionFilterProperty(String),
@@ -274,14 +224,14 @@ pub enum TransactionFilterError {
     MissingOperator,
     #[error(transparent)]
     EntityIdError(#[from] EntityIdError),
-    #[error(transparent)]
-    FromHexError(#[from] FromHexError),
+    #[error("Hex error: {0}")]
+    FromHexError(String),
     #[error("BlockId filter is not valid")]
     InvalidBlockIdFilter,
-    #[error(transparent)]
-    ComparisonFilterError(#[from] ComparisonFilterError),
-    #[error(transparent)]
-    FilterError(#[from] FilterError),
+    // #[error(transparent)]
+    // ComparisonFilterError(#[from] ComparisonFilterError),
+    // #[error(transparent)]
+    // FilterError(#[from] FilterError),
 }
 
 #[derive(Debug, PartialEq)]
@@ -313,152 +263,6 @@ impl TransactionFilter {
             Ok(block_id)
         } else {
             Err(TransactionFilterError::InvalidBlockIdFilter)
-        }
-    }
-
-    // Helper function to parse filter components
-    fn parse_filter<'a, T, F>(
-        pair: Pair<'a, Rule>,
-        value_parser: F,
-        constructor: impl FnOnce(FilterType<T>) -> TransactionFilter,
-    ) -> Result<TransactionFilter, TransactionFilterError>
-    where
-        F: FnOnce(&str) -> T,
-        FilterType<T>: TryFrom<(Pair<'a, Rule>, T), Error = FilterError>,
-    {
-        let mut inner_pair = pair.into_inner();
-        let operator = inner_pair.next();
-
-        match operator {
-            Some(op) => {
-                let value = value_parser(inner_pair.as_str().trim());
-                Ok(constructor(FilterType::try_from((op, value))?))
-            }
-            None => Err(TransactionFilterError::MissingOperator),
-        }
-    }
-
-    /// Helper function to parse equality filter components
-    fn parse_equality_filter<'a, T, F>(
-        pair: Pair<'a, Rule>,
-        value_parser: F,
-        constructor: impl FnOnce(EqualityFilter<T>) -> TransactionFilter,
-    ) -> Result<TransactionFilter, TransactionFilterError>
-    where
-        F: FnOnce(&str) -> T,
-        EqualityFilter<T>: TryFrom<(Pair<'a, Rule>, T), Error = EqualityFilterError>,
-    {
-        let mut inner_pair = pair.into_inner();
-        let operator = inner_pair.next();
-
-        match operator {
-            Some(op) => {
-                let value = value_parser(inner_pair.as_str().trim());
-                let filter =
-                    EqualityFilter::try_from((op, value)).map_err(|e| FilterError::from(e))?;
-                Ok(constructor(filter))
-            }
-            None => Err(TransactionFilterError::MissingOperator),
-        }
-    }
-
-    // Implementation using the helper
-    fn try_from(pair: Pair<'_, Rule>) -> Result<Self, TransactionFilterError> {
-        match pair.as_rule() {
-            Rule::blockrange_filter => {
-                let range = pair
-                    .as_str()
-                    .trim_start_matches("block")
-                    .trim_start_matches(|c: char| c.is_whitespace() || c == '=')
-                    .trim();
-
-                let (start, end) = match range.split_once(':') {
-                    // if ":" is present, we have a start and an end
-                    Some((start, end)) => (
-                        parse_block_number_or_tag(start)?,
-                        Some(parse_block_number_or_tag(end)?),
-                    ),
-                    // else we only have start
-                    None => (parse_block_number_or_tag(range)?, None),
-                };
-                Ok(TransactionFilter::BlockId(BlockId::Range(BlockRange::new(
-                    start, end,
-                ))))
-            }
-            Rule::type_filter_type => Self::parse_equality_filter(
-                pair,
-                |s| s.parse::<u8>().unwrap(),
-                TransactionFilter::Type,
-            ),
-            Rule::value_filter_type => Self::parse_filter(
-                pair,
-                |s| U256::from_str(s).unwrap(),
-                TransactionFilter::Value,
-            ),
-            Rule::gas_price_filter_type => Self::parse_filter(
-                pair,
-                |s| s.parse::<u128>().unwrap(),
-                TransactionFilter::GasPrice,
-            ),
-            Rule::gas_limit_filter_type => Self::parse_filter(
-                pair,
-                |s| s.parse::<u64>().unwrap(),
-                TransactionFilter::GasLimit,
-            ),
-            Rule::max_fee_per_blob_gas_filter_type => Self::parse_filter(
-                pair,
-                |s| s.parse::<u128>().unwrap(),
-                TransactionFilter::MaxFeePerBlobGas,
-            ),
-            Rule::max_fee_per_gas_filter_type => Self::parse_filter(
-                pair,
-                |s| s.parse::<u128>().unwrap(),
-                TransactionFilter::MaxFeePerGas,
-            ),
-            Rule::max_priority_fee_per_gas_filter_type => Self::parse_filter(
-                pair,
-                |s| s.parse::<u128>().unwrap(),
-                TransactionFilter::MaxPriorityFeePerGas,
-            ),
-            Rule::status_filter_type => {
-                let mut inner_pair = pair.into_inner();
-                let operator = inner_pair.next().unwrap();
-                let value = inner_pair.as_str().trim();
-
-                Ok(TransactionFilter::Status(
-                    EqualityFilter::try_from((operator, value == "true")).unwrap(),
-                ))
-            }
-            Rule::from_filter_type => Self::parse_equality_filter(
-                pair,
-                |s| Address::from_str(s).unwrap(),
-                TransactionFilter::From,
-            ),
-            Rule::to_filter_type => Self::parse_equality_filter(
-                pair,
-                |s| Address::from_str(s).unwrap(),
-                TransactionFilter::To,
-            ),
-            Rule::data_filter_type => {
-                let mut inner_pair = pair.into_inner();
-                let operator = inner_pair.next().unwrap();
-                let value = alloy::primitives::Bytes::from_str(inner_pair.as_str()).unwrap();
-                let result = EqualityFilter::try_from((operator, value)).unwrap();
-
-                Ok(TransactionFilter::Data(result))
-            }
-            Rule::y_parity_filter_type => {
-                let mut inner_pair = pair.into_inner();
-                let operator = inner_pair.next().unwrap();
-                let value = inner_pair.as_str();
-
-                Ok(TransactionFilter::YParity(
-                    EqualityFilter::try_from((operator, value == "true")).unwrap(),
-                ))
-            }
-            _ => Err(TransactionFilterError::InvalidTransactionFilterProperty(
-                pair.as_str().to_string(),
-            )),
         }
     }
 }
