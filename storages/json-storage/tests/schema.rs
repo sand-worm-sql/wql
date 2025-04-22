@@ -1,5 +1,5 @@
 use {
-    gluesql_core::{
+    wql_core::{
         data::{value::HashMapJsonExt, Interval},
         prelude::{
             Glue,

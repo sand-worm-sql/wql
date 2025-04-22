@@ -1,5 +1,5 @@
 use {
-    gluesql_core::prelude::{
+    wql_core::prelude::{
         Glue,
         {Payload, Value::*},
     },

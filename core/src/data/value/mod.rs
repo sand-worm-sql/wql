@@ -820,7 +820,7 @@ impl Value {
     ///
     /// # Examples
     /// ```
-    /// use gluesql_core::prelude::Value;
+    /// use wql_core::prelude::Value;
     ///
     /// let str1 = Value::Str("ramen".to_owned());
     /// let str2 = Value::Str("men".to_owned());

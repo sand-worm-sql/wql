@@ -1,5 +1,5 @@
 use {
-    gluesql_core::prelude::{Glue, Payload, Value},
+    wql_core::prelude::{Glue, Payload, Value},
     gluesql_json_storage::JsonStorage,
     serde_json::json,
     std::{

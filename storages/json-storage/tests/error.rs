@@ -1,5 +1,5 @@
 use {
-    gluesql_core::{
+    wql_core::{
         error::{SchemaParseError, ValueError},
         prelude::{Error, Glue},
     },
