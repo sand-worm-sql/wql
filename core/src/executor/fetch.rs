@@ -8,7 +8,7 @@ use {
         data::{get_alias, get_index, Key, Row, Value},
         executor::select::select,
         result::Result,
-        store::{DataRow, GStore, Metadata},
+        store::{DataRow, GStore},
     },
     async_recursion::async_recursion,
     futures::stream::{self, Stream, StreamExt, TryStreamExt},
