@@ -4,14 +4,12 @@ members = [
   "cli",
   "core",
   "utils",
-  "storages/*",
   "chains-support/*",
 ]
 
 default-members = [
   "cli",
   "utils",
-  "storages/*",
   "chains-support/*",
 ]
 

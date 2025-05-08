@@ -193,6 +193,7 @@ impl ParquetStorage {
             engine: None,
             foreign_keys: Vec::new(),
             comment: None,
+            chain_name: todo!(),
         }
     }
 }
