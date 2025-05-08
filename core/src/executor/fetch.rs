@@ -318,13 +318,6 @@ where
                 "DEFAULT".to_owned(),
                 "COMMENT".to_owned(),
             ],
-            // Dictionary::GlueIndexes => vec![
-            //     "TABLE_NAME".to_owned(),
-            //     "INDEX_NAME".to_owned(),
-            //     "ORDER".to_owned(),
-            //     "EXPRESSION".to_owned(),
-            //     "UNIQUENESS".to_owned(),
-            // ],
         })),
         TableFactor::Derived {
             subquery: Query { body, .. },

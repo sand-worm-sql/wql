@@ -5,12 +5,12 @@ use {
         data::Value,
         error::Error,
         result::Result,
-        store::{GStore, GStoreMut},
+        store::GStore,
     },
     futures::stream::{StreamExt, TryStreamExt},
     reqwest::Client,
     serde::{Deserialize, Serialize},
-    std::{collections::HashMap, env::var, fmt::Debug, hash::Hash, str::FromStr},
+    std::{collections::HashMap, env::var, fmt::Debug, str::FromStr},
     thiserror::Error as ThisError,
 };
 
@@ -23,8 +23,6 @@ struct Chain {
 #[derive(Debug, Deserialize)]
 struct Entity {
     name: String,
-    description: String,
-    live_preview: String,
     fields: HashMap<String, String>,
 }
 
@@ -95,28 +93,20 @@ pub enum PayloadVariable {
     Version(String),
 }
 
-pub async fn execute<T: GStore + GStoreMut>(
+pub async fn execute<T: GStore >(
     storage: &mut T,
     statement: &Statement,
 ) -> Result<Payload> {
-    let autocommit = storage.begin(true).await?;
     let result = execute_inner(storage, statement).await;
 
-    if !autocommit {
-        return result;
-    }
-
     match result {
-        Ok(payload) => storage.commit().await.map(|_| payload),
-        Err(error) => {
-            storage.rollback().await?;
-
-            Err(error)
-        }
+        Ok(payload) => Ok(payload),
+        Err(error) => Err(error),
+        
     }
 }
 
-async fn execute_inner<T: GStore + GStoreMut>(
+async fn execute_inner<T: GStore >(
     storage: &mut T,
     statement: &Statement,
 ) -> Result<Payload> {

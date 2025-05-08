@@ -2,7 +2,7 @@ use {
     crate::{
         data::{Key, Schema},
         result::{Error, Result},
-        store::{DataRow, Metadata, RowIter, Store, StoreMut},
+        store::{DataRow, Metadata, RowIter, Store, StoreMut, Transaction},
     },
     async_trait::async_trait,
     std::collections::HashMap,
@@ -10,7 +10,7 @@ use {
 
 #[cfg(test)]
 use {
-    crate::{parse_sql::parse, translate::translate},
+    crate::{ executor::execute,parse_sql::parse, translate::translate},
     futures::executor::block_on,
 };
 
@@ -20,8 +20,7 @@ pub fn run(sql: &str) -> MockStorage {
 
     for parsed in parse(sql).unwrap() {
         let statement = translate(&parsed).unwrap();
-
-        //block_on(execute(&mut storage, &statement)).unwrap();
+        block_on(execute(&mut storage, &statement)).unwrap();
     }
 
     storage
@@ -79,13 +78,16 @@ impl StoreMut for MockStorage {
     }
 }
 
+impl Transaction for MockStorage {}
+// impl Metadata for MockStorage {}
+
 #[cfg(test)]
 mod tests {
     use {
         super::MockStorage,
         crate::{
             data::Key,
-            store::{Metadata, Store, StoreMut},
+            store::Store,
         },
         futures::executor::block_on,
     };
