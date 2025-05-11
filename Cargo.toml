@@ -5,12 +5,14 @@ members = [
   "core",
   "utils",
   "chains-support/*",
+  "storages/*"
 ]
 
 default-members = [
   "cli",
   "utils",
   "chains-support/*",
+  
 ]
 
 [workspace.package]
@@ -26,4 +28,17 @@ wql-core = { path = "./core", version = "0.0.1" }
 wql-cli = { package = "sand-worm-cli", path = "./cli", version = "0.0.1" }
 wql_evm_adapter = { path = "./chains-support/evm-adapter", version = "0.0.1" }
 wql_sui_adapter = { path = "./chains-support/sui-adapter", version = "0.0.1" }
+wql_memory_storage = { path = "./storages/memory-storage", version = "0.0.1" }
+wql-shared-memory-storage = { path = "./storages/shared-memory-storage", version = "0.0.1" }
+wql_sled_storage = { path = "./storages/sled-storage", version = "0.0.1" }
+wql-json-storage = { path = "./storages/json-storage", version = "0.0.1" }
+wql-csv-storage = { path = "./storages/csv-storage", version = "0.0.1" }
+wql-composite-storage = { path = "./storages/composite-storage", version = "0.0.1" }
+wql-web-storage = { path = "./storages/web-storage", version = "0.0.1" }
+wql-idb-storage = { path = "./storages/idb-storage", version = "0.0.1" }
+wql-redis-storage = { path = "./storages/redis-storage", version = "0.0.1" }
+wql-mongo-storage = { path = "./storages/mongo-storage", version = "0.0.1" }
+wql-parquet-storage = { path = "./storages/parquet-storage", version = "0.0.1" }
+wql-file-storage = { path = "./storages/file-storage", version = "0.0.1" }
+wql-git-storage = { path = "./storages/git-storage", version = "0.0.1" }
 utils = { package = "wql-utils", path = "./utils", version = "0.0.1" }

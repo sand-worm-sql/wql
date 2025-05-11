@@ -64,7 +64,7 @@ WQL is open-source and licensed under **Apache-2.0**.
 
 WQL wouldn't be possible without the work of **GlueSQL** and **EQL**, which helped shape its architecture:  
 
-- **[GlueSQL](https://github.com/gluesql/gluesql)** → Provided a strong foundation for SQL parsing and execution in Rust. Its embedded database model influenced WQL's structure.  
+- **[GlueSQL](https://github.com/wql/wql)** → Provided a strong foundation for SQL parsing and execution in Rust. Its embedded database model influenced WQL's structure.  
 - **[EQL (EVM Query Language)](https://github.com/the-graph/eql)** → Inspired the **blockchain data querying approach**, making on-chain data retrieval more intuitive and accessible.  
 
 While WQL is an independent project with its own goals, these technologies played a major role in shaping its core. If you're exploring **embedded SQL databases** or **on-chain queries**, we highly recommend checking them out!  
