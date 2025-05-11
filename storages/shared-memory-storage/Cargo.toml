@@ -1,0 +1,25 @@
+[package]
+name = "wql-shared-memory-storage"
+authors = [
+	"Jiseok CHOI <jiseok.dev@gmail.com>",
+	"Taehoon Moon <taehoon.moon@outlook.com>",
+]
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+
+[dependencies]
+wql-core.workspace = true
+wql_memory_storage.workspace = true
+
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["sync"] }
+futures = "0.3"
+
+[dev-dependencies]
+
+tokio = { version = "1", features = ["rt", "macros"] }

@@ -355,8 +355,8 @@ mod tests {
         // );
 
         test(
-            r#"CONCAT("gluesql", " ", "is", " ", "cool")"#,
-            &[r#""gluesql""#, r#"" ""#, r#""is""#, r#"" ""#, r#""cool""#],
+            r#"CONCAT("wql", " ", "is", " ", "cool")"#,
+            &[r#""wql""#, r#"" ""#, r#""is""#, r#"" ""#, r#""cool""#],
         );
 
         test(r#"POSITION("men" IN "ramen")"#, &[r#""men""#, r#""ramen""#]);
@@ -364,8 +364,8 @@ mod tests {
 
         //TypedStringVariableArgs
         test(
-            r#"CONCAT_WS(",", "gluesql", "is", "cool")"#,
-            &[r#"",""#, r#""gluesql""#, r#""is""#, r#""cool""#],
+            r#"CONCAT_WS(",", "wql", "is", "cool")"#,
+            &[r#"",""#, r#""wql""#, r#""is""#, r#""cool""#],
         );
     }
 }

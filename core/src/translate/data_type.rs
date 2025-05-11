@@ -62,9 +62,9 @@ mod tests {
     #[test]
     fn support_data_type() {
         macro_rules! test {
-            ($text:literal => $parser:expr => $gluesql: expr) => {
+            ($text:literal => $parser:expr => $wql: expr) => {
                 assert_eq!(parse_data_type($text), Ok($parser));
-                assert_eq!(translate_data_type(&$parser), $gluesql);
+                assert_eq!(translate_data_type(&$parser), $wql);
             };
         }
 
@@ -99,13 +99,13 @@ mod tests {
     #[test]
     fn support_custom_data_type() {
         macro_rules! test {
-            ($text:literal => $gluesql: expr) => {
+            ($text:literal => $wql: expr) => {
                 assert_eq!(
                     translate_data_type(&SqlDataType::Custom(
                         ObjectName(vec![$text.into()]),
                         vec![]
                     )),
-                    $gluesql
+                    $wql
                 );
             };
         }

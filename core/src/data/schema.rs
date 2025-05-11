@@ -30,6 +30,7 @@ pub struct Schema {
     pub indexes: Vec<SchemaIndex>,
     pub comment: Option<String>,
     pub chain_name: Option<String>,
+    pub engine: Option<String>,
 }
 
 #[derive(ThisError, Debug, PartialEq, Serialize)]

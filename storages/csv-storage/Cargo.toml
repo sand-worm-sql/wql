@@ -1,0 +1,29 @@
+[package]
+name = "wql-csv-storage"
+authors = [
+  "Taehoon Moon <taehoon.moon@outlook.com>",
+]
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+
+[dependencies]
+wql-core.workspace = true
+utils.workspace = true
+
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1.0"
+csv = "1.2.2"
+futures = "0.3"
+
+[dev-dependencies]
+
+
+tokio = { version = "1", features = ["rt", "macros"] }
+rust_decimal = "1"
+rust_decimal_macros = "1"

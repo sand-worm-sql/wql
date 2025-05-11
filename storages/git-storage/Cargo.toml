@@ -1,0 +1,25 @@
+[package]
+name = "wql-git-storage"
+authors = ["Taehoon Moon <taehoon.moon@outlook.com>"]
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+
+[dependencies]
+wql-core.workspace = true
+wql-file-storage.workspace = true
+wql-csv-storage.workspace = true
+wql-json-storage.workspace = true
+async-trait = "0.1"
+strum_macros = "0.26.4"
+
+[dev-dependencies]
+
+tokio = { version = "1", features = ["rt", "macros"] }
+uuid = { version = "1.10.0", features = ["v7"] }
+
+[features]
+test-git-remote = []
